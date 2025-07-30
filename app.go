@@ -80,6 +80,31 @@ func (a *App) DeleteCustomer(id int) error {
 	return a.db.DeleteCustomer(id)
 }
 
+// Supplier Management Methods
+
+func (a *App) CreateSupplier(supplier database.Supplier) error {
+	supplier.CreatedAt = time.Now()
+	supplier.UpdatedAt = time.Now()
+	return a.db.CreateSupplier(&supplier)
+}
+
+func (a *App) GetSuppliers() ([]database.Supplier, error) {
+	return a.db.GetSuppliers()
+}
+
+func (a *App) GetSupplierByID(id int) (*database.Supplier, error) {
+	return a.db.GetSupplierByID(id)
+}
+
+func (a *App) UpdateSupplier(supplier database.Supplier) error {
+	supplier.UpdatedAt = time.Now()
+	return a.db.UpdateSupplier(&supplier)
+}
+
+func (a *App) DeleteSupplier(id int) error {
+	return a.db.DeleteSupplier(id)
+}
+
 // Product Category Management Methods
 
 func (a *App) CreateProductCategory(category database.ProductCategory) error {

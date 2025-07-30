@@ -1,12 +1,13 @@
 <script>
+  import { onMount } from 'svelte'
+  import { CreateSupplier, GetSuppliers, UpdateSupplier, DeleteSupplier } from '../wailsjs/go/main/App.js'
   import PageLayout from './components/PageLayout.svelte'
   import DataTable from './components/DataTable.svelte'
   import SupplierModal from './components/SupplierModal.svelte'
   import StatusBadge from './components/StatusBadge.svelte'
 
   /** @type {Array<{id: number, company_name: string, company_name_arabic: string, contact_person: string, contact_person_arabic: string, email: string, phone: string, vat_number: string, address: string, address_arabic: string, city: string, city_arabic: string, country: string, country_arabic: string, payment_terms: string, active: boolean, created_at: string}>} */
-  let suppliers = [
-  ]
+  let suppliers = []
 
   /** @type {string} */
   let searchTerm = ''
@@ -17,10 +18,27 @@
   /** @type {boolean} */
   let loading = false
 
+  // Load suppliers on component mount
+  onMount(async () => {
+    await loadSuppliers()
+  })
+
+  async function loadSuppliers() {
+    try {
+      loading = true
+      suppliers = await GetSuppliers()
+    } catch (error) {
+      console.error('Error loading suppliers:', error)
+      suppliers = []
+    } finally {
+      loading = false
+    }
+  }
+
   // Filter suppliers based on search term
   $: filteredSuppliers = suppliers.filter(supplier => 
     supplier.company_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    supplier.company_name_arabic.includes(searchTerm) ||
+    (supplier.company_name_arabic && supplier.company_name_arabic.includes(searchTerm)) ||
     supplier.contact_person.toLowerCase().includes(searchTerm.toLowerCase()) ||
     supplier.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     supplier.phone.includes(searchTerm)
@@ -36,38 +54,43 @@
     showSupplierModal = true
   }
 
-  function handleDeleteSupplier(supplier) {
+  async function handleDeleteSupplier(supplier) {
     if (confirm(`Are you sure you want to delete ${supplier.company_name}?`)) {
-      suppliers = suppliers.filter(s => s.id !== supplier.id)
+      try {
+        loading = true
+        await DeleteSupplier(supplier.id)
+        await loadSuppliers() // Reload the list
+      } catch (error) {
+        console.error('Error deleting supplier:', error)
+        alert('Error deleting supplier. Please try again.')
+      } finally {
+        loading = false
+      }
     }
   }
 
-  function handleSupplierSave(event) {
+  async function handleSupplierSave(event) {
     loading = true
     const supplierData = event.detail
 
-    setTimeout(() => {
+    try {
       if (editingSupplier) {
         // Update existing supplier
-        const index = suppliers.findIndex(s => s.id === editingSupplier.id)
-        if (index !== -1) {
-          suppliers[index] = { ...suppliers[index], ...supplierData }
-          suppliers = [...suppliers]
-        }
+        await UpdateSupplier({ ...editingSupplier, ...supplierData })
       } else {
         // Add new supplier
-        const newSupplier = {
-          id: Math.max(...suppliers.map(s => s.id)) + 1,
-          ...supplierData,
-          created_at: new Date().toISOString().split('T')[0]
-        }
-        suppliers = [...suppliers, newSupplier]
+        await CreateSupplier(supplierData)
       }
       
+      await loadSuppliers() // Reload the list
       showSupplierModal = false
       editingSupplier = null
+    } catch (error) {
+      console.error('Error saving supplier:', error)
+      alert('Error saving supplier. Please try again.')
+    } finally {
       loading = false
-    }, 1000)
+    }
   }
 
   function handleSupplierModalClose() {

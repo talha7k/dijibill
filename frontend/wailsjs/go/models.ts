@@ -543,6 +543,72 @@ export namespace database {
 	
 	
 	
+	export class Supplier {
+	    id: number;
+	    company_name: string;
+	    company_name_arabic: string;
+	    contact_person: string;
+	    contact_person_arabic: string;
+	    vat_number: string;
+	    email: string;
+	    phone: string;
+	    address: string;
+	    address_arabic: string;
+	    city: string;
+	    city_arabic: string;
+	    country: string;
+	    country_arabic: string;
+	    payment_terms: string;
+	    active: boolean;
+	    // Go type: time
+	    created_at: any;
+	    // Go type: time
+	    updated_at: any;
+	
+	    static createFrom(source: any = {}) {
+	        return new Supplier(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.company_name = source["company_name"];
+	        this.company_name_arabic = source["company_name_arabic"];
+	        this.contact_person = source["contact_person"];
+	        this.contact_person_arabic = source["contact_person_arabic"];
+	        this.vat_number = source["vat_number"];
+	        this.email = source["email"];
+	        this.phone = source["phone"];
+	        this.address = source["address"];
+	        this.address_arabic = source["address_arabic"];
+	        this.city = source["city"];
+	        this.city_arabic = source["city_arabic"];
+	        this.country = source["country"];
+	        this.country_arabic = source["country_arabic"];
+	        this.payment_terms = source["payment_terms"];
+	        this.active = source["active"];
+	        this.created_at = this.convertValues(source["created_at"], null);
+	        this.updated_at = this.convertValues(source["updated_at"], null);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	export class TaxRate {
 	    id: number;
 	    name: string;

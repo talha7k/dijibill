@@ -22,6 +22,28 @@ type Customer struct {
 	UpdatedAt     time.Time `json:"updated_at"`
 }
 
+// Supplier represents a supplier in the system
+type Supplier struct {
+	ID                  int       `json:"id"`
+	CompanyName         string    `json:"company_name"`
+	CompanyNameArabic   string    `json:"company_name_arabic"`
+	ContactPerson       string    `json:"contact_person"`
+	ContactPersonArabic string    `json:"contact_person_arabic"`
+	VATNumber           string    `json:"vat_number"`
+	Email               string    `json:"email"`
+	Phone               string    `json:"phone"`
+	Address             string    `json:"address"`
+	AddressArabic       string    `json:"address_arabic"`
+	City                string    `json:"city"`
+	CityArabic          string    `json:"city_arabic"`
+	Country             string    `json:"country"`
+	CountryArabic       string    `json:"country_arabic"`
+	PaymentTerms        string    `json:"payment_terms"` // net_15, net_30, net_45, net_60, cash_on_delivery, advance_payment
+	Active              bool      `json:"active"`
+	CreatedAt           time.Time `json:"created_at"`
+	UpdatedAt           time.Time `json:"updated_at"`
+}
+
 // ProductCategory represents a category for products
 type ProductCategory struct {
 	ID                int       `json:"id"`

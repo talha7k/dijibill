@@ -18,6 +18,8 @@ export function CreateSalesCategory(arg1:database.SalesCategory):Promise<void>;
 
 export function CreateSampleData():Promise<void>;
 
+export function CreateSupplier(arg1:database.Supplier):Promise<void>;
+
 export function CreateTaxRate(arg1:database.TaxRate):Promise<void>;
 
 export function CreateUnitOfMeasurement(arg1:database.UnitOfMeasurement):Promise<void>;
@@ -31,6 +33,8 @@ export function DeletePaymentType(arg1:number):Promise<void>;
 export function DeleteProduct(arg1:number):Promise<void>;
 
 export function DeleteSalesCategory(arg1:number):Promise<void>;
+
+export function DeleteSupplier(arg1:number):Promise<void>;
 
 export function DeleteTaxRate(arg1:number):Promise<void>;
 
@@ -78,6 +82,10 @@ export function GetQRCodeInfo(arg1:string):Promise<Record<string, any>>;
 
 export function GetSalesCategories():Promise<Array<database.SalesCategory>>;
 
+export function GetSupplierByID(arg1:number):Promise<database.Supplier>;
+
+export function GetSuppliers():Promise<Array<database.Supplier>>;
+
 export function GetTaxRates():Promise<Array<database.TaxRate>>;
 
 export function GetUnitsOfMeasurement():Promise<Array<database.UnitOfMeasurement>>;
@@ -119,6 +127,8 @@ export function UpdatePaymentType(arg1:database.PaymentType):Promise<void>;
 export function UpdateProduct(arg1:database.Product):Promise<void>;
 
 export function UpdateSalesCategory(arg1:database.SalesCategory):Promise<void>;
+
+export function UpdateSupplier(arg1:database.Supplier):Promise<void>;
 
 export function UpdateTaxRate(arg1:database.TaxRate):Promise<void>;
 

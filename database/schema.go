@@ -40,6 +40,26 @@ func (d *Database) createTables() error {
 			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 		)`,
+		`CREATE TABLE IF NOT EXISTS suppliers (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			company_name TEXT NOT NULL,
+			company_name_arabic TEXT,
+			contact_person TEXT NOT NULL,
+			contact_person_arabic TEXT,
+			vat_number TEXT,
+			email TEXT,
+			phone TEXT,
+			address TEXT,
+			address_arabic TEXT,
+			city TEXT,
+			city_arabic TEXT,
+			country TEXT,
+			country_arabic TEXT,
+			payment_terms TEXT DEFAULT 'net_30',
+			active BOOLEAN DEFAULT 1,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+		)`,
 		`CREATE TABLE IF NOT EXISTS product_categories (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			name TEXT NOT NULL,

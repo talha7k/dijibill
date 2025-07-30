@@ -34,6 +34,10 @@ export function CreateSampleData() {
   return window['go']['main']['App']['CreateSampleData']();
 }
 
+export function CreateSupplier(arg1) {
+  return window['go']['main']['App']['CreateSupplier'](arg1);
+}
+
 export function CreateTaxRate(arg1) {
   return window['go']['main']['App']['CreateTaxRate'](arg1);
 }
@@ -60,6 +64,10 @@ export function DeleteProduct(arg1) {
 
 export function DeleteSalesCategory(arg1) {
   return window['go']['main']['App']['DeleteSalesCategory'](arg1);
+}
+
+export function DeleteSupplier(arg1) {
+  return window['go']['main']['App']['DeleteSupplier'](arg1);
 }
 
 export function DeleteTaxRate(arg1) {
@@ -154,6 +162,14 @@ export function GetSalesCategories() {
   return window['go']['main']['App']['GetSalesCategories']();
 }
 
+export function GetSupplierByID(arg1) {
+  return window['go']['main']['App']['GetSupplierByID'](arg1);
+}
+
+export function GetSuppliers() {
+  return window['go']['main']['App']['GetSuppliers']();
+}
+
 export function GetTaxRates() {
   return window['go']['main']['App']['GetTaxRates']();
 }
@@ -236,6 +252,10 @@ export function UpdateProduct(arg1) {
 
 export function UpdateSalesCategory(arg1) {
   return window['go']['main']['App']['UpdateSalesCategory'](arg1);
+}
+
+export function UpdateSupplier(arg1) {
+  return window['go']['main']['App']['UpdateSupplier'](arg1);
 }
 
 export function UpdateTaxRate(arg1) {
