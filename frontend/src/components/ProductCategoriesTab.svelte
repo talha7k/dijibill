@@ -19,7 +19,7 @@
   }
 
   // Filtered categories based on search
-  $: filteredCategories = categories.filter(category => 
+  $: filteredCategories = (categories || []).filter(category => 
     category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (category.name_arabic && category.name_arabic.includes(searchTerm))
   )

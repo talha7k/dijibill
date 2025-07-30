@@ -45,7 +45,7 @@
       stats.customers = customers.length
       stats.items = productsData?.length || 0
         stats.products = productsData?.length || 0
-      stats.payments = invoices.filter(inv => inv.status === 'paid').length
+      stats.payments = (invoices || []).filter(inv => inv.status === 'paid').length
 
     } catch (error) {
       console.error('Error loading dashboard data:', error)
@@ -55,10 +55,10 @@
   })
 
   // Calculate invoice statistics
-  $: paidInvoices = invoices.filter(inv => inv.status === 'paid').length
-  $: totalInvoices = invoices.length
-  $: overdueCustomers = customers.slice(0, 3) // Mock overdue customers
-  $: topCustomers = customers.slice(0, 3) // Mock top customers
+  $: paidInvoices = (invoices || []).filter(inv => inv.status === 'paid').length
+  $: totalInvoices = (invoices || []).length
+  $: overdueCustomers = (customers || []).slice(0, 3) // Mock overdue customers
+  $: topCustomers = (customers || []).slice(0, 3) // Mock top customers
 </script>
 
 <div class="p-6 min-h-screen">

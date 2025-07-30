@@ -17,7 +17,7 @@
     }
   }
 
-  $: filteredProducts = products.filter(product => 
+  $: filteredProducts = (products || []).filter(product => 
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     product.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
     product.barcode.toLowerCase().includes(searchTerm.toLowerCase())

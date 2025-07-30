@@ -88,7 +88,7 @@
           <label class="label-glass">Category</label>
           <select class="select-glass" bind:value={productForm.category_id}>
             <option value={0}>Select Category</option>
-            {#each categories as category}
+            {#each (categories || []) as category}
               <option value={category.id}>{category.name}</option>
             {/each}
           </select>
@@ -98,7 +98,7 @@
          <div class="form-control">
            <label class="label-glass">Unit of Measurement</label>
            <select class="select-glass" bind:value={productForm.unit}>
-             {#each units as unit}
+             {#each (units || []) as unit}
                <option value={unit.value}>{unit.label}</option>
              {/each}
            </select>
