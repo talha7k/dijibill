@@ -53,12 +53,13 @@
 
     <!-- File Upload -->
     <div class="space-y-3">
-      <label class="label-standard">
+      <label for="product-image-upload" class="label-standard">
         Upload Image
         <span class="text-white/50 text-sm mr-2">رفع صورة</span>
       </label>
       <div class="flex gap-3">
         <input
+          id="product-image-upload"
           bind:this={fileInput}
           type="file"
           accept="image/*"
@@ -80,11 +81,11 @@
     <!-- Image Preview -->
     {#if imagePreview}
       <div class="space-y-3">
-        <label class="label-standard">
+        <label for="product-image-preview" class="label-standard">
           Preview
           <span class="text-white/50 text-sm mr-2">معاينة</span>
         </label>
-        <div class="relative w-full h-48 bg-white/5 rounded-lg border border-white/20 overflow-hidden">
+        <div id="product-image-preview" class="relative w-full h-48 bg-white/5 rounded-lg border border-white/20 overflow-hidden">
           <img
             src={imagePreview}
             alt="Product preview"
@@ -106,22 +107,15 @@
       placeholder="#000000"
     />
 
-    <!-- Color Text Input -->
-    <FormField
-      label="Color Name/Code"
-      labelArabic="اسم/رمز اللون"
-      type="text"
-      bind:value={productForm.color}
-      placeholder="e.g., Red, #FF0000, rgb(255,0,0)"
-    />
+  
 
     <!-- Quick Color Selection -->
     <div class="space-y-3">
-      <label class="label-standard">
+      <label id="quick-colors-label" class="label-standard">
         Quick Colors
         <span class="text-white/50 text-sm mr-2">الألوان السريعة</span>
       </label>
-      <div class="grid grid-cols-5 gap-2">
+      <div class="grid grid-cols-5 gap-2" role="group" aria-labelledby="quick-colors-label">
         {#each quickColors as color}
           <button
             type="button"
@@ -129,6 +123,7 @@
             style="background-color: {color}"
             on:click={() => selectColor(color)}
             title={color}
+            aria-label="Select color {color}"
           ></button>
         {/each}
       </div>

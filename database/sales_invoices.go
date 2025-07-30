@@ -238,7 +238,3 @@ func (d *Database) GetInvoiceItems(invoiceID int) ([]InvoiceItem, error) {
 	}
 	return items, nil
 }
-
-func (d *Database) generateInvoiceNumber() string {
-	return d.generateSalesInvoiceNumber()
-}

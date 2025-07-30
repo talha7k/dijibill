@@ -592,10 +592,9 @@ func (a *App) GenerateSampleQRCode() (string, error) {
 
 	// Create sample invoice data
 	sampleInvoice := &database.Invoice{
-		InvoiceNumber: "INV-2024-001",
-		IssueDate:     time.Now(),
-		TotalAmount:   115.0,
-		VATAmount:     15.0,
+		IssueDate:   time.Now(),
+		TotalAmount: 115.0,
+		VATAmount:   15.0,
 	}
 
 	// Create sample company data
@@ -1213,7 +1212,7 @@ func (a *App) TestCustomerNAHandling() error {
 		// Check if the HTML contains "n/a" or "غير متوفر" for empty fields
 		if lang == "arabic" {
 			if !strings.Contains(htmlContent, "غير متوفر") {
-				return fmt.Errorf("Arabic template does not contain 'غير متوفر' for empty fields")
+				return fmt.Errorf("arabic template does not contain 'غير متوفر' for empty fields")
 			}
 		} else {
 			if !strings.Contains(htmlContent, "n/a") {
