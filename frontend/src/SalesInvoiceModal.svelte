@@ -1,6 +1,6 @@
 <script>
   import { createEventDispatcher, onMount } from 'svelte'
-  import { GetCustomers, GetProducts, GetPaymentTypes, GetSalesCategories, CreateInvoice } from '../wailsjs/go/main/App.js'
+  import { GetCustomers, GetProducts, GetPaymentTypes, GetSalesCategories, CreateSalesInvoice } from '../wailsjs/go/main/App.js'
   import {database} from '../wailsjs/go/models'
   import Modal from './components/Modal.svelte'
   import FormField from './components/FormField.svelte'
@@ -306,10 +306,10 @@
       
       console.log('invoiceObj created:', JSON.stringify(invoiceObj, null, 2))
       
-      console.log('Calling CreateInvoice backend function...')
-      const result = await CreateInvoice(new database.Invoice(invoiceObj))
-      console.log('CreateInvoice result:', result)
-      console.log('CreateInvoice completed successfully')
+      console.log('Calling CreateSalesInvoice backend function...')
+      const result = await CreateSalesInvoice(new database.SalesInvoice(invoiceObj))
+      console.log('CreateSalesInvoice result:', result)
+      console.log('CreateSalesInvoice completed successfully')
       
       alert('Invoice saved successfully!')
       dispatch('saved')

@@ -148,6 +148,54 @@ export namespace database {
 		    return a;
 		}
 	}
+	export class PaymentType {
+	    id: number;
+	    name: string;
+	    name_arabic: string;
+	    code: string;
+	    is_default: boolean;
+	    is_active: boolean;
+	    description: string;
+	    // Go type: time
+	    created_at: any;
+	    // Go type: time
+	    updated_at: any;
+	
+	    static createFrom(source: any = {}) {
+	        return new PaymentType(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.name_arabic = source["name_arabic"];
+	        this.code = source["code"];
+	        this.is_default = source["is_default"];
+	        this.is_active = source["is_active"];
+	        this.description = source["description"];
+	        this.created_at = this.convertValues(source["created_at"], null);
+	        this.updated_at = this.convertValues(source["updated_at"], null);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	export class ProductCategory {
 	    id: number;
 	    name: string;
@@ -266,7 +314,7 @@ export namespace database {
 		    return a;
 		}
 	}
-	export class InvoiceItem {
+	export class SalesInvoiceItem {
 	    id: number;
 	    invoice_id: number;
 	    product_id: number;
@@ -280,7 +328,7 @@ export namespace database {
 	    created_at: any;
 	
 	    static createFrom(source: any = {}) {
-	        return new InvoiceItem(source);
+	        return new SalesInvoiceItem(source);
 	    }
 	
 	    constructor(source: any = {}) {
@@ -365,7 +413,7 @@ export namespace database {
 		    return a;
 		}
 	}
-	export class Invoice {
+	export class SalesInvoice {
 	    id: number;
 	    invoice_number: string;
 	    customer_id: number;
@@ -383,14 +431,14 @@ export namespace database {
 	    notes: string;
 	    notes_arabic: string;
 	    qr_code: string;
-	    items?: InvoiceItem[];
+	    items?: SalesInvoiceItem[];
 	    // Go type: time
 	    created_at: any;
 	    // Go type: time
 	    updated_at: any;
 	
 	    static createFrom(source: any = {}) {
-	        return new Invoice(source);
+	        return new SalesInvoice(source);
 	    }
 	
 	    constructor(source: any = {}) {
@@ -410,56 +458,7 @@ export namespace database {
 	        this.notes = source["notes"];
 	        this.notes_arabic = source["notes_arabic"];
 	        this.qr_code = source["qr_code"];
-	        this.items = this.convertValues(source["items"], InvoiceItem);
-	        this.created_at = this.convertValues(source["created_at"], null);
-	        this.updated_at = this.convertValues(source["updated_at"], null);
-	    }
-	
-		convertValues(a: any, classs: any, asMap: boolean = false): any {
-		    if (!a) {
-		        return a;
-		    }
-		    if (a.slice && a.map) {
-		        return (a as any[]).map(elem => this.convertValues(elem, classs));
-		    } else if ("object" === typeof a) {
-		        if (asMap) {
-		            for (const key of Object.keys(a)) {
-		                a[key] = new classs(a[key]);
-		            }
-		            return a;
-		        }
-		        return new classs(a);
-		    }
-		    return a;
-		}
-	}
-	
-	export class PaymentType {
-	    id: number;
-	    name: string;
-	    name_arabic: string;
-	    code: string;
-	    is_default: boolean;
-	    is_active: boolean;
-	    description: string;
-	    // Go type: time
-	    created_at: any;
-	    // Go type: time
-	    updated_at: any;
-	
-	    static createFrom(source: any = {}) {
-	        return new PaymentType(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.id = source["id"];
-	        this.name = source["name"];
-	        this.name_arabic = source["name_arabic"];
-	        this.code = source["code"];
-	        this.is_default = source["is_default"];
-	        this.is_active = source["is_active"];
-	        this.description = source["description"];
+	        this.items = this.convertValues(source["items"], SalesInvoiceItem);
 	        this.created_at = this.convertValues(source["created_at"], null);
 	        this.updated_at = this.convertValues(source["updated_at"], null);
 	    }
@@ -485,7 +484,7 @@ export namespace database {
 	export class Payment {
 	    id: number;
 	    invoice_id: number;
-	    invoice?: Invoice;
+	    invoice?: SalesInvoice;
 	    payment_type_id: number;
 	    payment_type?: PaymentType;
 	    amount: number;
@@ -508,7 +507,7 @@ export namespace database {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.id = source["id"];
 	        this.invoice_id = source["invoice_id"];
-	        this.invoice = this.convertValues(source["invoice"], Invoice);
+	        this.invoice = this.convertValues(source["invoice"], SalesInvoice);
 	        this.payment_type_id = source["payment_type_id"];
 	        this.payment_type = this.convertValues(source["payment_type"], PaymentType);
 	        this.amount = source["amount"];
@@ -542,7 +541,55 @@ export namespace database {
 	
 	
 	
+	export class PurchaseInvoiceItem {
+	    id: number;
+	    invoice_id: number;
+	    product_id: number;
+	    product?: Product;
+	    quantity: number;
+	    unit_price: number;
+	    vat_rate: number;
+	    vat_amount: number;
+	    total_amount: number;
+	    // Go type: time
+	    created_at: any;
 	
+	    static createFrom(source: any = {}) {
+	        return new PurchaseInvoiceItem(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.invoice_id = source["invoice_id"];
+	        this.product_id = source["product_id"];
+	        this.product = this.convertValues(source["product"], Product);
+	        this.quantity = source["quantity"];
+	        this.unit_price = source["unit_price"];
+	        this.vat_rate = source["vat_rate"];
+	        this.vat_amount = source["vat_amount"];
+	        this.total_amount = source["total_amount"];
+	        this.created_at = this.convertValues(source["created_at"], null);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	export class Supplier {
 	    id: number;
 	    company_name: string;
@@ -609,6 +656,73 @@ export namespace database {
 		    return a;
 		}
 	}
+	export class PurchaseInvoice {
+	    id: number;
+	    invoice_number: string;
+	    supplier_id: number;
+	    supplier?: Supplier;
+	    // Go type: time
+	    issue_date: any;
+	    // Go type: time
+	    due_date: any;
+	    sub_total: number;
+	    vat_amount: number;
+	    total_amount: number;
+	    status: string;
+	    notes: string;
+	    notes_arabic: string;
+	    items?: PurchaseInvoiceItem[];
+	    // Go type: time
+	    created_at: any;
+	    // Go type: time
+	    updated_at: any;
+	
+	    static createFrom(source: any = {}) {
+	        return new PurchaseInvoice(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.invoice_number = source["invoice_number"];
+	        this.supplier_id = source["supplier_id"];
+	        this.supplier = this.convertValues(source["supplier"], Supplier);
+	        this.issue_date = this.convertValues(source["issue_date"], null);
+	        this.due_date = this.convertValues(source["due_date"], null);
+	        this.sub_total = source["sub_total"];
+	        this.vat_amount = source["vat_amount"];
+	        this.total_amount = source["total_amount"];
+	        this.status = source["status"];
+	        this.notes = source["notes"];
+	        this.notes_arabic = source["notes_arabic"];
+	        this.items = this.convertValues(source["items"], PurchaseInvoiceItem);
+	        this.created_at = this.convertValues(source["created_at"], null);
+	        this.updated_at = this.convertValues(source["updated_at"], null);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
+	
+	
+	
+	
 	export class TaxRate {
 	    id: number;
 	    name: string;

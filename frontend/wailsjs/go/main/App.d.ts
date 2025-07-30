@@ -4,7 +4,7 @@ import {database} from '../models';
 
 export function CreateCustomer(arg1:database.Customer):Promise<void>;
 
-export function CreateInvoice(arg1:database.Invoice):Promise<void>;
+export function CreateInvoice(arg1:database.SalesInvoice):Promise<void>;
 
 export function CreatePayment(arg1:database.Payment):Promise<void>;
 
@@ -14,7 +14,11 @@ export function CreateProduct(arg1:database.Product):Promise<void>;
 
 export function CreateProductCategory(arg1:database.ProductCategory):Promise<void>;
 
+export function CreatePurchaseInvoice(arg1:database.PurchaseInvoice):Promise<void>;
+
 export function CreateSalesCategory(arg1:database.SalesCategory):Promise<void>;
+
+export function CreateSalesInvoice(arg1:database.SalesInvoice):Promise<void>;
 
 export function CreateSampleData():Promise<void>;
 
@@ -32,7 +36,11 @@ export function DeletePaymentType(arg1:number):Promise<void>;
 
 export function DeleteProduct(arg1:number):Promise<void>;
 
+export function DeletePurchaseInvoice(arg1:number):Promise<void>;
+
 export function DeleteSalesCategory(arg1:number):Promise<void>;
+
+export function DeleteSalesInvoice(arg1:number):Promise<void>;
 
 export function DeleteSupplier(arg1:number):Promise<void>;
 
@@ -62,9 +70,9 @@ export function GetCustomers():Promise<Array<database.Customer>>;
 
 export function GetDefaultProductSettings():Promise<database.DefaultProductSettings>;
 
-export function GetInvoiceByID(arg1:number):Promise<database.Invoice>;
+export function GetInvoiceByID(arg1:number):Promise<database.SalesInvoice>;
 
-export function GetInvoices():Promise<Array<database.Invoice>>;
+export function GetInvoices():Promise<Array<database.SalesInvoice>>;
 
 export function GetPaymentByID(arg1:number):Promise<database.Payment>;
 
@@ -78,9 +86,17 @@ export function GetProductCategories():Promise<Array<database.ProductCategory>>;
 
 export function GetProducts():Promise<Array<database.Product>>;
 
+export function GetPurchaseInvoiceByID(arg1:number):Promise<database.PurchaseInvoice>;
+
+export function GetPurchaseInvoices():Promise<Array<database.PurchaseInvoice>>;
+
 export function GetQRCodeInfo(arg1:string):Promise<Record<string, any>>;
 
 export function GetSalesCategories():Promise<Array<database.SalesCategory>>;
+
+export function GetSalesInvoiceByID(arg1:number):Promise<database.SalesInvoice>;
+
+export function GetSalesInvoices():Promise<Array<database.SalesInvoice>>;
 
 export function GetSupplierByID(arg1:number):Promise<database.Supplier>;
 
@@ -126,7 +142,11 @@ export function UpdatePaymentType(arg1:database.PaymentType):Promise<void>;
 
 export function UpdateProduct(arg1:database.Product):Promise<void>;
 
+export function UpdatePurchaseInvoice(arg1:database.PurchaseInvoice):Promise<void>;
+
 export function UpdateSalesCategory(arg1:database.SalesCategory):Promise<void>;
+
+export function UpdateSalesInvoice(arg1:database.SalesInvoice):Promise<void>;
 
 export function UpdateSupplier(arg1:database.Supplier):Promise<void>;
 

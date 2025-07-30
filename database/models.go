@@ -81,30 +81,30 @@ type Product struct {
 	UpdatedAt              time.Time `json:"updated_at"`
 }
 
-// Invoice represents an invoice
-type Invoice struct {
-	ID               int           `json:"id"`
-	InvoiceNumber    string        `json:"invoice_number"`
-	CustomerID       int           `json:"customer_id"`
-	Customer         *Customer     `json:"customer,omitempty"`
-	SalesCategoryID  int           `json:"sales_category_id"`
-	SalesCategory    *SalesCategory `json:"sales_category,omitempty"`
-	IssueDate        time.Time     `json:"issue_date"`
-	DueDate          time.Time     `json:"due_date"`
-	SubTotal         float64       `json:"sub_total"`
-	VATAmount        float64       `json:"vat_amount"`
-	TotalAmount      float64       `json:"total_amount"`
-	Status           string        `json:"status"` // draft, sent, paid, cancelled
-	Notes            string        `json:"notes"`
-	NotesArabic      string        `json:"notes_arabic"`
-	QRCode           string        `json:"qr_code"`
-	Items            []InvoiceItem `json:"items,omitempty"`
-	CreatedAt        time.Time     `json:"created_at"`
-	UpdatedAt        time.Time     `json:"updated_at"`
+// SalesInvoice represents a sales invoice (to customers)
+type SalesInvoice struct {
+	ID               int                `json:"id"`
+	InvoiceNumber    string             `json:"invoice_number"`
+	CustomerID       int                `json:"customer_id"`
+	Customer         *Customer          `json:"customer,omitempty"`
+	SalesCategoryID  int                `json:"sales_category_id"`
+	SalesCategory    *SalesCategory     `json:"sales_category,omitempty"`
+	IssueDate        time.Time          `json:"issue_date"`
+	DueDate          time.Time          `json:"due_date"`
+	SubTotal         float64            `json:"sub_total"`
+	VATAmount        float64            `json:"vat_amount"`
+	TotalAmount      float64            `json:"total_amount"`
+	Status           string             `json:"status"` // draft, sent, paid, cancelled
+	Notes            string             `json:"notes"`
+	NotesArabic      string             `json:"notes_arabic"`
+	QRCode           string             `json:"qr_code"`
+	Items            []SalesInvoiceItem `json:"items,omitempty"`
+	CreatedAt        time.Time          `json:"created_at"`
+	UpdatedAt        time.Time          `json:"updated_at"`
 }
 
-// InvoiceItem represents an item in an invoice
-type InvoiceItem struct {
+// SalesInvoiceItem represents an item in a sales invoice
+type SalesInvoiceItem struct {
 	ID          int      `json:"id"`
 	InvoiceID   int      `json:"invoice_id"`
 	ProductID   int      `json:"product_id"`
@@ -116,6 +116,43 @@ type InvoiceItem struct {
 	TotalAmount float64  `json:"total_amount"`
 	CreatedAt   time.Time `json:"created_at"`
 }
+
+// PurchaseInvoice represents a purchase invoice (from suppliers)
+type PurchaseInvoice struct {
+	ID               int                   `json:"id"`
+	InvoiceNumber    string                `json:"invoice_number"`
+	SupplierID       int                   `json:"supplier_id"`
+	Supplier         *Supplier             `json:"supplier,omitempty"`
+	IssueDate        time.Time             `json:"issue_date"`
+	DueDate          time.Time             `json:"due_date"`
+	SubTotal         float64               `json:"sub_total"`
+	VATAmount        float64               `json:"vat_amount"`
+	TotalAmount      float64               `json:"total_amount"`
+	Status           string                `json:"status"` // draft, received, paid, cancelled
+	Notes            string                `json:"notes"`
+	NotesArabic      string                `json:"notes_arabic"`
+	Items            []PurchaseInvoiceItem `json:"items,omitempty"`
+	CreatedAt        time.Time             `json:"created_at"`
+	UpdatedAt        time.Time             `json:"updated_at"`
+}
+
+// PurchaseInvoiceItem represents an item in a purchase invoice
+type PurchaseInvoiceItem struct {
+	ID          int      `json:"id"`
+	InvoiceID   int      `json:"invoice_id"`
+	ProductID   int      `json:"product_id"`
+	Product     *Product `json:"product,omitempty"`
+	Quantity    float64  `json:"quantity"`
+	UnitPrice   float64  `json:"unit_price"`
+	VATRate     float64  `json:"vat_rate"`
+	VATAmount   float64  `json:"vat_amount"`
+	TotalAmount float64  `json:"total_amount"`
+	CreatedAt   time.Time `json:"created_at"`
+}
+
+// Legacy Invoice type for backward compatibility (maps to SalesInvoice)
+type Invoice = SalesInvoice
+type InvoiceItem = SalesInvoiceItem
 
 // Company represents the seller company information
 type Company struct {

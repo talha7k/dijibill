@@ -1,0 +1,193 @@
+package database
+
+import (
+	"fmt"
+)
+
+// PurchaseInvoice operations
+func (d *Database) CreatePurchaseInvoice(invoice *PurchaseInvoice) error {
+	tx, err := d.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	// Generate invoice number if not provided
+	if invoice.InvoiceNumber == "" {
+		invoice.InvoiceNumber = d.generatePurchaseInvoiceNumber()
+	}
+
+	// Insert purchase invoice
+	query := `
+		INSERT INTO purchase_invoices (invoice_number, supplier_id, issue_date, due_date, sub_total, vat_amount, total_amount, status, notes, notes_arabic)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+
+	result, err := tx.Exec(query, invoice.InvoiceNumber, invoice.SupplierID, invoice.IssueDate, invoice.DueDate,
+		invoice.SubTotal, invoice.VATAmount, invoice.TotalAmount, invoice.Status, invoice.Notes, invoice.NotesArabic)
+	if err != nil {
+		return err
+	}
+
+	invoiceID, err := result.LastInsertId()
+	if err != nil {
+		return err
+	}
+	invoice.ID = int(invoiceID)
+
+	// Insert purchase invoice items
+	for _, item := range invoice.Items {
+		itemQuery := `
+			INSERT INTO purchase_invoice_items (invoice_id, product_id, quantity, unit_price, vat_rate, vat_amount, total_amount)
+			VALUES (?, ?, ?, ?, ?, ?, ?)`
+
+		_, err = tx.Exec(itemQuery, invoiceID, item.ProductID, item.Quantity, item.UnitPrice, item.VATRate, item.VATAmount, item.TotalAmount)
+		if err != nil {
+			return err
+		}
+	}
+
+	return tx.Commit()
+}
+
+func (d *Database) GetPurchaseInvoices() ([]PurchaseInvoice, error) {
+	query := `SELECT id, invoice_number, supplier_id, issue_date, due_date, sub_total, vat_amount, total_amount, status, notes, notes_arabic, created_at, updated_at FROM purchase_invoices ORDER BY created_at DESC`
+
+	rows, err := d.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var invoices []PurchaseInvoice
+	for rows.Next() {
+		var inv PurchaseInvoice
+		err := rows.Scan(&inv.ID, &inv.InvoiceNumber, &inv.SupplierID, &inv.IssueDate, &inv.DueDate,
+			&inv.SubTotal, &inv.VATAmount, &inv.TotalAmount, &inv.Status, &inv.Notes, &inv.NotesArabic,
+			&inv.CreatedAt, &inv.UpdatedAt)
+		if err != nil {
+			return nil, err
+		}
+		invoices = append(invoices, inv)
+	}
+	return invoices, nil
+}
+
+func (d *Database) GetPurchaseInvoiceByID(id int) (*PurchaseInvoice, error) {
+	query := `SELECT id, invoice_number, supplier_id, issue_date, due_date, sub_total, vat_amount, total_amount, status, notes, notes_arabic, created_at, updated_at FROM purchase_invoices WHERE id = ?`
+
+	var inv PurchaseInvoice
+	err := d.db.QueryRow(query, id).Scan(&inv.ID, &inv.InvoiceNumber, &inv.SupplierID, &inv.IssueDate, &inv.DueDate,
+		&inv.SubTotal, &inv.VATAmount, &inv.TotalAmount, &inv.Status, &inv.Notes, &inv.NotesArabic,
+		&inv.CreatedAt, &inv.UpdatedAt)
+	if err != nil {
+		return nil, err
+	}
+
+	// Get supplier only if SupplierID is not 0
+	if inv.SupplierID > 0 {
+		supplier, err := d.GetSupplierByID(inv.SupplierID)
+		if err == nil {
+			inv.Supplier = supplier
+		}
+		// If supplier retrieval fails, inv.Supplier remains nil
+	}
+
+	// Get purchase invoice items
+	items, err := d.GetPurchaseInvoiceItems(inv.ID)
+	if err == nil {
+		inv.Items = items
+	}
+
+	return &inv, nil
+}
+
+func (d *Database) UpdatePurchaseInvoice(invoice *PurchaseInvoice) error {
+	tx, err := d.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	// Update purchase invoice
+	query := `
+		UPDATE purchase_invoices 
+		SET invoice_number = ?, supplier_id = ?, issue_date = ?, due_date = ?, 
+		    sub_total = ?, vat_amount = ?, total_amount = ?, status = ?, notes = ?, notes_arabic = ?, updated_at = CURRENT_TIMESTAMP
+		WHERE id = ?`
+
+	_, err = tx.Exec(query, invoice.InvoiceNumber, invoice.SupplierID, invoice.IssueDate, invoice.DueDate,
+		invoice.SubTotal, invoice.VATAmount, invoice.TotalAmount, invoice.Status, invoice.Notes, invoice.NotesArabic, invoice.ID)
+	if err != nil {
+		return err
+	}
+
+	// Delete existing items
+	_, err = tx.Exec("DELETE FROM purchase_invoice_items WHERE invoice_id = ?", invoice.ID)
+	if err != nil {
+		return err
+	}
+
+	// Insert updated items
+	for _, item := range invoice.Items {
+		itemQuery := `
+			INSERT INTO purchase_invoice_items (invoice_id, product_id, quantity, unit_price, vat_rate, vat_amount, total_amount)
+			VALUES (?, ?, ?, ?, ?, ?, ?)`
+
+		_, err = tx.Exec(itemQuery, invoice.ID, item.ProductID, item.Quantity, item.UnitPrice, item.VATRate, item.VATAmount, item.TotalAmount)
+		if err != nil {
+			return err
+		}
+	}
+
+	return tx.Commit()
+}
+
+func (d *Database) DeletePurchaseInvoice(id int) error {
+	tx, err := d.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	// Delete purchase invoice items first (due to foreign key constraint)
+	_, err = tx.Exec("DELETE FROM purchase_invoice_items WHERE invoice_id = ?", id)
+	if err != nil {
+		return err
+	}
+
+	// Delete purchase invoice
+	_, err = tx.Exec("DELETE FROM purchase_invoices WHERE id = ?", id)
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit()
+}
+
+func (d *Database) GetPurchaseInvoiceItems(invoiceID int) ([]PurchaseInvoiceItem, error) {
+	query := `SELECT id, invoice_id, product_id, quantity, unit_price, vat_rate, vat_amount, total_amount, created_at FROM purchase_invoice_items WHERE invoice_id = ?`
+
+	rows, err := d.db.Query(query, invoiceID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var items []PurchaseInvoiceItem
+	for rows.Next() {
+		var item PurchaseInvoiceItem
+		err := rows.Scan(&item.ID, &item.InvoiceID, &item.ProductID, &item.Quantity, &item.UnitPrice,
+			&item.VATRate, &item.VATAmount, &item.TotalAmount, &item.CreatedAt)
+		if err != nil {
+			return nil, err
+		}
+		items = append(items, item)
+	}
+	return items, nil
+}
+
+func (d *Database) generatePurchaseInvoiceNumber() string {
+	var count int
+	d.db.QueryRow("SELECT COUNT(*) FROM purchase_invoices").Scan(&count)
+	return fmt.Sprintf("PI-%06d", count+1)
+}

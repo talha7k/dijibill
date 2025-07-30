@@ -1,7 +1,7 @@
 <script>
   import { onMount } from 'svelte'
   import { 
-    GetInvoices, 
+    GetSalesInvoices, 
     GenerateInvoiceHTML, 
     ViewInvoiceHTML, 
     SaveInvoiceHTML,
@@ -44,7 +44,7 @@
     isLoading = true
     try {
       console.log('Loading invoices...')
-      const result = await GetInvoices()
+      const result = await GetSalesInvoices()
       console.log('Invoices loaded:', result)
       invoices = result || []
       console.log('Total invoices:', invoices.length)

@@ -1,18 +1,16 @@
 <script>
+  import { onMount } from 'svelte'
+  import { GetPurchaseInvoices, GetSuppliers, DeletePurchaseInvoice, CreatePurchaseInvoice, UpdatePurchaseInvoice } from '../wailsjs/go/main/App.js'
   import PageLayout from './components/PageLayout.svelte'
   import DataTable from './components/DataTable.svelte'
   import PurchaseInvoiceModal from './components/PurchaseInvoiceModal.svelte'
   import StatusBadge from './components/StatusBadge.svelte'
 
-  /** @type {Array<{id: number, invoice_number: string, supplier_id: number, supplier_name: string, invoice_date: string, due_date: string, amount: number, tax_amount: number, total_amount: number, currency: string, status: string, description: string, description_arabic: string, payment_terms: string, reference_number: string, notes: string}>} */
+  /** @type {Array<any>} */
   let purchaseInvoices = []
 
-  /** @type {Array<{id: number, company_name: string}>} */
-  let suppliers = [
-    { id: 1, company_name: 'Tech Solutions Ltd' },
-    { id: 2, company_name: 'Global Supplies Co' },
-    { id: 3, company_name: 'Office Depot' }
-  ]
+  /** @type {Array<any>} */
+  let suppliers = []
 
   /** @type {string} */
   let searchTerm = ''
@@ -22,13 +20,37 @@
   let editingInvoice = null
   /** @type {boolean} */
   let loading = false
+  /** @type {boolean} */
+  let isLoading = false
+
+  onMount(async () => {
+    await loadData()
+  })
+
+  async function loadData() {
+    isLoading = true
+    try {
+      const [invoicesResult, suppliersResult] = await Promise.all([
+        GetPurchaseInvoices(),
+        GetSuppliers()
+      ])
+      purchaseInvoices = invoicesResult || []
+      suppliers = suppliersResult || []
+    } catch (error) {
+      console.error('Error loading data:', error)
+      purchaseInvoices = []
+      suppliers = []
+    } finally {
+      isLoading = false
+    }
+  }
 
   // Filter invoices based on search term
   $: filteredInvoices = purchaseInvoices.filter(invoice => 
-    invoice.invoice_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    invoice.supplier_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    invoice.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    invoice.reference_number.toLowerCase().includes(searchTerm.toLowerCase())
+    invoice.invoice_number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (invoice.supplier && invoice.supplier.company_name?.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    invoice.notes?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    invoice.reference_number?.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   function handleAddInvoice() {
@@ -41,45 +63,54 @@
     showInvoiceModal = true
   }
 
-  function handleDeleteInvoice(invoice) {
-    if (confirm(`Are you sure you want to delete invoice ${invoice.invoice_number}?`)) {
-      purchaseInvoices = purchaseInvoices.filter(i => i.id !== invoice.id)
-    }
-  }
-
-  function handleInvoiceSave(event) {
-    loading = true
-    const invoiceData = event.detail
-
-    setTimeout(() => {
+  async function handleInvoiceSave(event) {
+    try {
+      const invoiceData = event.detail
+      
       if (editingInvoice) {
         // Update existing invoice
-        const index = purchaseInvoices.findIndex(i => i.id === editingInvoice.id)
-        if (index !== -1) {
-          // Get supplier name
-          const supplier = suppliers.find(s => s.id == invoiceData.supplier_id)
-          purchaseInvoices[index] = { 
-            ...purchaseInvoices[index], 
-            ...invoiceData,
-            supplier_name: supplier ? supplier.company_name : 'Unknown Supplier'
-          }
-          purchaseInvoices = [...purchaseInvoices]
-        }
-      } else {
-        // Add new invoice
-        const supplier = suppliers.find(s => s.id == invoiceData.supplier_id)
-        const newInvoice = {
-          id: Math.max(...purchaseInvoices.map(i => i.id)) + 1,
+        await UpdatePurchaseInvoice({
           ...invoiceData,
-          supplier_name: supplier ? supplier.company_name : 'Unknown Supplier'
-        }
-        purchaseInvoices = [...purchaseInvoices, newInvoice]
+          id: editingInvoice.id,
+          supplier_id: parseInt(invoiceData.supplier_id),
+          amount: parseFloat(invoiceData.amount),
+          tax_amount: parseFloat(invoiceData.tax_amount),
+          total_amount: parseFloat(invoiceData.total_amount)
+        })
+      } else {
+        // Create new invoice
+        await CreatePurchaseInvoice({
+          ...invoiceData,
+          supplier_id: parseInt(invoiceData.supplier_id),
+          amount: parseFloat(invoiceData.amount),
+          tax_amount: parseFloat(invoiceData.tax_amount),
+          total_amount: parseFloat(invoiceData.total_amount)
+        })
       }
       
       showInvoiceModal = false
-      editingInvoice = null
-      loading = false
-    }, 1000)
+      await loadData() // Refresh the list
+    } catch (error) {
+      console.error('Error saving invoice:', error)
+      alert('Error saving invoice: ' + error.message)
+    }
+  }
+
+  function handleInvoiceClose() {
+    showInvoiceModal = false
+    editingInvoice = null
+  }
+
+  async function handleDeleteInvoice(invoice) {
+    if (confirm(`Are you sure you want to delete invoice ${invoice.invoice_number}?`)) {
+      try {
+        await DeletePurchaseInvoice(invoice.id)
+        await loadData() // Refresh the list
+      } catch (error) {
+        console.error('Error deleting invoice:', error)
+        alert('Error deleting invoice: ' + error.message)
+      }
+    }
   }
 
   function handleInvoiceModalClose() {
@@ -148,22 +179,22 @@
       `
     },
     {
-      key: 'supplier_name',
+      key: 'supplier',
       label: 'Supplier',
       labelArabic: 'المورد',
       sortable: true,
       render: (invoice) => `
-        <div class="font-medium text-white">${invoice.supplier_name}</div>
+        <div class="font-medium text-white">${invoice.supplier ? invoice.supplier.company_name : 'No supplier'}</div>
       `
     },
     {
-      key: 'invoice_date',
+      key: 'issue_date',
       label: 'Date',
       labelArabic: 'التاريخ',
       sortable: true,
       render: (invoice) => `
         <div>
-          <div class="text-white">${formatDate(invoice.invoice_date)}</div>
+          <div class="text-white">${formatDate(invoice.issue_date)}</div>
           <div class="text-sm text-white/60">Due: ${formatDate(invoice.due_date)}</div>
         </div>
       `
@@ -176,7 +207,7 @@
       render: (invoice) => `
         <div>
           <div class="font-medium text-white">${formatCurrency(invoice.total_amount)}</div>
-          <div class="text-sm text-white/60">Tax: ${formatCurrency(invoice.tax_amount)}</div>
+          <div class="text-sm text-white/60">VAT: ${formatCurrency(invoice.vat_amount)}</div>
         </div>
       `
     },

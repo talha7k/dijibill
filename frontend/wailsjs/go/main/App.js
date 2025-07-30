@@ -26,8 +26,16 @@ export function CreateProductCategory(arg1) {
   return window['go']['main']['App']['CreateProductCategory'](arg1);
 }
 
+export function CreatePurchaseInvoice(arg1) {
+  return window['go']['main']['App']['CreatePurchaseInvoice'](arg1);
+}
+
 export function CreateSalesCategory(arg1) {
   return window['go']['main']['App']['CreateSalesCategory'](arg1);
+}
+
+export function CreateSalesInvoice(arg1) {
+  return window['go']['main']['App']['CreateSalesInvoice'](arg1);
 }
 
 export function CreateSampleData() {
@@ -62,8 +70,16 @@ export function DeleteProduct(arg1) {
   return window['go']['main']['App']['DeleteProduct'](arg1);
 }
 
+export function DeletePurchaseInvoice(arg1) {
+  return window['go']['main']['App']['DeletePurchaseInvoice'](arg1);
+}
+
 export function DeleteSalesCategory(arg1) {
   return window['go']['main']['App']['DeleteSalesCategory'](arg1);
+}
+
+export function DeleteSalesInvoice(arg1) {
+  return window['go']['main']['App']['DeleteSalesInvoice'](arg1);
 }
 
 export function DeleteSupplier(arg1) {
@@ -154,12 +170,28 @@ export function GetProducts() {
   return window['go']['main']['App']['GetProducts']();
 }
 
+export function GetPurchaseInvoiceByID(arg1) {
+  return window['go']['main']['App']['GetPurchaseInvoiceByID'](arg1);
+}
+
+export function GetPurchaseInvoices() {
+  return window['go']['main']['App']['GetPurchaseInvoices']();
+}
+
 export function GetQRCodeInfo(arg1) {
   return window['go']['main']['App']['GetQRCodeInfo'](arg1);
 }
 
 export function GetSalesCategories() {
   return window['go']['main']['App']['GetSalesCategories']();
+}
+
+export function GetSalesInvoiceByID(arg1) {
+  return window['go']['main']['App']['GetSalesInvoiceByID'](arg1);
+}
+
+export function GetSalesInvoices() {
+  return window['go']['main']['App']['GetSalesInvoices']();
 }
 
 export function GetSupplierByID(arg1) {
@@ -250,8 +282,16 @@ export function UpdateProduct(arg1) {
   return window['go']['main']['App']['UpdateProduct'](arg1);
 }
 
+export function UpdatePurchaseInvoice(arg1) {
+  return window['go']['main']['App']['UpdatePurchaseInvoice'](arg1);
+}
+
 export function UpdateSalesCategory(arg1) {
   return window['go']['main']['App']['UpdateSalesCategory'](arg1);
+}
+
+export function UpdateSalesInvoice(arg1) {
+  return window['go']['main']['App']['UpdateSalesInvoice'](arg1);
 }
 
 export function UpdateSupplier(arg1) {

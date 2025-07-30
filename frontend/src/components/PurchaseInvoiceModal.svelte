@@ -14,22 +14,20 @@
 
   const dispatch = createEventDispatcher()
 
-  /** @type {{invoice_number: string, supplier_id: string, invoice_date: string, due_date: string, amount: string, tax_amount: string, total_amount: string, currency: string, status: string, description: string, description_arabic: string, payment_terms: string, reference_number: string, notes: string}} */
+  /** @type {{invoice_number: string, supplier_id: string, issue_date: string, due_date: string, amount: string, vat_amount: string, total_amount: string, currency: string, status: string, notes: string, payment_terms: string, reference_number: string}} */
   let invoiceForm = {
     invoice_number: '',
     supplier_id: '',
-    invoice_date: '',
+    issue_date: '',
     due_date: '',
     amount: '',
-    tax_amount: '',
+    vat_amount: '',
     total_amount: '',
     currency: 'SAR',
     status: 'pending',
-    description: '',
-    description_arabic: '',
+    notes: '',
     payment_terms: 'net_30',
-    reference_number: '',
-    notes: ''
+    reference_number: ''
   }
 
   /** @type {Record<string, string>} */
@@ -42,43 +40,39 @@
       invoiceForm = {
         invoice_number: invoice?.invoice_number || '',
         supplier_id: invoice?.supplier_id || '',
-        invoice_date: invoice?.invoice_date || '',
+        issue_date: invoice?.issue_date || '',
         due_date: invoice?.due_date || '',
         amount: invoice?.amount || '',
-        tax_amount: invoice?.tax_amount || '',
+        vat_amount: invoice?.vat_amount || '',
         total_amount: invoice?.total_amount || '',
         currency: invoice?.currency || 'SAR',
         status: invoice?.status || 'pending',
-        description: invoice?.description || '',
-        description_arabic: invoice?.description_arabic || '',
+        notes: invoice?.notes || '',
         payment_terms: invoice?.payment_terms || 'net_30',
-        reference_number: invoice?.reference_number || '',
-        notes: invoice?.notes || ''
+        reference_number: invoice?.reference_number || ''
       }
     } else {
       invoiceForm = {
         invoice_number: '',
         supplier_id: '',
-        invoice_date: new Date().toISOString().split('T')[0],
+        issue_date: new Date().toISOString().split('T')[0],
         due_date: '',
         amount: '',
-        tax_amount: '',
+        vat_amount: '',
         total_amount: '',
         currency: 'SAR',
         status: 'pending',
-        description: '',
-        description_arabic: '',
+        notes: '',
         payment_terms: 'net_30',
-        reference_number: '',
-        notes: ''
+        reference_number: ''
       }
     }
     errors = {}
   }
 
   // Calculate due date based on payment terms
-  $: if (invoiceForm.invoice_date && invoiceForm.payment_terms) {
-    const invoiceDate = new Date(invoiceForm.invoice_date)
+  $: if (invoiceForm.issue_date && invoiceForm.payment_terms) {
+    const invoiceDate = new Date(invoiceForm.issue_date)
     let daysToAdd = 30
     
     switch (invoiceForm.payment_terms) {
@@ -99,10 +93,10 @@
   }
 
   // Calculate total amount when amount or tax changes
-  $: if (invoiceForm.amount || invoiceForm.tax_amount) {
+  $: if (invoiceForm.amount || invoiceForm.vat_amount) {
     const amount = parseFloat(invoiceForm.amount) || 0
-    const taxAmount = parseFloat(invoiceForm.tax_amount) || 0
-    invoiceForm.total_amount = (amount + taxAmount).toFixed(2)
+    const vatAmount = parseFloat(invoiceForm.vat_amount) || 0
+    invoiceForm.total_amount = (amount + vatAmount).toFixed(2)
   }
 
   function validateForm() {
@@ -116,8 +110,8 @@
       errors.supplier_id = 'Supplier is required'
     }
     
-    if (!invoiceForm.invoice_date) {
-      errors.invoice_date = 'Invoice date is required'
+    if (!invoiceForm.issue_date) {
+      errors.issue_date = 'Invoice date is required'
     }
     
     if (!invoiceForm.amount || parseFloat(invoiceForm.amount) <= 0) {
@@ -145,7 +139,7 @@
   $: primaryButtonText = editingInvoice ? 'Update Invoice' : 'Create Invoice'
   $: isFormValid = invoiceForm.invoice_number.trim().length > 0 && 
                    invoiceForm.supplier_id && 
-                   invoiceForm.invoice_date && 
+                   invoiceForm.issue_date && 
                    parseFloat(invoiceForm.amount) > 0
 
   const statusOptions = [
@@ -245,9 +239,9 @@
           label="Invoice Date"
           labelArabic="تاريخ الفاتورة"
           type="date"
-          bind:value={invoiceForm.invoice_date}
+          bind:value={invoiceForm.issue_date}
           required={true}
-          error={errors.invoice_date}
+          error={errors.issue_date}
         />
 
         <FormField
@@ -296,14 +290,14 @@
         />
 
         <FormField
-          label="Tax Amount"
-          labelArabic="مبلغ الضريبة"
+          label="VAT Amount"
+          labelArabic="مبلغ ضريبة القيمة المضافة"
           type="number"
-          bind:value={invoiceForm.tax_amount}
+          bind:value={invoiceForm.vat_amount}
           placeholder="0.00"
           step="0.01"
           min="0"
-          error={errors.tax_amount}
+          error={errors.vat_amount}
         />
 
         <FormField
@@ -320,39 +314,18 @@
       </div>
     </div>
 
-    <!-- Description & Notes -->
+    <!-- Notes -->
     <div class="glass-card p-6">
-      <h3 class="heading-4 mb-4">Description & Notes</h3>
+      <h3 class="heading-4 mb-4">Notes</h3>
       
       <div class="space-y-4">
-        <FormField
-          label="Description"
-          labelArabic="الوصف"
-          type="textarea"
-          bind:value={invoiceForm.description}
-          placeholder="Enter description"
-          rows={3}
-          error={errors.description}
-        />
-
-        <FormField
-          label="Description (Arabic)"
-          labelArabic="الوصف بالعربية"
-          type="textarea"
-          bind:value={invoiceForm.description_arabic}
-          placeholder="أدخل الوصف بالعربية"
-          dir="rtl"
-          rows={3}
-          error={errors.description_arabic}
-        />
-
         <FormField
           label="Notes"
           labelArabic="ملاحظات"
           type="textarea"
           bind:value={invoiceForm.notes}
           placeholder="Enter additional notes"
-          rows={2}
+          rows={4}
           error={errors.notes}
         />
       </div>

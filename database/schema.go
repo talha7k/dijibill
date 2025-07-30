@@ -89,7 +89,7 @@ func (d *Database) createTables() error {
 			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 			FOREIGN KEY (category_id) REFERENCES product_categories(id)
 		)`,
-		`CREATE TABLE IF NOT EXISTS invoices (
+		`CREATE TABLE IF NOT EXISTS sales_invoices (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			invoice_number TEXT UNIQUE NOT NULL,
 			customer_id INTEGER NOT NULL,
@@ -108,7 +108,7 @@ func (d *Database) createTables() error {
 			FOREIGN KEY (customer_id) REFERENCES customers(id),
 			FOREIGN KEY (sales_category_id) REFERENCES sales_categories(id)
 		)`,
-		`CREATE TABLE IF NOT EXISTS invoice_items (
+		`CREATE TABLE IF NOT EXISTS sales_invoice_items (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			invoice_id INTEGER NOT NULL,
 			product_id INTEGER NOT NULL,
@@ -118,9 +118,40 @@ func (d *Database) createTables() error {
 			vat_amount REAL NOT NULL,
 			total_amount REAL NOT NULL,
 			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-			FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON DELETE CASCADE,
+			FOREIGN KEY (invoice_id) REFERENCES sales_invoices(id) ON DELETE CASCADE,
 			FOREIGN KEY (product_id) REFERENCES products(id)
 		)`,
+		`CREATE TABLE IF NOT EXISTS purchase_invoices (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			invoice_number TEXT UNIQUE NOT NULL,
+			supplier_id INTEGER NOT NULL,
+			issue_date DATETIME NOT NULL,
+			due_date DATETIME,
+			sub_total REAL NOT NULL,
+			vat_amount REAL NOT NULL,
+			total_amount REAL NOT NULL,
+			status TEXT DEFAULT 'draft',
+			notes TEXT,
+			notes_arabic TEXT,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			FOREIGN KEY (supplier_id) REFERENCES suppliers(id)
+		)`,
+		`CREATE TABLE IF NOT EXISTS purchase_invoice_items (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			invoice_id INTEGER NOT NULL,
+			product_id INTEGER NOT NULL,
+			quantity REAL NOT NULL,
+			unit_price REAL NOT NULL,
+			vat_rate REAL NOT NULL,
+			vat_amount REAL NOT NULL,
+			total_amount REAL NOT NULL,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			FOREIGN KEY (invoice_id) REFERENCES purchase_invoices(id) ON DELETE CASCADE,
+			FOREIGN KEY (product_id) REFERENCES products(id)
+		)`,
+		`CREATE VIEW IF NOT EXISTS invoices AS SELECT * FROM sales_invoices`,
+		`CREATE VIEW IF NOT EXISTS invoice_items AS SELECT * FROM sales_invoice_items`,
 		`CREATE TABLE IF NOT EXISTS payment_types (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			name TEXT NOT NULL,

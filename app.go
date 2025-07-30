@@ -176,6 +176,132 @@ func (a *App) GetInvoiceByID(id int) (*database.Invoice, error) {
 	return a.db.GetInvoiceByID(id)
 }
 
+// Sales Invoice Management Methods
+
+func (a *App) CreateSalesInvoice(invoice database.SalesInvoice) error {
+	// Calculate totals
+	var subTotal, vatAmount, totalAmount float64
+
+	for i := range invoice.Items {
+		item := &invoice.Items[i]
+		item.VATAmount = (item.UnitPrice * item.Quantity * item.VATRate) / 100
+		item.TotalAmount = (item.UnitPrice * item.Quantity) + item.VATAmount
+
+		subTotal += item.UnitPrice * item.Quantity
+		vatAmount += item.VATAmount
+		totalAmount += item.TotalAmount
+	}
+
+	invoice.SubTotal = subTotal
+	invoice.VATAmount = vatAmount
+	invoice.TotalAmount = totalAmount
+	invoice.CreatedAt = time.Now()
+	invoice.UpdatedAt = time.Now()
+
+	if invoice.Status == "" {
+		invoice.Status = "draft"
+	}
+
+	return a.db.CreateSalesInvoice(&invoice)
+}
+
+func (a *App) GetSalesInvoices() ([]database.SalesInvoice, error) {
+	return a.db.GetSalesInvoices()
+}
+
+func (a *App) GetSalesInvoiceByID(id int) (*database.SalesInvoice, error) {
+	return a.db.GetSalesInvoiceByID(id)
+}
+
+func (a *App) UpdateSalesInvoice(invoice database.SalesInvoice) error {
+	// Calculate totals
+	var subTotal, vatAmount, totalAmount float64
+
+	for i := range invoice.Items {
+		item := &invoice.Items[i]
+		item.VATAmount = (item.UnitPrice * item.Quantity * item.VATRate) / 100
+		item.TotalAmount = (item.UnitPrice * item.Quantity) + item.VATAmount
+
+		subTotal += item.UnitPrice * item.Quantity
+		vatAmount += item.VATAmount
+		totalAmount += item.TotalAmount
+	}
+
+	invoice.SubTotal = subTotal
+	invoice.VATAmount = vatAmount
+	invoice.TotalAmount = totalAmount
+	invoice.UpdatedAt = time.Now()
+
+	return a.db.UpdateSalesInvoice(&invoice)
+}
+
+func (a *App) DeleteSalesInvoice(id int) error {
+	return a.db.DeleteSalesInvoice(id)
+}
+
+// Purchase Invoice Management Methods
+
+func (a *App) CreatePurchaseInvoice(invoice database.PurchaseInvoice) error {
+	// Calculate totals
+	var subTotal, vatAmount, totalAmount float64
+
+	for i := range invoice.Items {
+		item := &invoice.Items[i]
+		item.VATAmount = (item.UnitPrice * item.Quantity * item.VATRate) / 100
+		item.TotalAmount = (item.UnitPrice * item.Quantity) + item.VATAmount
+
+		subTotal += item.UnitPrice * item.Quantity
+		vatAmount += item.VATAmount
+		totalAmount += item.TotalAmount
+	}
+
+	invoice.SubTotal = subTotal
+	invoice.VATAmount = vatAmount
+	invoice.TotalAmount = totalAmount
+	invoice.CreatedAt = time.Now()
+	invoice.UpdatedAt = time.Now()
+
+	if invoice.Status == "" {
+		invoice.Status = "draft"
+	}
+
+	return a.db.CreatePurchaseInvoice(&invoice)
+}
+
+func (a *App) GetPurchaseInvoices() ([]database.PurchaseInvoice, error) {
+	return a.db.GetPurchaseInvoices()
+}
+
+func (a *App) GetPurchaseInvoiceByID(id int) (*database.PurchaseInvoice, error) {
+	return a.db.GetPurchaseInvoiceByID(id)
+}
+
+func (a *App) UpdatePurchaseInvoice(invoice database.PurchaseInvoice) error {
+	// Calculate totals
+	var subTotal, vatAmount, totalAmount float64
+
+	for i := range invoice.Items {
+		item := &invoice.Items[i]
+		item.VATAmount = (item.UnitPrice * item.Quantity * item.VATRate) / 100
+		item.TotalAmount = (item.UnitPrice * item.Quantity) + item.VATAmount
+
+		subTotal += item.UnitPrice * item.Quantity
+		vatAmount += item.VATAmount
+		totalAmount += item.TotalAmount
+	}
+
+	invoice.SubTotal = subTotal
+	invoice.VATAmount = vatAmount
+	invoice.TotalAmount = totalAmount
+	invoice.UpdatedAt = time.Now()
+
+	return a.db.UpdatePurchaseInvoice(&invoice)
+}
+
+func (a *App) DeletePurchaseInvoice(id int) error {
+	return a.db.DeletePurchaseInvoice(id)
+}
+
 // Company Management Methods
 
 func (a *App) GetCompany() (*database.Company, error) {
