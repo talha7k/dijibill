@@ -8,6 +8,7 @@
   const dispatch = createEventDispatcher()
   
   export let isOpen = false
+  export let editingInvoice = null
   
   // Form data
   let customers = []
@@ -54,6 +55,9 @@
   let vatTotal = 0
   let totalPrice = 0
 
+  // Reactive title based on edit mode
+  $: modalTitle = editingInvoice ? 'Edit Sales Invoice' : 'New Sales Invoice'
+
   // Transform data for FormField options
   $: customerOptions = (customers || []).map(customer => ({ 
     value: customer.id.toString(), 
@@ -95,6 +99,7 @@
   
   $: if (isOpen) {
     loadData()
+    initializeFormData()
   }
   
   $: if (invoiceItems) {
@@ -130,6 +135,58 @@
       salesCategories = []
     } finally {
       isLoading = false
+    }
+  }
+
+  function initializeFormData() {
+    if (editingInvoice) {
+      // Populate form with existing invoice data
+      invoiceData = {
+        customer_id: editingInvoice.customer_id || 0,
+        sales_category_id: editingInvoice.sales_category_id || 0,
+        issue_date: editingInvoice.issue_date ? new Date(editingInvoice.issue_date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+        due_date: editingInvoice.due_date ? new Date(editingInvoice.due_date).toISOString().split('T')[0] : '',
+        payment_terms: editingInvoice.payment_terms || '',
+        notes: editingInvoice.notes || ''
+      }
+      
+      // Set string values for FormField binding
+      customerIdString = invoiceData.customer_id.toString()
+      salesCategoryIdString = invoiceData.sales_category_id.toString()
+      
+      // Populate invoice items if they exist
+      if (editingInvoice.items && editingInvoice.items.length > 0) {
+        invoiceItems = editingInvoice.items.map(item => ({
+          product_id: item.product_id || 0,
+          quantity: item.quantity || 1,
+          unit_price: item.unit_price || 0,
+          vat_rate: item.vat_rate || 15,
+          vat_amount: item.vat_amount || 0,
+          total_amount: item.total_amount || 0
+        }))
+      }
+    } else {
+      // Reset form for new invoice
+      invoiceData = {
+        customer_id: 0,
+        sales_category_id: 0,
+        issue_date: new Date().toISOString().split('T')[0],
+        due_date: '',
+        payment_terms: '',
+        notes: ''
+      }
+      customerIdString = ''
+      salesCategoryIdString = ''
+      invoiceItems = [
+        {
+          product_id: 0,
+          quantity: 1,
+          unit_price: 0,
+          vat_rate: 15,
+          vat_amount: 0,
+          total_amount: 0
+        }
+      ]
     }
   }
   
@@ -358,7 +415,7 @@
 
 <Modal
   show={isOpen}
-  title="New Sales Invoice"
+  title={modalTitle}
   size="xl"
   loading={isLoading}
   primaryButtonText={isSaving ? 'Saving...' : 'Save Invoice'}

@@ -20,6 +20,7 @@
   let invoices = []
   let isLoading = false
   let showInvoiceModal = false
+  let editingInvoice = null
   let searchTerm = ''
   
   // Get invoice language preference from localStorage (set by system settings)
@@ -57,14 +58,17 @@
   }
   
   function openInvoiceModal() {
+    editingInvoice = null
     showInvoiceModal = true
   }
   
   function closeInvoiceModal() {
+    editingInvoice = null
     showInvoiceModal = false
   }
   
   function handleInvoiceSaved() {
+    editingInvoice = null
     showInvoiceModal = false
     loadInvoices() // Refresh the list
   }
@@ -136,11 +140,8 @@
 
   function editInvoice(invoice) {
     console.log('editInvoice called with invoice:', invoice)
-    // TODO: Implement proper edit functionality
-    // For now, we'll open the invoice modal with the invoice data pre-filled
-    // This would require modifying the InvoiceModal to accept an existing invoice
-    alert('Edit functionality is not yet implemented. Invoice ID: ' + invoice.id)
-    console.log('Edit invoice:', invoice)
+    editingInvoice = invoice
+    showInvoiceModal = true
   }
   
   $: filteredInvoices = (invoices || []).filter(invoice => 
@@ -166,7 +167,6 @@
     { key: 'total_amount', label: 'Amount', render: (item) => `<span class="font-medium">${formatCurrency(item.total_amount)}</span>` },
     { key: 'status', label: 'Status' },
     { 
-      key: 'actions', 
       label: 'Actions',
       actions: [
         { key: 'view', text: 'View', icon: 'fa-eye', class: 'btn-info', title: 'View HTML' },
@@ -254,6 +254,7 @@
 <!-- Invoice Modal -->
 <SalesInvoiceModal
   bind:isOpen={showInvoiceModal}
+  {editingInvoice}
   on:close={closeInvoiceModal}
   on:save={handleInvoiceSaved}
 />
