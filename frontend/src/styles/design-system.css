@@ -1,0 +1,626 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==========================================================================
+   DIJINVOICE DESIGN SYSTEM
+   ========================================================================== */
+
+/* Color System */
+:root {
+  /* Primary Colors */
+  --color-primary: #667eea;
+  --color-primary-light: #8b9df0;
+  --color-primary-dark: #4c63d2;
+  --color-primary-50: rgba(102, 126, 234, 0.05);
+  --color-primary-100: rgba(102, 126, 234, 0.1);
+  --color-primary-200: rgba(102, 126, 234, 0.2);
+  --color-primary-500: rgba(102, 126, 234, 0.5);
+  --color-primary-700: rgba(102, 126, 234, 0.7);
+  --color-primary-900: rgba(102, 126, 234, 0.9);
+
+  /* Secondary Colors */
+  --color-secondary: #764ba2;
+  --color-secondary-light: #9b7bc7;
+  --color-secondary-dark: #5a3a7d;
+  --color-secondary-50: rgba(118, 75, 162, 0.05);
+  --color-secondary-100: rgba(118, 75, 162, 0.1);
+  --color-secondary-200: rgba(118, 75, 162, 0.2);
+
+  /* Accent Colors */
+  --color-accent: #f093fb;
+  --color-accent-light: #f5b3fc;
+  --color-accent-dark: #e873f8;
+
+  /* Neutral Colors */
+  --color-neutral: #2a2e37;
+  --color-neutral-light: #4a5568;
+  --color-neutral-dark: #1a202c;
+
+  /* Status Colors */
+  --color-success: #36d399;
+  --color-success-light: #6ee7b7;
+  --color-success-dark: #10b981;
+  --color-warning: #fbbd23;
+  --color-warning-light: #fcd34d;
+  --color-warning-dark: #f59e0b;
+  --color-error: #f87272;
+  --color-error-light: #fca5a5;
+  --color-error-dark: #ef4444;
+  --color-info: #3abff8;
+  --color-info-light: #7dd3fc;
+  --color-info-dark: #0ea5e9;
+
+  /* Glass/Backdrop Colors */
+  --color-glass-white: rgba(255, 255, 255, 0.1);
+  --color-glass-white-light: rgba(255, 255, 255, 0.05);
+  --color-glass-white-strong: rgba(255, 255, 255, 0.2);
+  --color-glass-dark: rgba(0, 0, 0, 0.1);
+  --color-glass-dark-light: rgba(0, 0, 0, 0.05);
+  --color-glass-dark-strong: rgba(0, 0, 0, 0.2);
+
+  /* Text Colors */
+  --color-text-primary: #ffffff;
+  --color-text-secondary: rgba(255, 255, 255, 0.8);
+  --color-text-muted: rgba(255, 255, 255, 0.6);
+  --color-text-disabled: rgba(255, 255, 255, 0.4);
+  --color-text-dark: #1f2937;
+  --color-text-dark-secondary: #6b7280;
+  --color-text-dark-muted: #9ca3af;
+
+  /* Border Colors */
+  --color-border-light: rgba(255, 255, 255, 0.2);
+  --color-border-lighter: rgba(255, 255, 255, 0.1);
+  --color-border-dark: rgba(0, 0, 0, 0.1);
+  --color-border-gray: #d1d5db;
+  --color-border-gray-light: #e5e7eb;
+
+  /* Background Colors */
+  --color-bg-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --color-bg-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  --color-bg-dark: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  --color-bg-glass: rgba(255, 255, 255, 0.1);
+  --color-bg-glass-strong: rgba(255, 255, 255, 0.2);
+  --color-bg-overlay: rgba(0, 0, 0, 0.5);
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+
+  /* Border Radius */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-full: 9999px;
+
+  /* Transitions */
+  --transition-fast: 150ms ease-in-out;
+  --transition-normal: 200ms ease-in-out;
+  --transition-slow: 300ms ease-in-out;
+}
+
+/* ==========================================================================
+   COMPONENT STYLES
+   ========================================================================== */
+
+/* Glass Card Component */
+@layer components {
+  .glass-card {
+    @apply bg-white/10 backdrop-blur-lg border border-white/20 shadow-xl rounded-lg;
+  }
+
+  .glass-card-strong {
+    @apply bg-white/20 backdrop-blur-lg border border-white/30 shadow-xl rounded-lg;
+  }
+
+  .glass-card-subtle {
+    @apply bg-white/5 backdrop-blur-lg border border-white/10 shadow-lg rounded-lg;
+  }
+}
+
+/* Button System */
+@layer components {
+  /* Primary Buttons */
+  .btn-primary {
+    @apply px-4 py-2 bg-primary text-white rounded-md font-medium transition-all duration-200 
+           hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-primary-outline {
+    @apply px-4 py-2 border-2 border-primary text-primary bg-transparent rounded-md font-medium 
+           transition-all duration-200 hover:bg-primary hover:text-white focus:outline-none 
+           focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-primary-ghost {
+    @apply px-4 py-2 text-primary bg-transparent rounded-md font-medium transition-all duration-200 
+           hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* Secondary Buttons */
+  .btn-secondary {
+    @apply px-4 py-2 bg-secondary text-white rounded-md font-medium transition-all duration-200 
+           hover:bg-secondary-dark focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2 
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary-outline {
+    @apply px-4 py-2 border-2 border-secondary text-secondary bg-transparent rounded-md font-medium 
+           transition-all duration-200 hover:bg-secondary hover:text-white focus:outline-none 
+           focus:ring-2 focus:ring-secondary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* Glass Buttons */
+  .btn-glass {
+    @apply px-4 py-2 bg-white/10 text-white border border-white/20 rounded-md font-medium 
+           backdrop-blur-lg transition-all duration-200 hover:bg-white/20 focus:outline-none 
+           focus:ring-2 focus:ring-white/50 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-glass-outline {
+    @apply px-4 py-2 border-2 border-white/30 text-white bg-transparent rounded-md font-medium 
+           transition-all duration-200 hover:bg-white/10 focus:outline-none focus:ring-2 
+           focus:ring-white/50 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* Status Buttons */
+  .btn-success {
+    @apply px-4 py-2 bg-success text-white rounded-md font-medium transition-all duration-200 
+           hover:bg-success-dark focus:outline-none focus:ring-2 focus:ring-success focus:ring-offset-2 
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-warning {
+    @apply px-4 py-2 bg-warning text-white rounded-md font-medium transition-all duration-200 
+           hover:bg-warning-dark focus:outline-none focus:ring-2 focus:ring-warning focus:ring-offset-2 
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-error {
+    @apply px-4 py-2 bg-error text-white rounded-md font-medium transition-all duration-200 
+           hover:bg-error-dark focus:outline-none focus:ring-2 focus:ring-error focus:ring-offset-2 
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-info {
+    @apply px-4 py-2 bg-info text-white rounded-md font-medium transition-all duration-200 
+           hover:bg-info-dark focus:outline-none focus:ring-2 focus:ring-info focus:ring-offset-2 
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* Button Sizes */
+  .btn-sm {
+    @apply px-3 py-1.5 text-sm;
+  }
+
+  .btn-lg {
+    @apply px-6 py-3 text-lg;
+  }
+
+  .btn-xl {
+    @apply px-8 py-4 text-xl;
+  }
+
+  /* Icon Buttons */
+  .btn-icon {
+    @apply p-2 rounded-full transition-all duration-200;
+  }
+
+  .btn-icon-sm {
+    @apply p-1.5 rounded-full transition-all duration-200;
+  }
+
+  .btn-icon-lg {
+    @apply p-3 rounded-full transition-all duration-200;
+  }
+}
+
+/* Form Input System */
+@layer components {
+  /* Glass Inputs */
+  .input-glass {
+    @apply w-full px-3 py-2 bg-white/10 border border-white/20 rounded-md text-white 
+           placeholder-white/50 backdrop-blur-lg transition-all duration-200 
+           focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent;
+  }
+
+  .input-glass-strong {
+    @apply w-full px-3 py-2 bg-white/20 border border-white/30 rounded-md text-white 
+           placeholder-white/60 backdrop-blur-lg transition-all duration-200 
+           focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent;
+  }
+
+  /* Standard Inputs */
+  .input-standard {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 
+           placeholder-gray-500 transition-all duration-200 focus:outline-none 
+           focus:ring-2 focus:ring-primary focus:border-transparent;
+  }
+
+  /* Select Inputs */
+  .select-glass {
+    @apply w-full px-3 py-2 bg-white/10 border border-white/20 rounded-md text-white 
+           backdrop-blur-lg transition-all duration-200 focus:outline-none 
+           focus:ring-2 focus:ring-primary focus:border-transparent;
+  }
+
+  .select-standard {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 
+           transition-all duration-200 focus:outline-none focus:ring-2 
+           focus:ring-primary focus:border-transparent;
+  }
+
+  /* Textarea */
+  .textarea-glass {
+    @apply w-full px-3 py-2 bg-white/10 border border-white/20 rounded-md text-white 
+           placeholder-white/50 backdrop-blur-lg transition-all duration-200 
+           focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent 
+           resize-vertical;
+  }
+
+  .textarea-standard {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 
+           placeholder-gray-500 transition-all duration-200 focus:outline-none 
+           focus:ring-2 focus:ring-primary focus:border-transparent resize-vertical;
+  }
+}
+
+/* Text System */
+@layer components {
+  /* Headings */
+  .heading-1 {
+    @apply text-3xl font-bold text-white;
+  }
+
+  .heading-2 {
+    @apply text-2xl font-bold text-white;
+  }
+
+  .heading-3 {
+    @apply text-xl font-semibold text-white;
+  }
+
+  .heading-4 {
+    @apply text-lg font-medium text-white;
+  }
+
+  /* Body Text */
+  .text-primary {
+    @apply text-white;
+  }
+
+  .text-secondary {
+    @apply text-white/80;
+  }
+
+  .text-muted {
+    @apply text-white/60;
+  }
+
+  .text-disabled {
+    @apply text-white/40;
+  }
+
+  /* Dark Theme Text */
+  .text-dark-primary {
+    @apply text-gray-900;
+  }
+
+  .text-dark-secondary {
+    @apply text-gray-700;
+  }
+
+  .text-dark-muted {
+    @apply text-gray-500;
+  }
+
+  /* Labels */
+  .label-glass {
+    @apply block text-sm font-medium text-white mb-2;
+  }
+
+  .label-standard {
+    @apply block text-sm font-medium text-gray-700 mb-2;
+  }
+}
+
+/* Status Badge System */
+@layer components {
+  .badge-success {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+           bg-success/20 text-success border border-success/30;
+  }
+
+  .badge-warning {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+           bg-warning/20 text-warning border border-warning/30;
+  }
+
+  .badge-error {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+           bg-error/20 text-error border border-error/30;
+  }
+
+  .badge-info {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+           bg-info/20 text-info border border-info/30;
+  }
+
+  .badge-primary {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+           bg-primary/20 text-primary border border-primary/30;
+  }
+
+  .badge-neutral {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+           bg-white/20 text-white border border-white/30;
+  }
+}
+
+/* Table System */
+@layer components {
+  .table-glass {
+    @apply w-full bg-white/5 backdrop-blur-lg border border-white/10 rounded-lg overflow-hidden;
+  }
+
+  .table-glass thead {
+    @apply bg-white/10 border-b border-white/20;
+  }
+
+  .table-glass th {
+    @apply px-4 py-3 text-left text-xs font-medium text-white/70 uppercase tracking-wider;
+  }
+
+  .table-glass td {
+    @apply px-4 py-3 text-sm text-white/80 border-b border-white/10;
+  }
+
+  .table-glass tbody tr:hover {
+    @apply bg-white/5;
+  }
+
+  .table-standard {
+    @apply w-full bg-white shadow overflow-hidden rounded-lg;
+  }
+
+  .table-standard thead {
+    @apply bg-gray-50 border-b border-gray-200;
+  }
+
+  .table-standard th {
+    @apply px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider;
+  }
+
+  .table-standard td {
+    @apply px-4 py-3 text-sm text-gray-900 border-b border-gray-200;
+  }
+
+  .table-standard tbody tr:hover {
+    @apply bg-gray-50;
+  }
+}
+
+/* Modal System */
+@layer components {
+  .modal-glass {
+    @apply fixed inset-0 z-50 flex items-center justify-center p-4;
+  }
+
+  .modal-backdrop {
+    @apply fixed inset-0 bg-black/50 backdrop-blur-sm;
+  }
+
+  .modal-content {
+    @apply relative bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg 
+           shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto;
+  }
+
+  .modal-content-lg {
+    @apply max-w-2xl;
+  }
+
+  .modal-content-xl {
+    @apply max-w-4xl;
+  }
+
+  .modal-header {
+    @apply px-6 py-4 border-b border-white/20;
+  }
+
+  .modal-body {
+    @apply px-6 py-4;
+  }
+
+  .modal-footer {
+    @apply px-6 py-4 border-t border-white/20 flex justify-end space-x-3;
+  }
+}
+
+/* Navigation System */
+@layer components {
+  .nav-glass {
+    @apply bg-white/10 backdrop-blur-lg border-r border-white/20;
+  }
+
+  .nav-item {
+    @apply w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left 
+           transition-all duration-200 text-white/80 hover:bg-white/10;
+  }
+
+  .nav-item-active {
+    @apply bg-primary text-white;
+  }
+
+  .nav-section-title {
+    @apply text-xs font-semibold text-white/60 uppercase tracking-wider mb-2 px-3;
+  }
+}
+
+/* Tab System */
+@layer components {
+  .tabs-glass {
+    @apply bg-white/10 backdrop-blur-lg rounded-lg p-1;
+  }
+
+  .tab-glass {
+    @apply flex items-center px-3 py-2 text-sm font-medium rounded-md 
+           whitespace-nowrap transition-all duration-200 text-white/70 hover:text-white hover:bg-white/10;
+  }
+
+  .tab-glass-active {
+    @apply bg-primary text-white shadow-sm;
+  }
+
+  .tab-standard {
+    @apply flex items-center px-3 py-2 text-sm font-medium rounded-md 
+           whitespace-nowrap transition-all duration-200 text-gray-500 hover:text-gray-700 hover:bg-gray-50;
+  }
+
+  .tab-standard-active {
+    @apply bg-primary text-white shadow-sm;
+  }
+}
+
+/* Loading States */
+@layer components {
+  .loading-spinner {
+    @apply animate-spin h-5 w-5 text-white;
+  }
+
+  .loading-spinner-sm {
+    @apply animate-spin h-4 w-4 text-white;
+  }
+
+  .loading-spinner-lg {
+    @apply animate-spin h-8 w-8 text-white;
+  }
+
+  .loading-overlay {
+    @apply absolute inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center;
+  }
+}
+
+/* Utility Classes */
+@layer utilities {
+  .backdrop-blur-glass {
+    backdrop-filter: blur(16px);
+  }
+
+  .text-gradient {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .bg-gradient-primary {
+    background: var(--color-bg-primary);
+  }
+
+  .bg-gradient-secondary {
+    background: var(--color-bg-secondary);
+  }
+
+  .bg-gradient-dark {
+    background: var(--color-bg-dark);
+  }
+
+  .shadow-glass {
+    box-shadow: var(--shadow-glass);
+  }
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN
+   ========================================================================== */
+
+/* Mobile First Approach */
+@media (max-width: 640px) {
+  .glass-card {
+    @apply mx-2;
+  }
+
+  .modal-content {
+    @apply mx-2 max-w-none;
+  }
+
+  .btn-responsive {
+    @apply w-full;
+  }
+}
+
+/* Tablet */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .glass-card {
+    @apply mx-4;
+  }
+}
+
+/* Desktop */
+@media (min-width: 1025px) {
+  .glass-card {
+    @apply mx-auto;
+  }
+}
+
+/* ==========================================================================
+   ACCESSIBILITY
+   ========================================================================== */
+
+/* Focus States */
+@layer base {
+  *:focus {
+    @apply outline-none;
+  }
+
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    @apply ring-2 ring-primary ring-offset-2;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .glass-card {
+    @apply border-2 border-white;
+  }
+
+  .btn-glass {
+    @apply border-2 border-white;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-text-dark: #ffffff;
+    --color-text-dark-secondary: #e5e7eb;
+    --color-text-dark-muted: #9ca3af;
+  }
+}
