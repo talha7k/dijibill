@@ -129,9 +129,9 @@ func (h *HTMLInvoiceService) GenerateInvoiceHTMLWithLanguage(invoiceID int, lang
 	// Get customer (handle case where customer ID is 0 or customer doesn't exist)
 	var customer *database.Customer
 	if invoice.CustomerID > 0 {
-		var err error
-		customer, err = h.db.GetCustomerByID(invoice.CustomerID)
-		if err != nil {
+		var customerErr error
+		customer, customerErr = h.db.GetCustomerByID(invoice.CustomerID)
+		if customerErr != nil {
 			// Log the error but don't fail - create a placeholder customer
 			customer = &database.Customer{
 				Name:          "Walk-in Customer",
@@ -184,8 +184,8 @@ func (h *HTMLInvoiceService) GenerateInvoiceHTMLWithLanguage(invoiceID int, lang
 	// Get invoice items with product details
 	items := make([]InvoiceItemData, len(invoice.Items))
 	for i, item := range invoice.Items {
-		product, err := h.db.GetProductByID(item.ProductID)
-		if err != nil {
+		product, productErr := h.db.GetProductByID(item.ProductID)
+		if productErr != nil {
 			// Create a placeholder product if the product is not found
 			product = &database.Product{
 				Name:        fmt.Sprintf("Product ID: %d", item.ProductID),

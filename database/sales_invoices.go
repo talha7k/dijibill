@@ -61,11 +61,11 @@ func (d *Database) GetSalesInvoices() ([]SalesInvoice, error) {
 	var invoices []SalesInvoice
 	for rows.Next() {
 		var inv SalesInvoice
-		err := rows.Scan(&inv.ID, &inv.InvoiceNumber, &inv.CustomerID, &inv.SalesCategoryID, &inv.IssueDate, &inv.DueDate,
+		scanErr := rows.Scan(&inv.ID, &inv.InvoiceNumber, &inv.CustomerID, &inv.SalesCategoryID, &inv.IssueDate, &inv.DueDate,
 			&inv.SubTotal, &inv.VATAmount, &inv.TotalAmount, &inv.Status, &inv.Notes, &inv.NotesArabic,
 			&inv.QRCode, &inv.CreatedAt, &inv.UpdatedAt)
-		if err != nil {
-			return nil, err
+		if scanErr != nil {
+			return nil, scanErr
 		}
 		invoices = append(invoices, inv)
 	}
@@ -85,8 +85,8 @@ func (d *Database) GetSalesInvoiceByID(id int) (*SalesInvoice, error) {
 
 	// Get customer only if CustomerID is not 0
 	if inv.CustomerID > 0 {
-		customer, err := d.GetCustomerByID(inv.CustomerID)
-		if err == nil {
+		customer, customerErr := d.GetCustomerByID(inv.CustomerID)
+		if customerErr == nil {
 			inv.Customer = customer
 		}
 		// If customer retrieval fails, inv.Customer remains nil which is handled in PDF generation
@@ -94,15 +94,15 @@ func (d *Database) GetSalesInvoiceByID(id int) (*SalesInvoice, error) {
 
 	// Get sales category
 	if inv.SalesCategoryID > 0 {
-		salesCategory, err := d.GetSalesCategoryByID(inv.SalesCategoryID)
-		if err == nil {
+		salesCategory, categoryErr := d.GetSalesCategoryByID(inv.SalesCategoryID)
+		if categoryErr == nil {
 			inv.SalesCategory = salesCategory
 		}
 	}
 
 	// Get sales invoice items
-	items, err := d.GetSalesInvoiceItems(inv.ID)
-	if err == nil {
+	items, itemsErr := d.GetSalesInvoiceItems(inv.ID)
+	if itemsErr == nil {
 		inv.Items = items
 	}
 
@@ -141,9 +141,9 @@ func (d *Database) UpdateSalesInvoice(invoice *SalesInvoice) error {
 			INSERT INTO sales_invoice_items (invoice_id, product_id, quantity, unit_price, vat_rate, vat_amount, total_amount)
 			VALUES (?, ?, ?, ?, ?, ?, ?)`
 
-		_, err = tx.Exec(itemQuery, invoice.ID, item.ProductID, item.Quantity, item.UnitPrice, item.VATRate, item.VATAmount, item.TotalAmount)
-		if err != nil {
-			return err
+		_, execErr := tx.Exec(itemQuery, invoice.ID, item.ProductID, item.Quantity, item.UnitPrice, item.VATRate, item.VATAmount, item.TotalAmount)
+		if execErr != nil {
+			return execErr
 		}
 	}
 
@@ -184,10 +184,10 @@ func (d *Database) GetSalesInvoiceItems(invoiceID int) ([]SalesInvoiceItem, erro
 	var items []SalesInvoiceItem
 	for rows.Next() {
 		var item SalesInvoiceItem
-		err := rows.Scan(&item.ID, &item.InvoiceID, &item.ProductID, &item.Quantity, &item.UnitPrice,
+		scanErr := rows.Scan(&item.ID, &item.InvoiceID, &item.ProductID, &item.Quantity, &item.UnitPrice,
 			&item.VATRate, &item.VATAmount, &item.TotalAmount, &item.CreatedAt)
-		if err != nil {
-			return nil, err
+		if scanErr != nil {
+			return nil, scanErr
 		}
 		items = append(items, item)
 	}

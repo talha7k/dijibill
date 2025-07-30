@@ -40,9 +40,9 @@ func (d *Database) CreatePurchaseInvoice(invoice *PurchaseInvoice) error {
 			INSERT INTO purchase_invoice_items (invoice_id, product_id, quantity, unit_price, vat_rate, vat_amount, total_amount)
 			VALUES (?, ?, ?, ?, ?, ?, ?)`
 
-		_, err = tx.Exec(itemQuery, invoiceID, item.ProductID, item.Quantity, item.UnitPrice, item.VATRate, item.VATAmount, item.TotalAmount)
-		if err != nil {
-			return err
+		_, execErr := tx.Exec(itemQuery, invoiceID, item.ProductID, item.Quantity, item.UnitPrice, item.VATRate, item.VATAmount, item.TotalAmount)
+		if execErr != nil {
+			return execErr
 		}
 	}
 
@@ -61,11 +61,11 @@ func (d *Database) GetPurchaseInvoices() ([]PurchaseInvoice, error) {
 	var invoices []PurchaseInvoice
 	for rows.Next() {
 		var inv PurchaseInvoice
-		err := rows.Scan(&inv.ID, &inv.InvoiceNumber, &inv.SupplierID, &inv.IssueDate, &inv.DueDate,
+		scanErr := rows.Scan(&inv.ID, &inv.InvoiceNumber, &inv.SupplierID, &inv.IssueDate, &inv.DueDate,
 			&inv.SubTotal, &inv.VATAmount, &inv.TotalAmount, &inv.Status, &inv.Notes, &inv.NotesArabic,
 			&inv.CreatedAt, &inv.UpdatedAt)
-		if err != nil {
-			return nil, err
+		if scanErr != nil {
+			return nil, scanErr
 		}
 		invoices = append(invoices, inv)
 	}
@@ -85,16 +85,16 @@ func (d *Database) GetPurchaseInvoiceByID(id int) (*PurchaseInvoice, error) {
 
 	// Get supplier only if SupplierID is not 0
 	if inv.SupplierID > 0 {
-		supplier, err := d.GetSupplierByID(inv.SupplierID)
-		if err == nil {
+		supplier, supplierErr := d.GetSupplierByID(inv.SupplierID)
+		if supplierErr == nil {
 			inv.Supplier = supplier
 		}
 		// If supplier retrieval fails, inv.Supplier remains nil
 	}
 
 	// Get purchase invoice items
-	items, err := d.GetPurchaseInvoiceItems(inv.ID)
-	if err == nil {
+	items, itemsErr := d.GetPurchaseInvoiceItems(inv.ID)
+	if itemsErr == nil {
 		inv.Items = items
 	}
 
@@ -133,9 +133,9 @@ func (d *Database) UpdatePurchaseInvoice(invoice *PurchaseInvoice) error {
 			INSERT INTO purchase_invoice_items (invoice_id, product_id, quantity, unit_price, vat_rate, vat_amount, total_amount)
 			VALUES (?, ?, ?, ?, ?, ?, ?)`
 
-		_, err = tx.Exec(itemQuery, invoice.ID, item.ProductID, item.Quantity, item.UnitPrice, item.VATRate, item.VATAmount, item.TotalAmount)
-		if err != nil {
-			return err
+		_, execErr := tx.Exec(itemQuery, invoice.ID, item.ProductID, item.Quantity, item.UnitPrice, item.VATRate, item.VATAmount, item.TotalAmount)
+		if execErr != nil {
+			return execErr
 		}
 	}
 
@@ -176,10 +176,10 @@ func (d *Database) GetPurchaseInvoiceItems(invoiceID int) ([]PurchaseInvoiceItem
 	var items []PurchaseInvoiceItem
 	for rows.Next() {
 		var item PurchaseInvoiceItem
-		err := rows.Scan(&item.ID, &item.InvoiceID, &item.ProductID, &item.Quantity, &item.UnitPrice,
+		scanErr := rows.Scan(&item.ID, &item.InvoiceID, &item.ProductID, &item.Quantity, &item.UnitPrice,
 			&item.VATRate, &item.VATAmount, &item.TotalAmount, &item.CreatedAt)
-		if err != nil {
-			return nil, err
+		if scanErr != nil {
+			return nil, scanErr
 		}
 		items = append(items, item)
 	}

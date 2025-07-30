@@ -540,8 +540,8 @@ func (a *App) GenerateInvoicePDF(invoiceID int) (string, error) {
 	}
 
 	documentsDir := filepath.Join(homeDir, "Documents", "dijibill")
-	if err := os.MkdirAll(documentsDir, 0755); err != nil {
-		return "", err
+	if mkdirErr := os.MkdirAll(documentsDir, 0755); mkdirErr != nil {
+		return "", mkdirErr
 	}
 
 	invoice, err := a.db.GetInvoiceByID(invoiceID)
@@ -552,8 +552,8 @@ func (a *App) GenerateInvoicePDF(invoiceID int) (string, error) {
 	filename := fmt.Sprintf("Invoice_%s_%s.html", invoice.InvoiceNumber, time.Now().Format("20060102_150405"))
 	filepath := filepath.Join(documentsDir, filename)
 
-	if err := os.WriteFile(filepath, []byte(htmlContent), 0644); err != nil {
-		return "", err
+	if writeErr := os.WriteFile(filepath, []byte(htmlContent), 0644); writeErr != nil {
+		return "", writeErr
 	}
 
 	return filepath, nil
@@ -686,8 +686,8 @@ func (a *App) CreateSampleData() error {
 		CountryArabic: "المملكة العربية السعودية",
 	}
 
-	if err := a.CreateCustomer(customer); err != nil {
-		return err
+	if createErr := a.CreateCustomer(customer); createErr != nil {
+		return createErr
 	}
 
 	// Get the created customer
@@ -724,8 +724,8 @@ func (a *App) CreateSampleData() error {
 		IsActive:    true,
 	}
 
-	if err := a.CreateProduct(product); err != nil {
-		return err
+	if createErr := a.CreateProduct(product); createErr != nil {
+		return createErr
 	}
 
 	// Get the created product
@@ -833,8 +833,8 @@ func (a *App) PopulateSampleData() error {
 	}
 
 	for _, customer := range customers {
-		if err := a.CreateCustomer(customer); err != nil {
-			return fmt.Errorf("failed to create customer %s: %v", customer.Name, err)
+		if createErr := a.CreateCustomer(customer); createErr != nil {
+			return fmt.Errorf("failed to create customer %s: %v", customer.Name, createErr)
 		}
 	}
 
@@ -903,8 +903,8 @@ func (a *App) PopulateSampleData() error {
 	}
 
 	for _, product := range products {
-		if err := a.CreateProduct(product); err != nil {
-			return fmt.Errorf("failed to create product %s: %v", product.Name, err)
+		if createErr := a.CreateProduct(product); createErr != nil {
+			return createErr
 		}
 	}
 
@@ -943,8 +943,8 @@ func (a *App) PopulateSampleData() error {
 	}
 
 	for _, paymentType := range paymentTypes {
-		if err := a.CreatePaymentType(paymentType); err != nil {
-			return fmt.Errorf("failed to create payment type %s: %v", paymentType.Name, err)
+		if createErr := a.CreatePaymentType(paymentType); createErr != nil {
+			return fmt.Errorf("failed to create payment type %s: %v", paymentType.Name, createErr)
 		}
 	}
 
@@ -1093,8 +1093,8 @@ func (a *App) PopulateSampleData() error {
 	}
 
 	for _, invoice := range invoices {
-		if err := a.CreateInvoice(invoice); err != nil {
-			return fmt.Errorf("failed to create invoice %s: %v", invoice.InvoiceNumber, err)
+		if createErr := a.CreateInvoice(invoice); createErr != nil {
+			return fmt.Errorf("failed to create invoice %s: %v", invoice.InvoiceNumber, createErr)
 		}
 	}
 
@@ -1118,8 +1118,8 @@ func (a *App) TestCustomerNAHandling() error {
 		CountryArabic: "", // Empty field
 	}
 
-	if err := a.CreateCustomer(customer); err != nil {
-		return err
+	if createErr := a.CreateCustomer(customer); createErr != nil {
+		return createErr
 	}
 
 	// Get the created customer
@@ -1180,8 +1180,8 @@ func (a *App) TestCustomerNAHandling() error {
 		},
 	}
 
-	if err := a.CreateInvoice(invoice); err != nil {
-		return err
+	if createErr := a.CreateInvoice(invoice); createErr != nil {
+		return createErr
 	}
 
 	// Get the created invoice
@@ -1205,9 +1205,9 @@ func (a *App) TestCustomerNAHandling() error {
 	// Test all three templates
 	languages := []string{"english", "arabic", "bilingual"}
 	for _, lang := range languages {
-		htmlContent, err := a.htmlInvoiceService.GenerateInvoiceHTMLWithLanguage(testInvoice.ID, lang)
-		if err != nil {
-			return fmt.Errorf("failed to generate %s template: %v", lang, err)
+		htmlContent, generateErr := a.htmlInvoiceService.GenerateInvoiceHTMLWithLanguage(testInvoice.ID, lang)
+		if generateErr != nil {
+			return fmt.Errorf("failed to generate %s template: %v", lang, generateErr)
 		}
 
 		// Check if the HTML contains "n/a" or "غير متوفر" for empty fields

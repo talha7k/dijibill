@@ -21,8 +21,8 @@ func (d *Database) insertDefaultSettings() error {
 		}
 
 		for _, pt := range paymentTypes {
-			if err := d.CreatePaymentType(&pt); err != nil {
-				log.Printf("Warning: Could not insert payment type %s: %v", pt.Name, err)
+			if createErr := d.CreatePaymentType(&pt); createErr != nil {
+				log.Printf("Warning: Could not insert payment type %s: %v", pt.Name, createErr)
 			}
 		}
 	}
@@ -42,8 +42,8 @@ func (d *Database) insertDefaultSettings() error {
 		}
 
 		for _, sc := range salesCategories {
-			if err := d.CreateSalesCategory(&sc); err != nil {
-				log.Printf("Warning: Could not insert sales category %s: %v", sc.Name, err)
+			if createErr := d.CreateSalesCategory(&sc); createErr != nil {
+				log.Printf("Warning: Could not insert sales category %s: %v", sc.Name, createErr)
 			}
 		}
 	}
@@ -63,8 +63,8 @@ func (d *Database) insertDefaultSettings() error {
 		}
 
 		for _, tr := range taxRates {
-			if err := d.CreateTaxRate(&tr); err != nil {
-				log.Printf("Warning: Could not insert tax rate %s: %v", tr.Name, err)
+			if createErr := d.CreateTaxRate(&tr); createErr != nil {
+				log.Printf("Warning: Could not insert tax rate %s: %v", tr.Name, createErr)
 			}
 		}
 	}
@@ -87,8 +87,8 @@ func (d *Database) insertDefaultSettings() error {
 		}
 
 		for _, u := range units {
-			if err := d.CreateUnitOfMeasurement(&u); err != nil {
-				log.Printf("Warning: Could not insert unit %s: %v", u.Label, err)
+			if createErr := d.CreateUnitOfMeasurement(&u); createErr != nil {
+				log.Printf("Warning: Could not insert unit %s: %v", u.Label, createErr)
 			}
 		}
 	}
@@ -108,7 +108,7 @@ func (d *Database) insertDefaultSettings() error {
 		d.db.QueryRow("SELECT id FROM units_of_measurement WHERE is_default = 1 LIMIT 1").Scan(&defaultUnitID)
 		d.db.QueryRow("SELECT id FROM sales_categories WHERE is_default = 1 LIMIT 1").Scan(&defaultSalesCategoryID)
 
-		_, err = d.db.Exec(`
+		_, execErr := d.db.Exec(`
 			INSERT INTO default_product_settings (
 				default_stock, default_tax_rate_id, default_unit_id, 
 				default_product_type, default_product_status, 
@@ -117,8 +117,8 @@ func (d *Database) insertDefaultSettings() error {
 			1, defaultTaxRateID, defaultUnitID,
 			"product", true, 0.0, false, true)
 		
-		if err != nil {
-			log.Printf("Warning: Could not insert default product settings: %v", err)
+		if execErr != nil {
+			log.Printf("Warning: Could not insert default product settings: %v", execErr)
 		}
 	}
 
@@ -134,14 +134,14 @@ func (d *Database) insertDefaultCompany() error {
 	}
 
 	if count == 0 {
-		_, err = d.db.Exec(`
+		_, execErr := d.db.Exec(`
 			INSERT INTO companies (name, name_arabic, vat_number, cr_number, email, phone, address, address_arabic, city, city_arabic, country, country_arabic)
 			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 			"Your Company Name", "اسم شركتك", "123456789012345", "1234567890",
 			"info@company.com", "+966501234567",
 			"123 Business Street", "شارع الأعمال ١٢٣",
 			"Riyadh", "الرياض", "Saudi Arabia", "المملكة العربية السعودية")
-		return err
+		return execErr
 	}
 	return nil
 }
