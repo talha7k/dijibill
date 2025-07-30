@@ -126,6 +126,23 @@ type PaymentType struct {
 	UpdatedAt   time.Time `json:"updated_at"`
 }
 
+// Payment represents a payment made against an invoice
+type Payment struct {
+	ID            int          `json:"id"`
+	InvoiceID     int          `json:"invoice_id"`
+	Invoice       *Invoice     `json:"invoice,omitempty"`
+	PaymentTypeID int          `json:"payment_type_id"`
+	PaymentType   *PaymentType `json:"payment_type,omitempty"`
+	Amount        float64      `json:"amount"`
+	PaymentDate   time.Time    `json:"payment_date"`
+	Reference     string       `json:"reference"`     // Check number, transaction ID, etc.
+	Notes         string       `json:"notes"`
+	NotesArabic   string       `json:"notes_arabic"`
+	Status        string       `json:"status"`        // pending, completed, failed, cancelled
+	CreatedAt     time.Time    `json:"created_at"`
+	UpdatedAt     time.Time    `json:"updated_at"`
+}
+
 // SalesCategory represents categories for sales/invoices
 type SalesCategory struct {
 	ID                int       `json:"id"`

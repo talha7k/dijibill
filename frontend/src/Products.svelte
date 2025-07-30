@@ -1,6 +1,6 @@
 <script>
   import { onMount } from 'svelte'
-  import { GetProducts, CreateProduct, GetProductCategories, CreateProductCategory, GetDefaultProductSettings } from '../wailsjs/go/main/App.js'
+  import { GetProducts, CreateProduct, UpdateProduct, GetProductCategories, CreateProductCategory, GetDefaultProductSettings } from '../wailsjs/go/main/App.js'
   import {database} from '../wailsjs/go/models'
   
   // Import components
@@ -150,7 +150,15 @@
     try {
       isLoading = true
       const product = database.Product.createFrom(productForm)
-      await CreateProduct(product)
+      
+      if (editingProduct) {
+        // We're editing an existing product, so update it
+        await UpdateProduct(product)
+      } else {
+        // We're creating a new product
+        await CreateProduct(product)
+      }
+      
       await loadProducts()
       showProductModal = false
       resetProductForm()

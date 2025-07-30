@@ -170,6 +170,44 @@ func (a *App) DeletePaymentType(id int) error {
 	return a.db.DeletePaymentType(id)
 }
 
+// Payment Management Methods
+
+func (a *App) CreatePayment(payment database.Payment) error {
+	payment.CreatedAt = time.Now()
+	payment.UpdatedAt = time.Now()
+	if payment.Status == "" {
+		payment.Status = "completed"
+	}
+	createdPayment, err := a.db.CreatePayment(payment)
+	if err != nil {
+		return err
+	}
+	// Update the original payment with the created payment data
+	payment = createdPayment
+	return nil
+}
+
+func (a *App) GetPayments() ([]database.Payment, error) {
+	return a.db.GetPayments()
+}
+
+func (a *App) GetPaymentsByInvoiceID(invoiceID int) ([]database.Payment, error) {
+	return a.db.GetPaymentsByInvoiceID(invoiceID)
+}
+
+func (a *App) GetPaymentByID(id int) (database.Payment, error) {
+	return a.db.GetPaymentByID(id)
+}
+
+func (a *App) UpdatePayment(payment database.Payment) error {
+	payment.UpdatedAt = time.Now()
+	return a.db.UpdatePayment(payment)
+}
+
+func (a *App) DeletePayment(id int) error {
+	return a.db.DeletePayment(id)
+}
+
 // Sales Category Management Methods
 
 func (a *App) CreateSalesCategory(salesCategory database.SalesCategory) error {

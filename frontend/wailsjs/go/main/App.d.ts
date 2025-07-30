@@ -6,6 +6,8 @@ export function CreateCustomer(arg1:database.Customer):Promise<void>;
 
 export function CreateInvoice(arg1:database.Invoice):Promise<void>;
 
+export function CreatePayment(arg1:database.Payment):Promise<void>;
+
 export function CreatePaymentType(arg1:database.PaymentType):Promise<void>;
 
 export function CreateProduct(arg1:database.Product):Promise<void>;
@@ -19,6 +21,8 @@ export function CreateTaxRate(arg1:database.TaxRate):Promise<void>;
 export function CreateUnitOfMeasurement(arg1:database.UnitOfMeasurement):Promise<void>;
 
 export function DeleteCustomer(arg1:number):Promise<void>;
+
+export function DeletePayment(arg1:number):Promise<void>;
 
 export function DeletePaymentType(arg1:number):Promise<void>;
 
@@ -44,7 +48,13 @@ export function GetInvoiceByID(arg1:number):Promise<database.Invoice>;
 
 export function GetInvoices():Promise<Array<database.Invoice>>;
 
+export function GetPaymentByID(arg1:number):Promise<database.Payment>;
+
 export function GetPaymentTypes():Promise<Array<database.PaymentType>>;
+
+export function GetPayments():Promise<Array<database.Payment>>;
+
+export function GetPaymentsByInvoiceID(arg1:number):Promise<Array<database.Payment>>;
 
 export function GetProductCategories():Promise<Array<database.ProductCategory>>;
 
@@ -75,6 +85,8 @@ export function UpdateCompany(arg1:database.Company):Promise<void>;
 export function UpdateCustomer(arg1:database.Customer):Promise<void>;
 
 export function UpdateDefaultProductSettings(arg1:database.DefaultProductSettings):Promise<void>;
+
+export function UpdatePayment(arg1:database.Payment):Promise<void>;
 
 export function UpdatePaymentType(arg1:database.PaymentType):Promise<void>;
 

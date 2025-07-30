@@ -112,6 +112,21 @@ func (d *Database) createTables() error {
 			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 		)`,
+		`CREATE TABLE IF NOT EXISTS payments (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			invoice_id INTEGER NOT NULL,
+			payment_type_id INTEGER NOT NULL,
+			amount REAL NOT NULL,
+			payment_date DATETIME NOT NULL,
+			reference TEXT,
+			notes TEXT,
+			notes_arabic TEXT,
+			status TEXT DEFAULT 'completed',
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON DELETE CASCADE,
+			FOREIGN KEY (payment_type_id) REFERENCES payment_types(id)
+		)`,
 		`CREATE TABLE IF NOT EXISTS sales_categories (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			name TEXT NOT NULL,

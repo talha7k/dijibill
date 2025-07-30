@@ -10,6 +10,10 @@ export function CreateInvoice(arg1) {
   return window['go']['main']['App']['CreateInvoice'](arg1);
 }
 
+export function CreatePayment(arg1) {
+  return window['go']['main']['App']['CreatePayment'](arg1);
+}
+
 export function CreatePaymentType(arg1) {
   return window['go']['main']['App']['CreatePaymentType'](arg1);
 }
@@ -36,6 +40,10 @@ export function CreateUnitOfMeasurement(arg1) {
 
 export function DeleteCustomer(arg1) {
   return window['go']['main']['App']['DeleteCustomer'](arg1);
+}
+
+export function DeletePayment(arg1) {
+  return window['go']['main']['App']['DeletePayment'](arg1);
 }
 
 export function DeletePaymentType(arg1) {
@@ -86,8 +94,20 @@ export function GetInvoices() {
   return window['go']['main']['App']['GetInvoices']();
 }
 
+export function GetPaymentByID(arg1) {
+  return window['go']['main']['App']['GetPaymentByID'](arg1);
+}
+
 export function GetPaymentTypes() {
   return window['go']['main']['App']['GetPaymentTypes']();
+}
+
+export function GetPayments() {
+  return window['go']['main']['App']['GetPayments']();
+}
+
+export function GetPaymentsByInvoiceID(arg1) {
+  return window['go']['main']['App']['GetPaymentsByInvoiceID'](arg1);
 }
 
 export function GetProductCategories() {
@@ -148,6 +168,10 @@ export function UpdateCustomer(arg1) {
 
 export function UpdateDefaultProductSettings(arg1) {
   return window['go']['main']['App']['UpdateDefaultProductSettings'](arg1);
+}
+
+export function UpdatePayment(arg1) {
+  return window['go']['main']['App']['UpdatePayment'](arg1);
 }
 
 export function UpdatePaymentType(arg1) {
