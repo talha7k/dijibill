@@ -6,6 +6,8 @@ import (
 	"encoding/base64"
 	"fmt"
 	"time"
+
+	"dijinvoice/database"
 )
 
 // ZATCAQRService handles ZATCA-compliant QR code generation
@@ -27,7 +29,7 @@ type ZATCAQRData struct {
 }
 
 // GenerateZATCAQRCode generates a ZATCA-compliant QR code in Base64 format
-func (q *ZATCAQRService) GenerateZATCAQRCode(invoice *Invoice, company *Company) (string, error) {
+func (q *ZATCAQRService) GenerateZATCAQRCode(invoice *database.Invoice, company *database.Company) (string, error) {
 	// Prepare QR data
 	qrData := ZATCAQRData{
 		SellerName:  company.Name,

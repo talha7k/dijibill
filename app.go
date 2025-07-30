@@ -9,12 +9,13 @@ import (
 	"time"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
+	"dijinvoice/database"
 )
 
 // App struct
 type App struct {
 	ctx        context.Context
-	db         *Database
+	db         *database.Database
 	pdfService *PDFService
 }
 
@@ -35,7 +36,7 @@ func (a *App) startup(ctx context.Context) {
 	}
 
 	dbPath := filepath.Join(homeDir, "dijinvoice.db")
-	a.db, err = NewDatabase(dbPath)
+	a.db, err = database.NewDatabase(dbPath)
 	if err != nil {
 		log.Fatal("Failed to initialize database:", err)
 	}
@@ -48,21 +49,21 @@ func (a *App) startup(ctx context.Context) {
 
 // Customer Management Methods
 
-func (a *App) CreateCustomer(customer Customer) error {
+func (a *App) CreateCustomer(customer database.Customer) error {
 	customer.CreatedAt = time.Now()
 	customer.UpdatedAt = time.Now()
 	return a.db.CreateCustomer(&customer)
 }
 
-func (a *App) GetCustomers() ([]Customer, error) {
+func (a *App) GetCustomers() ([]database.Customer, error) {
 	return a.db.GetCustomers()
 }
 
-func (a *App) GetCustomerByID(id int) (*Customer, error) {
+func (a *App) GetCustomerByID(id int) (*database.Customer, error) {
 	return a.db.GetCustomerByID(id)
 }
 
-func (a *App) UpdateCustomer(customer Customer) error {
+func (a *App) UpdateCustomer(customer database.Customer) error {
 	customer.UpdatedAt = time.Now()
 	return a.db.UpdateCustomer(&customer)
 }
@@ -73,36 +74,36 @@ func (a *App) DeleteCustomer(id int) error {
 
 // Product Category Management Methods
 
-func (a *App) CreateProductCategory(category ProductCategory) error {
+func (a *App) CreateProductCategory(category database.ProductCategory) error {
 	category.CreatedAt = time.Now()
 	category.UpdatedAt = time.Now()
 	return a.db.CreateProductCategory(&category)
 }
 
-func (a *App) GetProductCategories() ([]ProductCategory, error) {
+func (a *App) GetProductCategories() ([]database.ProductCategory, error) {
 	return a.db.GetProductCategories()
 }
 
 // Product Management Methods
 
-func (a *App) CreateProduct(product Product) error {
+func (a *App) CreateProduct(product database.Product) error {
 	product.CreatedAt = time.Now()
 	product.UpdatedAt = time.Now()
 	return a.db.CreateProduct(&product)
 }
 
-func (a *App) GetProducts() ([]Product, error) {
+func (a *App) GetProducts() ([]database.Product, error) {
 	return a.db.GetProducts()
 }
 
-func (a *App) UpdateProduct(product Product) error {
+func (a *App) UpdateProduct(product database.Product) error {
 	product.UpdatedAt = time.Now()
 	return a.db.UpdateProduct(&product)
 }
 
 // Invoice Management Methods
 
-func (a *App) CreateInvoice(invoice Invoice) error {
+func (a *App) CreateInvoice(invoice database.Invoice) error {
 	// Calculate totals
 	var subTotal, vatAmount, totalAmount float64
 
@@ -129,37 +130,37 @@ func (a *App) CreateInvoice(invoice Invoice) error {
 	return a.db.CreateInvoice(&invoice)
 }
 
-func (a *App) GetInvoices() ([]Invoice, error) {
+func (a *App) GetInvoices() ([]database.Invoice, error) {
 	return a.db.GetInvoices()
 }
 
-func (a *App) GetInvoiceByID(id int) (*Invoice, error) {
+func (a *App) GetInvoiceByID(id int) (*database.Invoice, error) {
 	return a.db.GetInvoiceByID(id)
 }
 
 // Company Management Methods
 
-func (a *App) GetCompany() (*Company, error) {
+func (a *App) GetCompany() (*database.Company, error) {
 	return a.db.GetCompany()
 }
 
-func (a *App) UpdateCompany(company Company) error {
+func (a *App) UpdateCompany(company database.Company) error {
 	return a.db.UpdateCompany(&company)
 }
 
 // Payment Type Management Methods
 
-func (a *App) CreatePaymentType(paymentType PaymentType) error {
+func (a *App) CreatePaymentType(paymentType database.PaymentType) error {
 	paymentType.CreatedAt = time.Now()
 	paymentType.UpdatedAt = time.Now()
 	return a.db.CreatePaymentType(&paymentType)
 }
 
-func (a *App) GetPaymentTypes() ([]PaymentType, error) {
+func (a *App) GetPaymentTypes() ([]database.PaymentType, error) {
 	return a.db.GetPaymentTypes()
 }
 
-func (a *App) UpdatePaymentType(paymentType PaymentType) error {
+func (a *App) UpdatePaymentType(paymentType database.PaymentType) error {
 	paymentType.UpdatedAt = time.Now()
 	return a.db.UpdatePaymentType(&paymentType)
 }
@@ -170,17 +171,17 @@ func (a *App) DeletePaymentType(id int) error {
 
 // Sales Category Management Methods
 
-func (a *App) CreateSalesCategory(salesCategory SalesCategory) error {
+func (a *App) CreateSalesCategory(salesCategory database.SalesCategory) error {
 	salesCategory.CreatedAt = time.Now()
 	salesCategory.UpdatedAt = time.Now()
 	return a.db.CreateSalesCategory(&salesCategory)
 }
 
-func (a *App) GetSalesCategories() ([]SalesCategory, error) {
+func (a *App) GetSalesCategories() ([]database.SalesCategory, error) {
 	return a.db.GetSalesCategories()
 }
 
-func (a *App) UpdateSalesCategory(salesCategory SalesCategory) error {
+func (a *App) UpdateSalesCategory(salesCategory database.SalesCategory) error {
 	salesCategory.UpdatedAt = time.Now()
 	return a.db.UpdateSalesCategory(&salesCategory)
 }
@@ -191,17 +192,17 @@ func (a *App) DeleteSalesCategory(id int) error {
 
 // Tax Rate Management Methods
 
-func (a *App) CreateTaxRate(taxRate TaxRate) error {
+func (a *App) CreateTaxRate(taxRate database.TaxRate) error {
 	taxRate.CreatedAt = time.Now()
 	taxRate.UpdatedAt = time.Now()
 	return a.db.CreateTaxRate(&taxRate)
 }
 
-func (a *App) GetTaxRates() ([]TaxRate, error) {
+func (a *App) GetTaxRates() ([]database.TaxRate, error) {
 	return a.db.GetTaxRates()
 }
 
-func (a *App) UpdateTaxRate(taxRate TaxRate) error {
+func (a *App) UpdateTaxRate(taxRate database.TaxRate) error {
 	taxRate.UpdatedAt = time.Now()
 	return a.db.UpdateTaxRate(&taxRate)
 }
@@ -212,17 +213,17 @@ func (a *App) DeleteTaxRate(id int) error {
 
 // Unit of Measurement Management Methods
 
-func (a *App) CreateUnitOfMeasurement(unit UnitOfMeasurement) error {
+func (a *App) CreateUnitOfMeasurement(unit database.UnitOfMeasurement) error {
 	unit.CreatedAt = time.Now()
 	unit.UpdatedAt = time.Now()
 	return a.db.CreateUnitOfMeasurement(&unit)
 }
 
-func (a *App) GetUnitsOfMeasurement() ([]UnitOfMeasurement, error) {
+func (a *App) GetUnitsOfMeasurement() ([]database.UnitOfMeasurement, error) {
 	return a.db.GetUnitsOfMeasurement()
 }
 
-func (a *App) UpdateUnitOfMeasurement(unit UnitOfMeasurement) error {
+func (a *App) UpdateUnitOfMeasurement(unit database.UnitOfMeasurement) error {
 	unit.UpdatedAt = time.Now()
 	return a.db.UpdateUnitOfMeasurement(&unit)
 }
@@ -233,11 +234,11 @@ func (a *App) DeleteUnitOfMeasurement(id int) error {
 
 // Default Product Settings Management Methods
 
-func (a *App) GetDefaultProductSettings() (*DefaultProductSettings, error) {
+func (a *App) GetDefaultProductSettings() (*database.DefaultProductSettings, error) {
 	return a.db.GetDefaultProductSettings()
 }
 
-func (a *App) UpdateDefaultProductSettings(settings DefaultProductSettings) error {
+func (a *App) UpdateDefaultProductSettings(settings database.DefaultProductSettings) error {
 	settings.UpdatedAt = time.Now()
 	return a.db.UpdateDefaultProductSettings(&settings)
 }
@@ -298,7 +299,7 @@ func (a *App) GenerateSampleQRCode() (string, error) {
 	qrService := NewZATCAQRService()
 	
 	// Create sample invoice data
-	sampleInvoice := &Invoice{
+	sampleInvoice := &database.Invoice{
 		InvoiceNumber: "INV-2024-001",
 		IssueDate:     time.Now(),
 		TotalAmount:   115.0,
@@ -306,7 +307,7 @@ func (a *App) GenerateSampleQRCode() (string, error) {
 	}
 	
 	// Create sample company data
-	sampleCompany := &Company{
+	sampleCompany := &database.Company{
 		Name:      "Sample Company Ltd",
 		VATNumber: "300000000000003",
 	}

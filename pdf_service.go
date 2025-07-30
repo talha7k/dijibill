@@ -7,14 +7,15 @@ import (
 
 	"github.com/jung-kurt/gofpdf"
 	"github.com/skip2/go-qrcode"
+	"dijinvoice/database"
 )
 
 type PDFService struct {
-	db        *Database
+	db        *database.Database
 	qrService *ZATCAQRService
 }
 
-func NewPDFService(db *Database) *PDFService {
+func NewPDFService(db *database.Database) *PDFService {
 	return &PDFService{
 		db:        db,
 		qrService: NewZATCAQRService(),
@@ -120,7 +121,7 @@ func (p *PDFService) GenerateInvoicePDF(invoiceID int) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func (p *PDFService) addCompanyHeader(pdf *gofpdf.Fpdf, company *Company) {
+func (p *PDFService) addCompanyHeader(pdf *gofpdf.Fpdf, company *database.Company) {
 	pdf.SetFont("Arial", "B", 14)
 	pdf.Cell(95, 8, company.Name)
 	pdf.Cell(95, 8, company.NameArabic)
@@ -158,7 +159,7 @@ func (p *PDFService) addCompanyHeader(pdf *gofpdf.Fpdf, company *Company) {
 	}
 }
 
-func (p *PDFService) addCustomerInfo(pdf *gofpdf.Fpdf, customer *Customer) {
+func (p *PDFService) addCustomerInfo(pdf *gofpdf.Fpdf, customer *database.Customer) {
 	pdf.SetFont("Arial", "B", 12)
 	pdf.Cell(95, 8, "Bill To:")
 	pdf.Cell(95, 8, "إرسال الفاتورة إلى:")
@@ -200,7 +201,7 @@ func (p *PDFService) addCustomerInfo(pdf *gofpdf.Fpdf, customer *Customer) {
 	}
 }
 
-func (p *PDFService) addInvoiceItemsTable(pdf *gofpdf.Fpdf, invoice *Invoice) {
+func (p *PDFService) addInvoiceItemsTable(pdf *gofpdf.Fpdf, invoice *database.Invoice) {
 	// Table headers
 	pdf.SetFont("Arial", "B", 9)
 	pdf.SetFillColor(240, 240, 240)
@@ -234,7 +235,7 @@ func (p *PDFService) addInvoiceItemsTable(pdf *gofpdf.Fpdf, invoice *Invoice) {
 	}
 }
 
-func (p *PDFService) addInvoiceTotals(pdf *gofpdf.Fpdf, invoice *Invoice) {
+func (p *PDFService) addInvoiceTotals(pdf *gofpdf.Fpdf, invoice *database.Invoice) {
 	pdf.SetFont("Arial", "B", 10)
 
 	// Subtotal
@@ -270,7 +271,7 @@ func (p *PDFService) addQRCode(pdf *gofpdf.Fpdf, qrCodeBase64 string) {
 	}
 }
 
-func (p *PDFService) addFooter(pdf *gofpdf.Fpdf, company *Company) {
+func (p *PDFService) addFooter(pdf *gofpdf.Fpdf, company *database.Company) {
 	pdf.Ln(10)
 	pdf.SetFont("Arial", "I", 8)
 	pdf.Cell(0, 6, "Thank you for your business! / شكراً لتعاملكم معنا!")
@@ -278,7 +279,7 @@ func (p *PDFService) addFooter(pdf *gofpdf.Fpdf, company *Company) {
 	pdf.Cell(0, 6, "This is a computer generated invoice. / هذه فاتورة مُنشأة بواسطة الحاسوب.")
 }
 
-func (p *PDFService) generateQRCodeData(invoice *Invoice, company *Company) (string, error) {
+func (p *PDFService) generateQRCodeData(invoice *database.Invoice, company *database.Company) (string, error) {
 	// Generate ZATCA-compliant QR code
 	qrCodeBase64, err := p.qrService.GenerateZATCAQRCode(invoice, company)
 	if err != nil {
@@ -288,7 +289,7 @@ func (p *PDFService) generateQRCodeData(invoice *Invoice, company *Company) (str
 	return qrCodeBase64, nil
 }
 
-func (p *PDFService) getProductByID(id int) (*Product, error) {
+func (p *PDFService) getProductByID(id int) (*database.Product, error) {
 	// This is a simplified version - in a real app you'd have a proper method in the database
 	products, err := p.db.GetProducts()
 	if err != nil {
