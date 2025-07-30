@@ -99,8 +99,8 @@ func (d *Database) createTables() error {
 		`CREATE TABLE IF NOT EXISTS invoices (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			invoice_number TEXT UNIQUE NOT NULL,
-			customer_id INTEGER NOT NULL,
-			sales_category_id INTEGER NOT NULL,
+			customer_id INTEGER,
+			sales_category_id INTEGER,
 			issue_date DATETIME NOT NULL,
 			due_date DATETIME,
 			sub_total REAL NOT NULL,
@@ -616,9 +616,11 @@ func (d *Database) GetInvoiceByID(id int) (*Invoice, error) {
 	}
 
 	// Get customer
-	customer, err := d.GetCustomerByID(inv.CustomerID)
-	if err == nil {
-		inv.Customer = customer
+	if inv.CustomerID > 0 {
+		customer, err := d.GetCustomerByID(inv.CustomerID)
+		if err == nil {
+			inv.Customer = customer
+		}
 	}
 
 	// Get sales category

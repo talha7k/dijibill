@@ -25,6 +25,14 @@
     notes: ''
   }
   
+  // Form validation errors
+  let formErrors = {
+    customer_id: '',
+    sales_category_id: '',
+    issue_date: '',
+    items: []
+  }
+  
   // Add initial empty item
   let invoiceItems = [
     {
@@ -135,9 +143,79 @@
     onProductChange(index, event.target.value)
   }
   
+  function validateForm() {
+    // Reset errors
+    formErrors = {
+      customer_id: '',
+      sales_category_id: '',
+      issue_date: '',
+      items: []
+    }
+    
+    let isValid = true
+    
+    // Validate issue date
+    if (!invoiceData.issue_date) {
+      formErrors.issue_date = 'Please select an invoice date'
+      isValid = false
+    }
+    
+    // Validate invoice items
+    formErrors.items = []
+    invoiceItems.forEach((item, index) => {
+      let itemErrors = {
+        product_id: '',
+        quantity: '',
+        unit_price: ''
+      }
+      
+      if (!item.product_id || item.product_id === 0) {
+        itemErrors.product_id = 'Please select a product'
+        isValid = false
+      }
+      
+      if (!item.quantity || item.quantity <= 0) {
+        itemErrors.quantity = 'Quantity must be greater than 0'
+        isValid = false
+      }
+      
+      if (!item.unit_price || item.unit_price < 0) {
+        itemErrors.unit_price = 'Unit price must be 0 or greater'
+        isValid = false
+      }
+      
+      formErrors.items[index] = itemErrors
+    })
+    
+    return isValid
+  }
+  
+  function clearErrors() {
+    formErrors = {
+      customer_id: '',
+      sales_category_id: '',
+      issue_date: '',
+      items: []
+    }
+  }
+
   async function saveInvoice() {
-    if (!invoiceData.customer_id || invoiceItems.length === 0) {
-      alert('Please select a customer and add at least one item')
+    console.log('saveInvoice called')
+    
+    // Validate form first
+    if (!validateForm()) {
+      console.log('Form validation failed:', formErrors)
+      return
+    }
+    
+    console.log('Form validation passed')
+    console.log('invoiceData:', invoiceData)
+    console.log('invoiceItems:', invoiceItems)
+    
+    // Check if any items have valid product_id
+    const validItems = invoiceItems.filter(item => item.product_id > 0)
+    if (validItems.length === 0) {
+      alert('Please select products for your invoice items')
       return
     }
     
@@ -146,20 +224,20 @@
       const invoiceObj = {
         id: 0,
         invoice_number: '',
-        customer_id: parseInt(invoiceData.customer_id.toString()),
-        sales_category_id: parseInt(invoiceData.sales_category_id.toString()),
+        customer_id: invoiceData.customer_id ? parseInt(invoiceData.customer_id.toString()) : 0,
+        sales_category_id: invoiceData.sales_category_id ? parseInt(invoiceData.sales_category_id.toString()) : 0,
         issue_date: new Date(invoiceData.issue_date),
         due_date: invoiceData.due_date ? new Date(invoiceData.due_date) : new Date(),
         sub_total: 0,
         vat_amount: 0,
         total_amount: 0,
         status: 'draft',
-        notes: invoiceData.notes,
+        notes: invoiceData.notes || '',
         notes_arabic: '',
         qr_code: '',
         created_at: new Date(),
         updated_at: new Date(),
-        items: invoiceItems.filter(item => item.product_id > 0).map(item => ({
+        items: validItems.map(item => ({
           id: 0,
           invoice_id: 0,
           product_id: parseInt(item.product_id.toString()),
@@ -172,13 +250,21 @@
         }))
       }
       
+      console.log('invoiceObj before createFrom:', invoiceObj)
       const invoice = database.Invoice.createFrom(invoiceObj)
-      await CreateInvoice(invoice)
+      console.log('invoice after createFrom:', invoice)
+      
+      console.log('Calling CreateInvoice...')
+      const result = await CreateInvoice(invoice)
+      console.log('CreateInvoice result:', result)
+      console.log('CreateInvoice completed successfully')
+      
+      alert('Invoice saved successfully!')
       dispatch('saved')
       closeModal()
     } catch (error) {
       console.error('Error saving invoice:', error)
-      alert('Error saving invoice: ' + error.message)
+      alert('Error saving invoice: ' + (error.message || error.toString()))
     } finally {
       isSaving = false
     }
@@ -240,11 +326,10 @@
             <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
               <!-- Customer Selection -->
               <div class="form-group">
-                <label class="label-standard">Customer</label>
+                <label class="label-standard">Customer <span class="text-white/50">(Optional)</span></label>
                 <select 
                   bind:value={invoiceData.customer_id}
                   class="select-glass w-full"
-                  required
                 >
                   <option value={0}>Select Customer</option>
                   {#each customers as customer}
@@ -255,11 +340,10 @@
               
               <!-- Sales Category Selection -->
               <div class="form-group">
-                <label class="label-standard">Sales Category</label>
+                <label class="label-standard">Sales Category <span class="text-white/50">(Optional)</span></label>
                 <select 
                   bind:value={invoiceData.sales_category_id}
                   class="select-glass w-full"
-                  required
                 >
                   <option value={0}>Select Sales Category</option>
                   {#each salesCategories as category}
