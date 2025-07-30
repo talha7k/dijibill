@@ -100,6 +100,7 @@ func (d *Database) createTables() error {
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			invoice_number TEXT UNIQUE NOT NULL,
 			customer_id INTEGER NOT NULL,
+			sales_category_id INTEGER NOT NULL,
 			issue_date DATETIME NOT NULL,
 			due_date DATETIME,
 			sub_total REAL NOT NULL,
@@ -111,7 +112,8 @@ func (d *Database) createTables() error {
 			qr_code TEXT,
 			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-			FOREIGN KEY (customer_id) REFERENCES customers(id)
+			FOREIGN KEY (customer_id) REFERENCES customers(id),
+			FOREIGN KEY (sales_category_id) REFERENCES sales_categories(id)
 		)`,
 		`CREATE TABLE IF NOT EXISTS invoice_items (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -176,7 +178,7 @@ func (d *Database) createTables() error {
 			default_tax_rate_id INTEGER,
 			default_unit_id INTEGER,
 			default_payment_type_id INTEGER,
-			default_sales_category_id INTEGER,
+			default_product_category_id INTEGER,
 			default_product_type TEXT DEFAULT 'product',
 			default_product_status BOOLEAN DEFAULT 1,
 			default_markup REAL DEFAULT 0.0,
@@ -187,7 +189,7 @@ func (d *Database) createTables() error {
 			FOREIGN KEY (default_tax_rate_id) REFERENCES tax_rates(id),
 			FOREIGN KEY (default_unit_id) REFERENCES units_of_measurement(id),
 			FOREIGN KEY (default_payment_type_id) REFERENCES payment_types(id),
-			FOREIGN KEY (default_sales_category_id) REFERENCES sales_categories(id)
+			FOREIGN KEY (default_product_category_id) REFERENCES product_categories(id)
 		)`,
 	}
 
@@ -488,6 +490,19 @@ func (d *Database) CreateProduct(product *Product) error {
 	return nil
 }
 
+func (d *Database) UpdateProduct(product *Product) error {
+	query := `
+		UPDATE products SET name = ?, name_arabic = ?, description = ?, description_arabic = ?, 
+		category_id = ?, unit_price = ?, vat_rate = ?, unit = ?, unit_arabic = ?, 
+		sku = ?, barcode = ?, stock = ?, min_stock = ?, is_active = ?, updated_at = CURRENT_TIMESTAMP
+		WHERE id = ?`
+
+	_, err := d.db.Exec(query, product.Name, product.NameArabic, product.Description, product.DescriptionArabic,
+		product.CategoryID, product.UnitPrice, product.VATRate, product.Unit, product.UnitArabic,
+		product.SKU, product.Barcode, product.Stock, product.MinStock, product.IsActive, product.ID)
+	return err
+}
+
 func (d *Database) GetProducts() ([]Product, error) {
 	query := `
 		SELECT 
@@ -541,10 +556,10 @@ func (d *Database) CreateInvoice(invoice *Invoice) error {
 
 	// Insert invoice
 	query := `
-		INSERT INTO invoices (invoice_number, customer_id, issue_date, due_date, sub_total, vat_amount, total_amount, status, notes, notes_arabic, qr_code)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+		INSERT INTO invoices (invoice_number, customer_id, sales_category_id, issue_date, due_date, sub_total, vat_amount, total_amount, status, notes, notes_arabic, qr_code)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
-	result, err := tx.Exec(query, invoice.InvoiceNumber, invoice.CustomerID, invoice.IssueDate, invoice.DueDate,
+	result, err := tx.Exec(query, invoice.InvoiceNumber, invoice.CustomerID, invoice.SalesCategoryID, invoice.IssueDate, invoice.DueDate,
 		invoice.SubTotal, invoice.VATAmount, invoice.TotalAmount, invoice.Status, invoice.Notes, invoice.NotesArabic, invoice.QRCode)
 	if err != nil {
 		return err
@@ -572,7 +587,7 @@ func (d *Database) CreateInvoice(invoice *Invoice) error {
 }
 
 func (d *Database) GetInvoices() ([]Invoice, error) {
-	query := `SELECT id, invoice_number, customer_id, issue_date, due_date, sub_total, vat_amount, total_amount, status, notes, notes_arabic, qr_code, created_at, updated_at FROM invoices ORDER BY created_at DESC`
+	query := `SELECT id, invoice_number, customer_id, sales_category_id, issue_date, due_date, sub_total, vat_amount, total_amount, status, notes, notes_arabic, qr_code, created_at, updated_at FROM invoices ORDER BY created_at DESC`
 
 	rows, err := d.db.Query(query)
 	if err != nil {
@@ -583,7 +598,7 @@ func (d *Database) GetInvoices() ([]Invoice, error) {
 	var invoices []Invoice
 	for rows.Next() {
 		var inv Invoice
-		err := rows.Scan(&inv.ID, &inv.InvoiceNumber, &inv.CustomerID, &inv.IssueDate, &inv.DueDate,
+		err := rows.Scan(&inv.ID, &inv.InvoiceNumber, &inv.CustomerID, &inv.SalesCategoryID, &inv.IssueDate, &inv.DueDate,
 			&inv.SubTotal, &inv.VATAmount, &inv.TotalAmount, &inv.Status, &inv.Notes, &inv.NotesArabic,
 			&inv.QRCode, &inv.CreatedAt, &inv.UpdatedAt)
 		if err != nil {
@@ -595,10 +610,10 @@ func (d *Database) GetInvoices() ([]Invoice, error) {
 }
 
 func (d *Database) GetInvoiceByID(id int) (*Invoice, error) {
-	query := `SELECT id, invoice_number, customer_id, issue_date, due_date, sub_total, vat_amount, total_amount, status, notes, notes_arabic, qr_code, created_at, updated_at FROM invoices WHERE id = ?`
+	query := `SELECT id, invoice_number, customer_id, sales_category_id, issue_date, due_date, sub_total, vat_amount, total_amount, status, notes, notes_arabic, qr_code, created_at, updated_at FROM invoices WHERE id = ?`
 
 	var inv Invoice
-	err := d.db.QueryRow(query, id).Scan(&inv.ID, &inv.InvoiceNumber, &inv.CustomerID, &inv.IssueDate, &inv.DueDate,
+	err := d.db.QueryRow(query, id).Scan(&inv.ID, &inv.InvoiceNumber, &inv.CustomerID, &inv.SalesCategoryID, &inv.IssueDate, &inv.DueDate,
 		&inv.SubTotal, &inv.VATAmount, &inv.TotalAmount, &inv.Status, &inv.Notes, &inv.NotesArabic,
 		&inv.QRCode, &inv.CreatedAt, &inv.UpdatedAt)
 	if err != nil {
@@ -609,6 +624,14 @@ func (d *Database) GetInvoiceByID(id int) (*Invoice, error) {
 	customer, err := d.GetCustomerByID(inv.CustomerID)
 	if err == nil {
 		inv.Customer = customer
+	}
+
+	// Get sales category
+	if inv.SalesCategoryID > 0 {
+		salesCategory, err := d.GetSalesCategoryByID(inv.SalesCategoryID)
+		if err == nil {
+			inv.SalesCategory = salesCategory
+		}
 	}
 
 	// Get invoice items
@@ -766,6 +789,17 @@ func (d *Database) GetSalesCategories() ([]SalesCategory, error) {
 	return salesCategories, nil
 }
 
+func (d *Database) GetSalesCategoryByID(id int) (*SalesCategory, error) {
+	query := `SELECT id, name, name_arabic, code, description, description_arabic, is_default, is_active, created_at, updated_at FROM sales_categories WHERE id = ?`
+
+	var sc SalesCategory
+	err := d.db.QueryRow(query, id).Scan(&sc.ID, &sc.Name, &sc.NameArabic, &sc.Code, &sc.Description, &sc.DescriptionArabic, &sc.IsDefault, &sc.IsActive, &sc.CreatedAt, &sc.UpdatedAt)
+	if err != nil {
+		return nil, err
+	}
+	return &sc, nil
+}
+
 func (d *Database) UpdateSalesCategory(salesCategory *SalesCategory) error {
 	query := `UPDATE sales_categories SET name = ?, name_arabic = ?, code = ?, description = ?, description_arabic = ?, is_default = ?, is_active = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`
 
@@ -881,13 +915,13 @@ func (d *Database) DeleteUnitOfMeasurement(id int) error {
 // DefaultProductSettings operations
 func (d *Database) GetDefaultProductSettings() (*DefaultProductSettings, error) {
 	query := `SELECT id, default_stock, default_tax_rate_id, default_unit_id, default_payment_type_id, 
-			  default_sales_category_id, default_product_type, default_product_status, default_markup, 
+			  default_product_category_id, default_product_type, default_product_status, default_markup, 
 			  default_price_includes_tax, default_price_change_allowed, created_at, updated_at 
 			  FROM default_product_settings LIMIT 1`
 
 	var dps DefaultProductSettings
 	err := d.db.QueryRow(query).Scan(&dps.ID, &dps.DefaultStock, &dps.DefaultTaxRateID, &dps.DefaultUnitID,
-		&dps.DefaultPaymentTypeID, &dps.DefaultSalesCategoryID, &dps.DefaultProductType, &dps.DefaultProductStatus,
+		&dps.DefaultPaymentTypeID, &dps.DefaultProductCategoryID, &dps.DefaultProductType, &dps.DefaultProductStatus,
 		&dps.DefaultMarkup, &dps.DefaultPriceIncludesTax, &dps.DefaultPriceChangeAllowed, &dps.CreatedAt, &dps.UpdatedAt)
 	if err != nil {
 		return nil, err
@@ -898,13 +932,13 @@ func (d *Database) GetDefaultProductSettings() (*DefaultProductSettings, error) 
 func (d *Database) UpdateDefaultProductSettings(settings *DefaultProductSettings) error {
 	query := `UPDATE default_product_settings SET 
 			  default_stock = ?, default_tax_rate_id = ?, default_unit_id = ?, default_payment_type_id = ?, 
-			  default_sales_category_id = ?, default_product_type = ?, default_product_status = ?, 
+			  default_product_category_id = ?, default_product_type = ?, default_product_status = ?, 
 			  default_markup = ?, default_price_includes_tax = ?, default_price_change_allowed = ?, 
 			  updated_at = CURRENT_TIMESTAMP 
 			  WHERE id = ?`
 
 	_, err := d.db.Exec(query, settings.DefaultStock, settings.DefaultTaxRateID, settings.DefaultUnitID,
-		settings.DefaultPaymentTypeID, settings.DefaultSalesCategoryID, settings.DefaultProductType,
+		settings.DefaultPaymentTypeID, settings.DefaultProductCategoryID, settings.DefaultProductType,
 		settings.DefaultProductStatus, settings.DefaultMarkup, settings.DefaultPriceIncludesTax,
 		settings.DefaultPriceChangeAllowed, settings.ID)
 	return err

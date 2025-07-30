@@ -78,6 +78,8 @@ export function UpdateDefaultProductSettings(arg1:main.DefaultProductSettings):P
 
 export function UpdatePaymentType(arg1:main.PaymentType):Promise<void>;
 
+export function UpdateProduct(arg1:main.Product):Promise<void>;
+
 export function UpdateSalesCategory(arg1:main.SalesCategory):Promise<void>;
 
 export function UpdateTaxRate(arg1:main.TaxRate):Promise<void>;

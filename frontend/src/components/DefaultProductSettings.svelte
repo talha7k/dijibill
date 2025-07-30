@@ -1,7 +1,7 @@
 <script>
   import { createEventDispatcher, onMount } from 'svelte'
-  import { GetDefaultProductSettings, UpdateDefaultProductSettings, GetTaxRates, GetUnitsOfMeasurement, GetPaymentTypes, GetSalesCategories } from '../../wailsjs/go/main/App.js'
-  import { main } from '../../wailsjs/go/models'
+  import { GetDefaultProductSettings, UpdateDefaultProductSettings, GetTaxRates, GetUnitsOfMeasurement, GetPaymentTypes, GetProductCategories } from '../../wailsjs/go/main/App.js'
+  import * as main from '../../wailsjs/go/models'
 
   const dispatch = createEventDispatcher()
 
@@ -14,7 +14,7 @@
     default_tax_rate_id: 1,
     default_unit_id: 1,
     default_payment_type_id: 1,
-    default_sales_category_id: 1,
+    default_product_category_id: 1,
     default_product_type: 'product',
     default_markup: 0,
     default_product_status: true,
@@ -26,7 +26,7 @@
   let taxRates = []
   let units = []
   let paymentTypes = []
-  let salesCategories = []
+  let productCategories = []
 
   onMount(async () => {
     await loadData()
@@ -40,20 +40,20 @@
         loadedTaxRates,
         loadedUnits,
         loadedPaymentTypes,
-        loadedSalesCategories,
+        loadedProductCategories,
         loadedDefaultSettings
       ] = await Promise.all([
         GetTaxRates(),
         GetUnitsOfMeasurement(),
         GetPaymentTypes(),
-        GetSalesCategories(),
+        GetProductCategories(),
         GetDefaultProductSettings()
       ])
 
       taxRates = loadedTaxRates || []
       units = loadedUnits || []
       paymentTypes = loadedPaymentTypes || []
-      salesCategories = loadedSalesCategories || []
+      productCategories = loadedProductCategories || []
 
       if (loadedDefaultSettings) {
         defaultProductSettings = loadedDefaultSettings
@@ -70,13 +70,13 @@
     isLoading = true
     try {
       // Create a new DefaultProductSettings object
-      const settings = new main.DefaultProductSettings()
+      const settings = new main.main.DefaultProductSettings()
       settings.id = defaultProductSettings.id
       settings.default_stock = defaultProductSettings.default_stock
       settings.default_tax_rate_id = defaultProductSettings.default_tax_rate_id
       settings.default_unit_id = defaultProductSettings.default_unit_id
       settings.default_payment_type_id = defaultProductSettings.default_payment_type_id
-      settings.default_sales_category_id = defaultProductSettings.default_sales_category_id
+      settings.default_product_category_id = defaultProductSettings.default_product_category_id
       settings.default_product_type = defaultProductSettings.default_product_type
       settings.default_markup = defaultProductSettings.default_markup
       settings.default_product_status = defaultProductSettings.default_product_status
@@ -177,18 +177,18 @@
         </div>
       </div>
 
-      <!-- Default Sales Category -->
+      <!-- Default Product Category -->
       <div>
-        <label for="default_sales_category" class="block text-sm font-medium text-gray-700">
-          Default Sales Category
+        <label for="default_product_category" class="block text-sm font-medium text-gray-700">
+          Default Product Category
         </label>
         <div class="mt-1">
           <select
-            id="default_sales_category"
-            bind:value={defaultProductSettings.default_sales_category_id}
+            id="default_product_category"
+            bind:value={defaultProductSettings.default_product_category_id}
             class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
           >
-            {#each salesCategories as category}
+            {#each productCategories as category}
               <option value={category.id}>{category.name}</option>
             {/each}
           </select>

@@ -1,6 +1,6 @@
 <script>
   import { GetTaxRates, CreateTaxRate, UpdateTaxRate, DeleteTaxRate } from '../../wailsjs/go/main/App.js'
-  import { main } from '../../wailsjs/go/models'
+  import * as main from '../../wailsjs/go/models'
   import { createEventDispatcher } from 'svelte'
 
   const dispatch = createEventDispatcher()
@@ -15,7 +15,7 @@
   async function addTaxRate() {
     if (newTaxRate.name && newTaxRate.rate >= 0) {
       try {
-        const taxRateData = new main.TaxRate({
+        const taxRateData = new main.main.TaxRate({
           id: 0,
           name: newTaxRate.name,
           name_arabic: newTaxRate.name_arabic || '',
@@ -44,7 +44,7 @@
 
   async function updateTaxRate() {
     try {
-      const taxRateData = new main.TaxRate({
+      const taxRateData = new main.main.TaxRate({
         id: editingTaxRate,
         name: newTaxRate.name,
         name_arabic: newTaxRate.name_arabic || '',
@@ -87,14 +87,14 @@
       // First, update all tax rates to not be default
       for (const taxRate of taxRates) {
         if (taxRate.is_default) {
-          const updatedTaxRate = new main.TaxRate({ ...taxRate, is_default: false });
+          const updatedTaxRate = new main.main.TaxRate({ ...taxRate, is_default: false });
           await UpdateTaxRate(updatedTaxRate);
         }
       }
       // Then set the selected one as default
       const selectedTaxRate = taxRates.find(tr => tr.id === id);
       if (selectedTaxRate) {
-        const updatedTaxRate = new main.TaxRate({ ...selectedTaxRate, is_default: true });
+        const updatedTaxRate = new main.main.TaxRate({ ...selectedTaxRate, is_default: true });
         await UpdateTaxRate(updatedTaxRate);
         dispatch('reload')
       }

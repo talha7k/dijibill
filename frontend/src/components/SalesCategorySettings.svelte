@@ -1,6 +1,6 @@
 <script>
   import { GetSalesCategories, CreateSalesCategory, UpdateSalesCategory, DeleteSalesCategory } from '../../wailsjs/go/main/App.js'
-  import { main } from '../../wailsjs/go/models'
+  import * as main from '../../wailsjs/go/models'
   import { createEventDispatcher } from 'svelte'
 
   const dispatch = createEventDispatcher()
@@ -15,7 +15,7 @@
   async function addSalesCategory() {
     if (newSalesCategory.name && newSalesCategory.code) {
       try {
-        const salesCategoryData = new main.SalesCategory({
+        const salesCategoryData = new main.main.SalesCategory({
           id: 0,
           name: newSalesCategory.name,
           name_arabic: newSalesCategory.name_arabic || '',
@@ -45,7 +45,7 @@
 
   async function updateSalesCategory() {
     try {
-      const salesCategoryData = new main.SalesCategory({
+      const salesCategoryData = new main.main.SalesCategory({
         id: editingSalesCategory,
         name: newSalesCategory.name,
         name_arabic: newSalesCategory.name_arabic || '',
@@ -89,14 +89,14 @@
       // First, update all sales categories to not be default
       for (const salesCategory of salesCategories) {
         if (salesCategory.is_default) {
-          const updatedSalesCategory = new main.SalesCategory({ ...salesCategory, is_default: false });
+          const updatedSalesCategory = new main.main.SalesCategory({ ...salesCategory, is_default: false });
           await UpdateSalesCategory(updatedSalesCategory);
         }
       }
       // Then set the selected one as default
       const selectedSalesCategory = salesCategories.find(sc => sc.id === id);
       if (selectedSalesCategory) {
-        const updatedSalesCategory = new main.SalesCategory({ ...selectedSalesCategory, is_default: true });
+        const updatedSalesCategory = new main.main.SalesCategory({ ...selectedSalesCategory, is_default: true });
         await UpdateSalesCategory(updatedSalesCategory);
         dispatch('reload')
       }

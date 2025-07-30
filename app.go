@@ -95,6 +95,11 @@ func (a *App) GetProducts() ([]Product, error) {
 	return a.db.GetProducts()
 }
 
+func (a *App) UpdateProduct(product Product) error {
+	product.UpdatedAt = time.Now()
+	return a.db.UpdateProduct(&product)
+}
+
 // Invoice Management Methods
 
 func (a *App) CreateInvoice(invoice Invoice) error {

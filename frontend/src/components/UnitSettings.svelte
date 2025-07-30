@@ -1,6 +1,6 @@
 <script>
   import { GetUnitsOfMeasurement, CreateUnitOfMeasurement, UpdateUnitOfMeasurement, DeleteUnitOfMeasurement } from '../../wailsjs/go/main/App.js'
-  import { main } from '../../wailsjs/go/models'
+  import * as main from '../../wailsjs/go/models'
   import { createEventDispatcher } from 'svelte'
 
   const dispatch = createEventDispatcher()
@@ -15,7 +15,7 @@
   async function addUnit() {
     if (newUnit.value && newUnit.label) {
       try {
-        const unitData = new main.UnitOfMeasurement({
+        const unitData = new main.main.UnitOfMeasurement({
           id: 0,
           value: newUnit.value,
           label: newUnit.label,
@@ -43,7 +43,7 @@
 
   async function updateUnit() {
     try {
-      const unitData = new main.UnitOfMeasurement({
+      const unitData = new main.main.UnitOfMeasurement({
         id: editingUnit,
         value: newUnit.value,
         label: newUnit.label,
@@ -85,14 +85,14 @@
       // First, update all units to not be default
       for (const unit of units) {
         if (unit.is_default) {
-          const updatedUnit = new main.UnitOfMeasurement({ ...unit, is_default: false });
+          const updatedUnit = new main.main.UnitOfMeasurement({ ...unit, is_default: false });
           await UpdateUnitOfMeasurement(updatedUnit);
         }
       }
       // Then set the selected one as default
       const selectedUnit = units.find(u => u.id === id);
       if (selectedUnit) {
-        const updatedUnit = new main.UnitOfMeasurement({ ...selectedUnit, is_default: true });
+        const updatedUnit = new main.main.UnitOfMeasurement({ ...selectedUnit, is_default: true });
         await UpdateUnitOfMeasurement(updatedUnit);
         dispatch('reload')
       }
