@@ -16,6 +16,8 @@ export function CreateProductCategory(arg1:database.ProductCategory):Promise<voi
 
 export function CreateSalesCategory(arg1:database.SalesCategory):Promise<void>;
 
+export function CreateSampleData():Promise<void>;
+
 export function CreateTaxRate(arg1:database.TaxRate):Promise<void>;
 
 export function CreateUnitOfMeasurement(arg1:database.UnitOfMeasurement):Promise<void>;
@@ -31,6 +33,8 @@ export function DeleteSalesCategory(arg1:number):Promise<void>;
 export function DeleteTaxRate(arg1:number):Promise<void>;
 
 export function DeleteUnitOfMeasurement(arg1:number):Promise<void>;
+
+export function DownloadInvoicePDF(arg1:number):Promise<void>;
 
 export function GenerateInvoicePDF(arg1:number):Promise<string>;
 
@@ -99,3 +103,5 @@ export function UpdateTaxRate(arg1:database.TaxRate):Promise<void>;
 export function UpdateUnitOfMeasurement(arg1:database.UnitOfMeasurement):Promise<void>;
 
 export function ValidateZATCAQRCode(arg1:string):Promise<void>;
+
+export function ViewInvoicePDF(arg1:number):Promise<void>;

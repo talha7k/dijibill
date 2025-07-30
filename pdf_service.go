@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"encoding/base64"
 	"fmt"
 
 	"dijibill/database"
@@ -10,6 +9,35 @@ import (
 	"github.com/jung-kurt/gofpdf"
 	"github.com/skip2/go-qrcode"
 )
+
+// Helper function to handle Arabic text display
+func (p *PDFService) handleArabicText(text string) string {
+	// For now, we'll transliterate common Arabic words to Latin characters
+	// This is a temporary solution until proper Arabic font support is added
+	arabicToLatin := map[string]string{
+		"فاتورة":                    "FATURAH",
+		"تاريخ الإصدار":             "TARIKH AL-ISDAR",
+		"تاريخ الاستحقاق":           "TARIKH AL-ISTIHQAQ",
+		"إرسال الفاتورة إلى":        "IRSAL AL-FATURAH ILA",
+		"عميل مباشر":               "AMEEL MUBASHIR",
+		"الرقم الضريبي":            "AL-RAQAM AL-DARIBI",
+		"رقم السجل التجاري":         "RAQAM AL-SIJIL AL-TIJARI",
+		"الهاتف":                   "AL-HATIF",
+		"البريد الإلكتروني":        "AL-BAREED AL-ILIKTROONI",
+		"الوصف":                    "AL-WASF",
+		"المجموع الفرعي":           "AL-MAJMOO AL-FAR'EE",
+		"ضريبة القيمة المضافة":      "DAREEBAT AL-QEEMAH AL-MUDAFAH",
+		"المجموع":                  "AL-MAJMOO",
+		"ملاحظات":                  "MULAHAZAT",
+		"شكراً لتعاملكم معنا":        "SHUKRAN LI-TA'AMULUKUM MA'ANA",
+		"هذه فاتورة مُنشأة بواسطة الحاسوب": "HADHIHI FATURAH MUNSHA'AH BI-WASIITAT AL-HASOOB",
+	}
+	
+	if latin, exists := arabicToLatin[text]; exists {
+		return latin
+	}
+	return text
+}
 
 type PDFService struct {
 	db        *database.Database
@@ -41,8 +69,8 @@ func (p *PDFService) GenerateInvoicePDF(invoiceID int) ([]byte, error) {
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.AddPage()
 
-	// Add Arabic font support (you may need to add actual Arabic font files)
-	// For now, we'll use the default font and handle Arabic text as best as possible
+	// Use Arial Unicode MS for better character support
+	// For Arabic text, we'll use a workaround since gofpdf has limited Unicode support
 	pdf.SetFont("Arial", "", 12)
 
 	// Generate ZATCA-compliant QR Code
@@ -57,28 +85,25 @@ func (p *PDFService) GenerateInvoicePDF(invoiceID int) ([]byte, error) {
 		return nil, fmt.Errorf("failed to generate QR code image: %v", err)
 	}
 
-	// Convert QR code image to base64 for embedding
-	qrCodeImageBase64 := base64.StdEncoding.EncodeToString(qrCodeBytes)
-
 	// Header - Company Information
 	p.addCompanyHeader(pdf, company)
 
 	// Invoice Title
 	pdf.Ln(10)
 	pdf.SetFont("Arial", "B", 16)
-	pdf.Cell(95, 10, "INVOICE / فاتورة")
+	pdf.Cell(95, 10, "INVOICE / "+p.handleArabicText("فاتورة"))
 	pdf.Cell(95, 10, fmt.Sprintf("Invoice No: %s", invoice.InvoiceNumber))
 	pdf.Ln(8)
 
 	// Invoice Details
 	pdf.SetFont("Arial", "", 10)
 	pdf.Cell(95, 6, fmt.Sprintf("Issue Date: %s", invoice.IssueDate.Format("2006-01-02")))
-	pdf.Cell(95, 6, fmt.Sprintf("تاريخ الإصدار: %s", invoice.IssueDate.Format("2006-01-02")))
+	pdf.Cell(95, 6, fmt.Sprintf("%s: %s", p.handleArabicText("تاريخ الإصدار"), invoice.IssueDate.Format("2006-01-02")))
 	pdf.Ln(6)
 
 	if !invoice.DueDate.IsZero() {
 		pdf.Cell(95, 6, fmt.Sprintf("Due Date: %s", invoice.DueDate.Format("2006-01-02")))
-		pdf.Cell(95, 6, fmt.Sprintf("تاريخ الاستحقاق: %s", invoice.DueDate.Format("2006-01-02")))
+		pdf.Cell(95, 6, fmt.Sprintf("%s: %s", p.handleArabicText("تاريخ الاستحقاق"), invoice.DueDate.Format("2006-01-02")))
 		pdf.Ln(6)
 	}
 
@@ -97,9 +122,15 @@ func (p *PDFService) GenerateInvoicePDF(invoiceID int) ([]byte, error) {
 	// Totals
 	p.addInvoiceTotals(pdf, invoice)
 
+	// Notes section
+	if invoice.Notes != "" || invoice.NotesArabic != "" {
+		pdf.Ln(10)
+		p.addNotes(pdf, invoice)
+	}
+
 	// QR Code
 	pdf.Ln(10)
-	p.addQRCode(pdf, qrCodeImageBase64)
+	p.addQRCode(pdf, qrCodeBytes)
 
 	// Store the ZATCA-compliant QR code in the invoice record
 	invoice.QRCode = qrCodeBase64
@@ -125,37 +156,37 @@ func (p *PDFService) GenerateInvoicePDF(invoiceID int) ([]byte, error) {
 func (p *PDFService) addCompanyHeader(pdf *gofpdf.Fpdf, company *database.Company) {
 	pdf.SetFont("Arial", "B", 14)
 	pdf.Cell(95, 8, company.Name)
-	pdf.Cell(95, 8, company.NameArabic)
+	pdf.Cell(95, 8, p.handleArabicText(company.NameArabic))
 	pdf.Ln(8)
 
 	pdf.SetFont("Arial", "", 10)
 	pdf.Cell(95, 6, fmt.Sprintf("VAT No: %s", company.VATNumber))
-	pdf.Cell(95, 6, fmt.Sprintf("الرقم الضريبي: %s", company.VATNumber))
+	pdf.Cell(95, 6, fmt.Sprintf("%s: %s", p.handleArabicText("الرقم الضريبي"), company.VATNumber))
 	pdf.Ln(6)
 
 	if company.CRNumber != "" {
 		pdf.Cell(95, 6, fmt.Sprintf("CR No: %s", company.CRNumber))
-		pdf.Cell(95, 6, fmt.Sprintf("رقم السجل التجاري: %s", company.CRNumber))
+		pdf.Cell(95, 6, fmt.Sprintf("%s: %s", p.handleArabicText("رقم السجل التجاري"), company.CRNumber))
 		pdf.Ln(6)
 	}
 
 	pdf.Cell(95, 6, company.Address)
-	pdf.Cell(95, 6, company.AddressArabic)
+	pdf.Cell(95, 6, p.handleArabicText(company.AddressArabic))
 	pdf.Ln(6)
 
 	pdf.Cell(95, 6, fmt.Sprintf("%s, %s", company.City, company.Country))
-	pdf.Cell(95, 6, fmt.Sprintf("%s، %s", company.CityArabic, company.CountryArabic))
+	pdf.Cell(95, 6, fmt.Sprintf("%s، %s", p.handleArabicText(company.CityArabic), p.handleArabicText(company.CountryArabic)))
 	pdf.Ln(6)
 
 	if company.Phone != "" {
 		pdf.Cell(95, 6, fmt.Sprintf("Phone: %s", company.Phone))
-		pdf.Cell(95, 6, fmt.Sprintf("الهاتف: %s", company.Phone))
+		pdf.Cell(95, 6, fmt.Sprintf("%s: %s", p.handleArabicText("الهاتف"), company.Phone))
 		pdf.Ln(6)
 	}
 
 	if company.Email != "" {
 		pdf.Cell(95, 6, fmt.Sprintf("Email: %s", company.Email))
-		pdf.Cell(95, 6, fmt.Sprintf("البريد الإلكتروني: %s", company.Email))
+		pdf.Cell(95, 6, fmt.Sprintf("%s: %s", p.handleArabicText("البريد الإلكتروني"), company.Email))
 		pdf.Ln(6)
 	}
 }
@@ -163,41 +194,60 @@ func (p *PDFService) addCompanyHeader(pdf *gofpdf.Fpdf, company *database.Compan
 func (p *PDFService) addCustomerInfo(pdf *gofpdf.Fpdf, customer *database.Customer) {
 	pdf.SetFont("Arial", "B", 12)
 	pdf.Cell(95, 8, "Bill To:")
-	pdf.Cell(95, 8, "إرسال الفاتورة إلى:")
+	pdf.Cell(95, 8, p.handleArabicText("إرسال الفاتورة إلى")+":")
 	pdf.Ln(8)
 
 	pdf.SetFont("Arial", "", 10)
-	pdf.Cell(95, 6, customer.Name)
-	pdf.Cell(95, 6, customer.NameArabic)
+	
+	// Handle nil customer case
+	if customer == nil {
+		pdf.Cell(95, 6, "Walk-in Customer")
+		pdf.Cell(95, 6, p.handleArabicText("عميل مباشر"))
+		pdf.Ln(6)
+		return
+	}
+
+	// Customer name
+	customerName := customer.Name
+	if customerName == "" {
+		customerName = "Walk-in Customer"
+	}
+	customerNameArabic := customer.NameArabic
+	if customerNameArabic == "" {
+		customerNameArabic = p.handleArabicText("عميل مباشر")
+	}
+	
+	pdf.Cell(95, 6, customerName)
+	pdf.Cell(95, 6, p.handleArabicText(customerNameArabic))
 	pdf.Ln(6)
 
 	if customer.VATNumber != "" {
 		pdf.Cell(95, 6, fmt.Sprintf("VAT No: %s", customer.VATNumber))
-		pdf.Cell(95, 6, fmt.Sprintf("الرقم الضريبي: %s", customer.VATNumber))
+		pdf.Cell(95, 6, fmt.Sprintf("%s: %s", p.handleArabicText("الرقم الضريبي"), customer.VATNumber))
 		pdf.Ln(6)
 	}
 
 	if customer.Address != "" {
 		pdf.Cell(95, 6, customer.Address)
-		pdf.Cell(95, 6, customer.AddressArabic)
+		pdf.Cell(95, 6, p.handleArabicText(customer.AddressArabic))
 		pdf.Ln(6)
 	}
 
 	if customer.City != "" {
 		pdf.Cell(95, 6, fmt.Sprintf("%s, %s", customer.City, customer.Country))
-		pdf.Cell(95, 6, fmt.Sprintf("%s، %s", customer.CityArabic, customer.CountryArabic))
+		pdf.Cell(95, 6, fmt.Sprintf("%s، %s", p.handleArabicText(customer.CityArabic), p.handleArabicText(customer.CountryArabic)))
 		pdf.Ln(6)
 	}
 
 	if customer.Phone != "" {
 		pdf.Cell(95, 6, fmt.Sprintf("Phone: %s", customer.Phone))
-		pdf.Cell(95, 6, fmt.Sprintf("الهاتف: %s", customer.Phone))
+		pdf.Cell(95, 6, fmt.Sprintf("%s: %s", p.handleArabicText("الهاتف"), customer.Phone))
 		pdf.Ln(6)
 	}
 
 	if customer.Email != "" {
 		pdf.Cell(95, 6, fmt.Sprintf("Email: %s", customer.Email))
-		pdf.Cell(95, 6, fmt.Sprintf("البريد الإلكتروني: %s", customer.Email))
+		pdf.Cell(95, 6, fmt.Sprintf("%s: %s", p.handleArabicText("البريد الإلكتروني"), customer.Email))
 		pdf.Ln(6)
 	}
 }
@@ -214,7 +264,7 @@ func (p *PDFService) addInvoiceItemsTable(pdf *gofpdf.Fpdf, invoice *database.In
 	pdf.CellFormat(20, 8, "VAT %", "1", 0, "C", true, 0, "")
 	pdf.CellFormat(25, 8, "VAT Amount", "1", 0, "C", true, 0, "")
 	pdf.CellFormat(25, 8, "Total", "1", 0, "C", true, 0, "")
-	pdf.CellFormat(45, 8, "الوصف", "1", 1, "C", true, 0, "")
+	pdf.CellFormat(45, 8, p.handleArabicText("الوصف"), "1", 1, "C", true, 0, "")
 
 	pdf.SetFont("Arial", "", 8)
 	pdf.SetFillColor(255, 255, 255)
@@ -241,43 +291,61 @@ func (p *PDFService) addInvoiceTotals(pdf *gofpdf.Fpdf, invoice *database.Invoic
 
 	// Subtotal
 	pdf.Cell(120, 8, "")
-	pdf.Cell(35, 8, "Subtotal / المجموع الفرعي:")
+	pdf.Cell(35, 8, "Subtotal / "+p.handleArabicText("المجموع الفرعي")+":")
 	pdf.Cell(35, 8, fmt.Sprintf("%.2f SAR", invoice.SubTotal))
 	pdf.Ln(8)
 
 	// VAT
 	pdf.Cell(120, 8, "")
-	pdf.Cell(35, 8, "VAT / ضريبة القيمة المضافة:")
+	pdf.Cell(35, 8, "VAT / "+p.handleArabicText("ضريبة القيمة المضافة")+":")
 	pdf.Cell(35, 8, fmt.Sprintf("%.2f SAR", invoice.VATAmount))
 	pdf.Ln(8)
 
 	// Total
 	pdf.SetFont("Arial", "B", 12)
 	pdf.Cell(120, 10, "")
-	pdf.Cell(35, 10, "Total / المجموع:")
+	pdf.Cell(35, 10, "Total / "+p.handleArabicText("المجموع")+":")
 	pdf.Cell(35, 10, fmt.Sprintf("%.2f SAR", invoice.TotalAmount))
 	pdf.Ln(10)
 }
 
-func (p *PDFService) addQRCode(pdf *gofpdf.Fpdf, qrCodeBase64 string) {
-	// Decode base64 and check if valid
-	_, err := base64.StdEncoding.DecodeString(qrCodeBase64)
-	if err == nil {
-		// For now, we'll just add text indicating QR code position
-		pdf.SetFont("Arial", "", 8)
-		pdf.Cell(0, 6, "QR Code for KSA VAT compliance would be placed here")
-		pdf.Ln(6)
-		pdf.Cell(0, 6, "رمز الاستجابة السريعة للامتثال لضريبة القيمة المضافة السعودية")
-		pdf.Ln(6)
+func (p *PDFService) addNotes(pdf *gofpdf.Fpdf, invoice *database.Invoice) {
+	pdf.SetFont("Arial", "B", 10)
+	pdf.Cell(0, 8, "Notes / "+p.handleArabicText("ملاحظات")+":")
+	pdf.Ln(8)
+
+	pdf.SetFont("Arial", "", 9)
+	if invoice.Notes != "" {
+		pdf.Cell(95, 6, invoice.Notes)
 	}
+	if invoice.NotesArabic != "" {
+		pdf.Cell(95, 6, p.handleArabicText(invoice.NotesArabic))
+	}
+	pdf.Ln(6)
+}
+
+func (p *PDFService) addQRCode(pdf *gofpdf.Fpdf, qrCodeBytes []byte) {
+	// Create a temporary file for the QR code image
+	pdf.SetFont("Arial", "B", 10)
+	pdf.Cell(0, 8, "ZATCA QR Code:")
+	pdf.Ln(10)
+	
+	// Register the QR code image from bytes
+	reader := bytes.NewReader(qrCodeBytes)
+	pdf.RegisterImageReader("qrcode", "PNG", reader)
+	
+	// Add the QR code image to PDF
+	pdf.Image("qrcode", 10, pdf.GetY(), 30, 30, false, "", 0, "")
+	
+	pdf.Ln(35)
 }
 
 func (p *PDFService) addFooter(pdf *gofpdf.Fpdf, company *database.Company) {
 	pdf.Ln(10)
 	pdf.SetFont("Arial", "I", 8)
-	pdf.Cell(0, 6, "Thank you for your business! / شكراً لتعاملكم معنا!")
+	pdf.Cell(0, 6, "Thank you for your business! / "+p.handleArabicText("شكراً لتعاملكم معنا")+"!")
 	pdf.Ln(4)
-	pdf.Cell(0, 6, "This is a computer generated invoice. / هذه فاتورة مُنشأة بواسطة الحاسوب.")
+	pdf.Cell(0, 6, "This is a computer generated invoice. / "+p.handleArabicText("هذه فاتورة مُنشأة بواسطة الحاسوب")+".")
 }
 
 func (p *PDFService) generateQRCodeData(invoice *database.Invoice, company *database.Company) (string, error) {

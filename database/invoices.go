@@ -83,10 +83,13 @@ func (d *Database) GetInvoiceByID(id int) (*Invoice, error) {
 		return nil, err
 	}
 
-	// Get customer
-	customer, err := d.GetCustomerByID(inv.CustomerID)
-	if err == nil {
-		inv.Customer = customer
+	// Get customer only if CustomerID is not 0
+	if inv.CustomerID > 0 {
+		customer, err := d.GetCustomerByID(inv.CustomerID)
+		if err == nil {
+			inv.Customer = customer
+		}
+		// If customer retrieval fails, inv.Customer remains nil which is handled in PDF generation
 	}
 
 	// Get sales category

@@ -30,6 +30,10 @@ export function CreateSalesCategory(arg1) {
   return window['go']['main']['App']['CreateSalesCategory'](arg1);
 }
 
+export function CreateSampleData() {
+  return window['go']['main']['App']['CreateSampleData']();
+}
+
 export function CreateTaxRate(arg1) {
   return window['go']['main']['App']['CreateTaxRate'](arg1);
 }
@@ -60,6 +64,10 @@ export function DeleteTaxRate(arg1) {
 
 export function DeleteUnitOfMeasurement(arg1) {
   return window['go']['main']['App']['DeleteUnitOfMeasurement'](arg1);
+}
+
+export function DownloadInvoicePDF(arg1) {
+  return window['go']['main']['App']['DownloadInvoicePDF'](arg1);
 }
 
 export function GenerateInvoicePDF(arg1) {
@@ -196,4 +204,8 @@ export function UpdateUnitOfMeasurement(arg1) {
 
 export function ValidateZATCAQRCode(arg1) {
   return window['go']['main']['App']['ValidateZATCAQRCode'](arg1);
+}
+
+export function ViewInvoicePDF(arg1) {
+  return window['go']['main']['App']['ViewInvoicePDF'](arg1);
 }

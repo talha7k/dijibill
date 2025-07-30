@@ -45,6 +45,11 @@ func (a *App) startup(ctx context.Context) {
 	// Initialize PDF service
 	a.pdfService = NewPDFService(a.db)
 
+	// Create sample data for testing
+	if err := a.CreateSampleData(); err != nil {
+		log.Printf("Warning: Could not create sample data: %v", err)
+	}
+
 	log.Println("Application started successfully")
 }
 
@@ -316,6 +321,68 @@ func (a *App) GenerateInvoicePDF(invoiceID int) (string, error) {
 	return filepath, nil
 }
 
+// ViewInvoicePDF generates PDF and opens it in browser for preview
+func (a *App) ViewInvoicePDF(invoiceID int) error {
+	pdfBytes, err := a.pdfService.GenerateInvoicePDF(invoiceID)
+	if err != nil {
+		return err
+	}
+
+	// Create a temporary file for viewing
+	tempDir := os.TempDir()
+	invoice, err := a.db.GetInvoiceByID(invoiceID)
+	if err != nil {
+		return err
+	}
+
+	filename := fmt.Sprintf("Invoice_%s_preview.pdf", invoice.InvoiceNumber)
+	tempFilePath := filepath.Join(tempDir, filename)
+
+	if err := os.WriteFile(tempFilePath, pdfBytes, 0644); err != nil {
+		return err
+	}
+
+	// Open in browser
+	return a.OpenPDFInViewer(tempFilePath)
+}
+
+// DownloadInvoicePDF generates PDF and allows user to save it where they want
+func (a *App) DownloadInvoicePDF(invoiceID int) error {
+	// Get invoice details for default filename
+	invoice, err := a.db.GetInvoiceByID(invoiceID)
+	if err != nil {
+		return err
+	}
+
+	defaultFilename := fmt.Sprintf("Invoice_%s_%s.pdf", invoice.InvoiceNumber, time.Now().Format("20060102_150405"))
+	
+	// Show save dialog
+	savePath, err := a.ShowSaveDialog(defaultFilename)
+	if err != nil {
+		return err
+	}
+
+	// If user cancelled the dialog, savePath will be empty
+	if savePath == "" {
+		return nil // User cancelled, not an error
+	}
+
+	// Generate PDF
+	pdfBytes, err := a.pdfService.GenerateInvoicePDF(invoiceID)
+	if err != nil {
+		return err
+	}
+
+	// Save to chosen location
+	if err := os.WriteFile(savePath, pdfBytes, 0644); err != nil {
+		return err
+	}
+
+	// Show success message
+	a.ShowMessage("Success", fmt.Sprintf("Invoice PDF saved successfully to:\n%s", savePath))
+	return nil
+}
+
 // OpenPDFInViewer opens a PDF file in the default system viewer
 func (a *App) OpenPDFInViewer(filepath string) error {
 	runtime.BrowserOpenURL(a.ctx, "file://"+filepath)
@@ -413,6 +480,108 @@ func (a *App) ShowError(title, message string) {
 		Title:   title,
 		Message: message,
 	})
+}
+
+// CreateSampleData creates sample data for testing
+func (a *App) CreateSampleData() error {
+	// Check if we already have invoices
+	invoices, err := a.db.GetInvoices()
+	if err != nil {
+		return err
+	}
+	
+	if len(invoices) > 0 {
+		return nil // Already have data
+	}
+
+	// Create a sample customer first
+	customer := database.Customer{
+		Name:        "Sample Customer",
+		NameArabic:  "عميل تجريبي",
+		VATNumber:   "123456789012345",
+		Email:       "customer@example.com",
+		Phone:       "+966501234567",
+		Address:     "123 Customer Street",
+		AddressArabic: "شارع العميل ١٢٣",
+		City:        "Riyadh",
+		CityArabic:  "الرياض",
+		Country:     "Saudi Arabia",
+		CountryArabic: "المملكة العربية السعودية",
+	}
+	
+	if err := a.CreateCustomer(customer); err != nil {
+		return err
+	}
+
+	// Get the created customer
+	customers, err := a.db.GetCustomers()
+	if err != nil {
+		return err
+	}
+	
+	if len(customers) == 0 {
+		return fmt.Errorf("no customers found")
+	}
+
+	// Get sales categories
+	salesCategories, err := a.db.GetSalesCategories()
+	if err != nil {
+		return err
+	}
+	
+	if len(salesCategories) == 0 {
+		return fmt.Errorf("no sales categories found")
+	}
+
+	// Create a sample product
+	product := database.Product{
+		Name:        "Sample Product",
+		NameArabic:  "منتج تجريبي",
+		Description: "A sample product for testing",
+		UnitPrice:   100.0,
+		VATRate:     15.0,
+		Unit:        "pcs",
+		UnitArabic:  "قطعة",
+		SKU:         "SAMPLE-001",
+		Stock:       10,
+		IsActive:    true,
+	}
+	
+	if err := a.CreateProduct(product); err != nil {
+		return err
+	}
+
+	// Get the created product
+	products, err := a.db.GetProducts()
+	if err != nil {
+		return err
+	}
+	
+	if len(products) == 0 {
+		return fmt.Errorf("no products found")
+	}
+
+	// Create sample invoice
+	invoice := database.Invoice{
+		InvoiceNumber:    "INV-2024-001",
+		CustomerID:       customers[0].ID,
+		SalesCategoryID:  salesCategories[0].ID,
+		IssueDate:        time.Now(),
+		DueDate:          time.Now().AddDate(0, 0, 30), // 30 days from now
+		Status:           "draft",
+		Notes:            "This is a sample invoice for testing",
+		NotesArabic:      "هذه فاتورة تجريبية للاختبار",
+		Items: []database.InvoiceItem{
+			{
+				ProductID:   products[0].ID,
+				Quantity:    2,
+				UnitPrice:   100.0,
+				VATRate:     15.0,
+			},
+		},
+	}
+
+	return a.CreateInvoice(invoice)
 }
 
 // Greet returns a greeting for the given name (keeping original method for compatibility)

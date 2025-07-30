@@ -1,6 +1,6 @@
 <script>
   import { onMount } from 'svelte'
-  import { GetInvoices, GenerateInvoicePDF } from '../wailsjs/go/main/App.js'
+  import { GetInvoices, GenerateInvoicePDF, ViewInvoicePDF, DownloadInvoicePDF } from '../wailsjs/go/main/App.js'
   import InvoiceModal from './InvoiceModal.svelte'
   
   let invoices = []
@@ -15,8 +15,11 @@
   async function loadInvoices() {
     isLoading = true
     try {
+      console.log('Loading invoices...')
       const result = await GetInvoices()
+      console.log('Invoices loaded:', result)
       invoices = result || []
+      console.log('Total invoices:', invoices.length)
     } catch (error) {
       console.error('Error loading invoices:', error)
       invoices = []
@@ -39,7 +42,13 @@
   }
   
   function formatDate(dateString) {
-    return new Date(dateString).toLocaleDateString()
+    if (!dateString) return 'N/A'
+    try {
+      return new Date(dateString).toLocaleDateString()
+    } catch (error) {
+      console.error('Error formatting date:', error)
+      return 'Invalid Date'
+    }
   }
   
   function formatCurrency(amount) {
@@ -60,31 +69,35 @@
   }
 
   async function downloadInvoicePDF(invoiceId) {
+    console.log('downloadInvoicePDF called with ID:', invoiceId)
     try {
       console.log('Downloading PDF for invoice:', invoiceId)
-      const filePath = await GenerateInvoicePDF(invoiceId)
-      console.log('PDF generated at:', filePath)
-      
-      // Show success message
-      alert(`PDF downloaded successfully to: ${filePath}`)
+      await DownloadInvoicePDF(invoiceId)
+      console.log('PDF download completed')
     } catch (error) {
-      console.error('Error generating PDF:', error)
-      alert('Failed to generate PDF. Please try again.')
+      console.error('Error downloading PDF:', error)
+      alert('Failed to download PDF. Please try again.')
     }
   }
 
   async function viewInvoicePDF(invoiceId) {
+    console.log('viewInvoicePDF called with ID:', invoiceId)
     try {
-      console.log('Viewing PDF for invoice:', invoiceId)
-      const filePath = await GenerateInvoicePDF(invoiceId)
-      console.log('PDF generated at:', filePath)
-      
-      // For now, just show the file path. In a real app, you might open the PDF viewer
-      alert(`PDF generated at: ${filePath}\n\nThe PDF has been saved to your Documents/dijibill folder.`)
+      console.log('Opening PDF preview for invoice:', invoiceId)
+      await ViewInvoicePDF(invoiceId)
+      console.log('PDF preview opened')
     } catch (error) {
-      console.error('Error generating PDF:', error)
-      alert('Failed to generate PDF. Please try again.')
+      console.error('Error viewing PDF:', error)
+      alert('Failed to open PDF preview. Please try again.')
     }
+  }
+
+  function editInvoice(invoice) {
+    console.log('editInvoice called with invoice:', invoice)
+    alert('Edit button clicked! Invoice ID: ' + invoice.id)
+    // TODO: Implement edit functionality
+    // This would typically open the invoice modal with the invoice data pre-filled
+    console.log('Edit invoice:', invoice)
   }
   
   $: filteredInvoices = (invoices || []).filter(invoice => 
@@ -209,7 +222,11 @@
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                         </svg>
                       </button>
-                      <button class="btn-icon btn-sm text-warning hover:bg-warning/20" title="Edit">
+                      <button 
+                        class="btn-icon btn-sm text-warning hover:bg-warning/20" 
+                        title="Edit"
+                        on:click={() => editInvoice(invoice)}
+                      >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                         </svg>
