@@ -36,19 +36,6 @@ func NewHTMLInvoiceService(ctx context.Context, db *database.Database) *HTMLInvo
 	}
 }
 
-// InvoiceData represents the data structure for invoice template
-type InvoiceData struct {
-	Invoice *database.Invoice
-	Company *database.Company
-	Items   []InvoiceItemData
-}
-
-// InvoiceItemData represents invoice item with product details
-type InvoiceItemData struct {
-	*database.InvoiceItem
-	Product *database.Product
-}
-
 // sanitizeCustomerData replaces empty string fields with "n/a"
 func (h *HTMLInvoiceService) sanitizeCustomerData(customer *database.Customer) *database.Customer {
 	if customer == nil {
