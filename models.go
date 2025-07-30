@@ -171,8 +171,6 @@ type DefaultProductSettings struct {
 	DefaultStock              int     `json:"default_stock"`               // Default stock quantity
 	DefaultTaxRateID          int     `json:"default_tax_rate_id"`         // Default tax rate ID
 	DefaultUnitID             int     `json:"default_unit_id"`             // Default unit of measurement ID
-	DefaultPaymentTypeID      int     `json:"default_payment_type_id"`     // Default payment type ID
-	DefaultProductCategoryID  int     `json:"default_product_category_id"` // Default product category ID
 	DefaultProductType        string  `json:"default_product_type"`        // "product" or "service"
 	DefaultProductStatus      bool    `json:"default_product_status"`      // true = active, false = inactive
 	DefaultMarkup             float64 `json:"default_markup"`              // Default markup percentage

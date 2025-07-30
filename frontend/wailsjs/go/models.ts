@@ -101,8 +101,6 @@ export namespace main {
 	    default_stock: number;
 	    default_tax_rate_id: number;
 	    default_unit_id: number;
-	    default_payment_type_id: number;
-	    default_product_category_id: number;
 	    default_product_type: string;
 	    default_product_status: boolean;
 	    default_markup: number;
@@ -123,8 +121,6 @@ export namespace main {
 	        this.default_stock = source["default_stock"];
 	        this.default_tax_rate_id = source["default_tax_rate_id"];
 	        this.default_unit_id = source["default_unit_id"];
-	        this.default_payment_type_id = source["default_payment_type_id"];
-	        this.default_product_category_id = source["default_product_category_id"];
 	        this.default_product_type = source["default_product_type"];
 	        this.default_product_status = source["default_product_status"];
 	        this.default_markup = source["default_markup"];

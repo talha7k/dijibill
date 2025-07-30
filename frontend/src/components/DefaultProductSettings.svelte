@@ -1,6 +1,6 @@
 <script>
   import { createEventDispatcher, onMount } from 'svelte'
-  import { GetDefaultProductSettings, UpdateDefaultProductSettings, GetTaxRates, GetUnitsOfMeasurement, GetPaymentTypes, GetProductCategories } from '../../wailsjs/go/main/App.js'
+  import { GetDefaultProductSettings, UpdateDefaultProductSettings, GetTaxRates, GetUnitsOfMeasurement } from '../../wailsjs/go/main/App.js'
   import * as main from '../../wailsjs/go/models'
 
   const dispatch = createEventDispatcher()
@@ -13,8 +13,6 @@
     default_stock: 0,
     default_tax_rate_id: 1,
     default_unit_id: 1,
-    default_payment_type_id: 1,
-    default_product_category_id: 1,
     default_product_type: 'product',
     default_markup: 0,
     default_product_status: true,
@@ -25,8 +23,6 @@
   // Reference data
   let taxRates = []
   let units = []
-  let paymentTypes = []
-  let productCategories = []
 
   onMount(async () => {
     await loadData()
@@ -39,21 +35,15 @@
       const [
         loadedTaxRates,
         loadedUnits,
-        loadedPaymentTypes,
-        loadedProductCategories,
         loadedDefaultSettings
       ] = await Promise.all([
         GetTaxRates(),
         GetUnitsOfMeasurement(),
-        GetPaymentTypes(),
-        GetProductCategories(),
         GetDefaultProductSettings()
       ])
 
       taxRates = loadedTaxRates || []
       units = loadedUnits || []
-      paymentTypes = loadedPaymentTypes || []
-      productCategories = loadedProductCategories || []
 
       if (loadedDefaultSettings) {
         defaultProductSettings = loadedDefaultSettings
@@ -75,8 +65,6 @@
       settings.default_stock = defaultProductSettings.default_stock
       settings.default_tax_rate_id = defaultProductSettings.default_tax_rate_id
       settings.default_unit_id = defaultProductSettings.default_unit_id
-      settings.default_payment_type_id = defaultProductSettings.default_payment_type_id
-      settings.default_product_category_id = defaultProductSettings.default_product_category_id
       settings.default_product_type = defaultProductSettings.default_product_type
       settings.default_markup = defaultProductSettings.default_markup
       settings.default_product_status = defaultProductSettings.default_product_status
@@ -154,42 +142,6 @@
           >
             {#each units as unit}
               <option value={unit.id}>{unit.name} ({unit.symbol})</option>
-            {/each}
-          </select>
-        </div>
-      </div>
-
-      <!-- Default Payment Type -->
-      <div>
-        <label for="default_payment_type" class="block text-sm font-medium text-gray-700">
-          Default Payment Type
-        </label>
-        <div class="mt-1">
-          <select
-            id="default_payment_type"
-            bind:value={defaultProductSettings.default_payment_type_id}
-            class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
-          >
-            {#each paymentTypes as paymentType}
-              <option value={paymentType.id}>{paymentType.name}</option>
-            {/each}
-          </select>
-        </div>
-      </div>
-
-      <!-- Default Product Category -->
-      <div>
-        <label for="default_product_category" class="block text-sm font-medium text-gray-700">
-          Default Product Category
-        </label>
-        <div class="mt-1">
-          <select
-            id="default_product_category"
-            bind:value={defaultProductSettings.default_product_category_id}
-            class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
-          >
-            {#each productCategories as category}
-              <option value={category.id}>{category.name}</option>
             {/each}
           </select>
         </div>

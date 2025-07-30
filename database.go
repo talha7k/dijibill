@@ -177,8 +177,6 @@ func (d *Database) createTables() error {
 			default_stock INTEGER DEFAULT 0,
 			default_tax_rate_id INTEGER,
 			default_unit_id INTEGER,
-			default_payment_type_id INTEGER,
-			default_product_category_id INTEGER,
 			default_product_type TEXT DEFAULT 'product',
 			default_product_status BOOLEAN DEFAULT 1,
 			default_markup REAL DEFAULT 0.0,
@@ -187,9 +185,7 @@ func (d *Database) createTables() error {
 			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 			FOREIGN KEY (default_tax_rate_id) REFERENCES tax_rates(id),
-			FOREIGN KEY (default_unit_id) REFERENCES units_of_measurement(id),
-			FOREIGN KEY (default_payment_type_id) REFERENCES payment_types(id),
-			FOREIGN KEY (default_product_category_id) REFERENCES product_categories(id)
+			FOREIGN KEY (default_unit_id) REFERENCES units_of_measurement(id)
 		)`,
 	}
 
@@ -310,20 +306,19 @@ func (d *Database) insertDefaultSettings() error {
 
 	if defaultSettingsCount == 0 {
 		// Get default IDs for foreign keys
-		var defaultTaxRateID, defaultUnitID, defaultPaymentTypeID, defaultSalesCategoryID int
+		var defaultTaxRateID, defaultUnitID, defaultSalesCategoryID int
 		
 		d.db.QueryRow("SELECT id FROM tax_rates WHERE is_default = 1 LIMIT 1").Scan(&defaultTaxRateID)
 		d.db.QueryRow("SELECT id FROM units_of_measurement WHERE is_default = 1 LIMIT 1").Scan(&defaultUnitID)
-		d.db.QueryRow("SELECT id FROM payment_types WHERE is_default = 1 LIMIT 1").Scan(&defaultPaymentTypeID)
 		d.db.QueryRow("SELECT id FROM sales_categories WHERE is_default = 1 LIMIT 1").Scan(&defaultSalesCategoryID)
 
 		_, err = d.db.Exec(`
 			INSERT INTO default_product_settings (
-				default_stock, default_tax_rate_id, default_unit_id, default_payment_type_id, 
+				default_stock, default_tax_rate_id, default_unit_id, 
 				default_sales_category_id, default_product_type, default_product_status, 
 				default_markup, default_price_includes_tax, default_price_change_allowed
-			) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-			1, defaultTaxRateID, defaultUnitID, defaultPaymentTypeID, defaultSalesCategoryID,
+			) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+			1, defaultTaxRateID, defaultUnitID, defaultSalesCategoryID,
 			"product", true, 0.0, false, true)
 		
 		if err != nil {
@@ -914,14 +909,14 @@ func (d *Database) DeleteUnitOfMeasurement(id int) error {
 
 // DefaultProductSettings operations
 func (d *Database) GetDefaultProductSettings() (*DefaultProductSettings, error) {
-	query := `SELECT id, default_stock, default_tax_rate_id, default_unit_id, default_payment_type_id, 
-			  default_product_category_id, default_product_type, default_product_status, default_markup, 
+	query := `SELECT id, default_stock, default_tax_rate_id, default_unit_id, 
+			  default_product_type, default_product_status, default_markup, 
 			  default_price_includes_tax, default_price_change_allowed, created_at, updated_at 
 			  FROM default_product_settings LIMIT 1`
 
 	var dps DefaultProductSettings
 	err := d.db.QueryRow(query).Scan(&dps.ID, &dps.DefaultStock, &dps.DefaultTaxRateID, &dps.DefaultUnitID,
-		&dps.DefaultPaymentTypeID, &dps.DefaultProductCategoryID, &dps.DefaultProductType, &dps.DefaultProductStatus,
+		&dps.DefaultProductType, &dps.DefaultProductStatus,
 		&dps.DefaultMarkup, &dps.DefaultPriceIncludesTax, &dps.DefaultPriceChangeAllowed, &dps.CreatedAt, &dps.UpdatedAt)
 	if err != nil {
 		return nil, err
@@ -931,14 +926,14 @@ func (d *Database) GetDefaultProductSettings() (*DefaultProductSettings, error) 
 
 func (d *Database) UpdateDefaultProductSettings(settings *DefaultProductSettings) error {
 	query := `UPDATE default_product_settings SET 
-			  default_stock = ?, default_tax_rate_id = ?, default_unit_id = ?, default_payment_type_id = ?, 
-			  default_product_category_id = ?, default_product_type = ?, default_product_status = ?, 
+			  default_stock = ?, default_tax_rate_id = ?, default_unit_id = ?, 
+			  default_product_type = ?, default_product_status = ?, 
 			  default_markup = ?, default_price_includes_tax = ?, default_price_change_allowed = ?, 
 			  updated_at = CURRENT_TIMESTAMP 
 			  WHERE id = ?`
 
 	_, err := d.db.Exec(query, settings.DefaultStock, settings.DefaultTaxRateID, settings.DefaultUnitID,
-		settings.DefaultPaymentTypeID, settings.DefaultProductCategoryID, settings.DefaultProductType,
+		settings.DefaultProductType,
 		settings.DefaultProductStatus, settings.DefaultMarkup, settings.DefaultPriceIncludesTax,
 		settings.DefaultPriceChangeAllowed, settings.ID)
 	return err
