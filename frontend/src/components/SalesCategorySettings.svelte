@@ -3,7 +3,7 @@
   import { database } from '../../wailsjs/go/models'
   import { createEventDispatcher } from 'svelte'
   import DataTable from './DataTable.svelte'
-  import FormField from './FormField.svelte'
+  import SalesCategoryModal from './SalesCategoryModal.svelte'
   import ConfirmationModal from './ConfirmationModal.svelte'
 
   const dispatch = createEventDispatcher()
@@ -11,85 +11,73 @@
   export let salesCategories = []
   export let isLoading = false
 
-  let newSalesCategory = { name: '', name_arabic: '', code: '', description: '', description_arabic: '', is_default: false, is_active: true }
-  let showSalesCategoryForm = false
+  let showSalesCategoryModal = false
   let editingSalesCategory = null
   let showDeleteConfirm = false
-  let categoryToDelete = null
+  let salesCategoryToDelete = null
   let loading = false
 
-  async function addSalesCategory() {
-    if (newSalesCategory.name && newSalesCategory.code) {
-      try {
-        const salesCategoryData = new database.SalesCategory({
+  function editSalesCategory(salesCategory) {
+    editingSalesCategory = salesCategory
+    showSalesCategoryModal = true
+  }
+
+  function closeSalesCategoryModal() {
+    showSalesCategoryModal = false
+    editingSalesCategory = null
+  }
+
+  async function handleSalesCategorySave(event) {
+    const salesCategoryData = event.detail
+    loading = true
+    
+    try {
+      if (editingSalesCategory) {
+        // Update existing sales category
+        const updatedSalesCategory = new database.SalesCategory({
+          ...editingSalesCategory,
+          ...salesCategoryData
+        })
+        await UpdateSalesCategory(updatedSalesCategory)
+      } else {
+        // Create new sales category
+        const newSalesCategory = new database.SalesCategory({
           id: 0,
-          name: newSalesCategory.name,
-          name_arabic: newSalesCategory.name_arabic || '',
-          code: newSalesCategory.code,
-          description: newSalesCategory.description || '',
-          description_arabic: newSalesCategory.description_arabic || '',
-          is_default: newSalesCategory.is_default || false,
-          is_active: true,
+          ...salesCategoryData,
           created_at: null,
           updated_at: null
-        });
-        await CreateSalesCategory(salesCategoryData)
-        dispatch('reload')
-        resetSalesCategoryForm()
-      } catch (error) {
-        console.error('Error adding sales category:', error)
-        dispatch('error', { message: 'Error adding sales category: ' + error.message })
+        })
+        await CreateSalesCategory(newSalesCategory)
       }
-    }
-  }
-
-  function editSalesCategory(salesCategory) {
-    editingSalesCategory = salesCategory.id
-    newSalesCategory = { ...salesCategory }
-    showSalesCategoryForm = true
-  }
-
-  async function updateSalesCategory() {
-    try {
-      const salesCategoryData = new database.SalesCategory({
-        id: editingSalesCategory,
-        name: newSalesCategory.name,
-        name_arabic: newSalesCategory.name_arabic || '',
-        code: newSalesCategory.code,
-        description: newSalesCategory.description || '',
-        description_arabic: newSalesCategory.description_arabic || '',
-        is_default: newSalesCategory.is_default || false,
-        is_active: newSalesCategory.is_active !== undefined ? newSalesCategory.is_active : true,
-        created_at: newSalesCategory.created_at || null,
-        updated_at: newSalesCategory.updated_at || null
-      });
-      await UpdateSalesCategory(salesCategoryData)
+      
       dispatch('reload')
-      resetSalesCategoryForm()
+      closeSalesCategoryModal()
     } catch (error) {
-      console.error('Error updating sales category:', error)
-      dispatch('error', { message: 'Error updating sales category: ' + error.message })
+      console.error('Error saving sales category:', error)
+      dispatch('error', { message: 'Error saving sales category: ' + error.message })
+    } finally {
+      loading = false
     }
   }
 
   function showDeleteConfirmation(id) {
-    categoryToDelete = id
+    salesCategoryToDelete = id
     showDeleteConfirm = true
   }
 
   function cancelDelete() {
     showDeleteConfirm = false
-    categoryToDelete = null
+    salesCategoryToDelete = null
   }
 
   async function confirmDelete() {
-    if (categoryToDelete) {
+    if (salesCategoryToDelete) {
       loading = true
       try {
-        await DeleteSalesCategory(categoryToDelete)
+        await DeleteSalesCategory(salesCategoryToDelete)
         dispatch('reload')
         showDeleteConfirm = false
-        categoryToDelete = null
+        salesCategoryToDelete = null
       } catch (error) {
         console.error('Error deleting sales category:', error)
         dispatch('error', { message: 'Error deleting sales category: ' + error.message })
@@ -97,12 +85,6 @@
         loading = false
       }
     }
-  }
-
-  function resetSalesCategoryForm() {
-    newSalesCategory = { name: '', name_arabic: '', code: '', description: '', description_arabic: '', is_default: false, is_active: true }
-    showSalesCategoryForm = false
-    editingSalesCategory = null
   }
 
   async function setDefaultSalesCategory(id) {
@@ -179,15 +161,31 @@
       `
     },
     {
-      key: 'actions',
       label: 'Actions',
-      render: (salesCategory) => `
-        <div class="flex items-center space-x-2">
-          ${!salesCategory.is_default ? `<button class="action-btn" data-action="setDefault" data-id="${salesCategory.id}">Set Default</button>` : ''}
-          <button class="action-btn" data-action="edit" data-id="${salesCategory.id}">Edit</button>
-          <button class="action-btn text-red-600" data-action="delete" data-id="${salesCategory.id}">Delete</button>
-        </div>
-      `
+      actions: [
+        {
+          key: 'setDefault',
+          text: 'Set Default',
+          icon: 'fa-star',
+          class: 'btn-secondary',
+          title: 'Set as default sales category',
+          condition: (item) => !item.is_default
+        },
+        {
+          key: 'edit',
+          text: 'Edit',
+          icon: 'fa-edit',
+          class: 'btn-secondary',
+          title: 'Edit sales category'
+        },
+        {
+          key: 'delete',
+          text: 'Delete',
+          icon: 'fa-trash',
+          class: 'btn-error',
+          title: 'Delete sales category'
+        }
+      ]
     }
   ]
 
@@ -198,7 +196,7 @@
 
   // Event handlers for DataTable
   function handlePrimaryAction() {
-    showSalesCategoryForm = true
+    showSalesCategoryModal = true
   }
 
   function handleSearch(event) {
@@ -206,108 +204,23 @@
   }
 
   function handleRowAction(event) {
-    const { action, id } = event.detail
-    const salesCategory = salesCategories.find(sc => sc.id === parseInt(id))
+    const { action, item } = event.detail
     
     switch (action) {
       case 'edit':
-        editSalesCategory(salesCategory)
+        editSalesCategory(item)
         break
       case 'delete':
-        showDeleteConfirmation(parseInt(id))
+        showDeleteConfirmation(item.id)
         break
       case 'setDefault':
-        setDefaultSalesCategory(parseInt(id))
+        setDefaultSalesCategory(item.id)
         break
     }
   }
 </script>
 
 <div class="space-y-6">
-  <!-- Sales Category Form -->
-  {#if showSalesCategoryForm}
-    <div class=" p-6 rounded-lg border">
-      <h4 class="text-lg font-medium text-gray-100 mb-6">
-        {editingSalesCategory ? 'Edit Sales Category' : 'Add New Sales Category'}
-      </h4>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <FormField
-          label="Name"
-          labelArabic="الاسم"
-          type="text"
-          bind:value={newSalesCategory.name}
-          placeholder="Enter category name"
-          required
-        />
-
-        <FormField
-          label="Name (Arabic)"
-          labelArabic="الاسم بالعربية"
-          type="text"
-          bind:value={newSalesCategory.name_arabic}
-          placeholder="اسم الفئة"
-          dir="rtl"
-        />
-
-        <FormField
-          label="Code"
-          labelArabic="الرمز"
-          type="text"
-          bind:value={newSalesCategory.code}
-          placeholder="Enter category code"
-          required
-        />
-
-        <FormField
-          label="Description"
-          labelArabic="الوصف"
-          type="text"
-          bind:value={newSalesCategory.description}
-          placeholder="Enter description"
-        />
-
-        <div class="col-span-2">
-          <FormField
-            label="Description (Arabic)"
-            labelArabic="الوصف بالعربية"
-            type="text"
-            bind:value={newSalesCategory.description_arabic}
-            placeholder="الوصف"
-            dir="rtl"
-          />
-        </div>
-
-        <div class="flex items-center space-x-6 col-span-2">
-          <FormField
-            type="checkbox"
-            bind:checked={newSalesCategory.is_default}
-            placeholder="Set as default"
-          />
-          <FormField
-            type="checkbox"
-            bind:checked={newSalesCategory.is_active}
-            placeholder="Active"
-          />
-        </div>
-      </div>
-      
-      <div class="flex justify-end space-x-3 mt-6">
-        <button
-          on:click={resetSalesCategoryForm}
-          class="px-4 py-2 border border-gray-300 text-gray-300 rounded-md hover: focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          Cancel
-        </button>
-        <button
-          on:click={editingSalesCategory ? updateSalesCategory : addSalesCategory}
-          class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          {editingSalesCategory ? 'Update' : 'Add'} Sales Category
-        </button>
-      </div>
-    </div>
-  {/if}
-
   <!-- Sales Categories DataTable -->
   <DataTable
     data={filteredSalesCategories}
@@ -324,6 +237,15 @@
     on:row-action={handleRowAction}
   />
 </div>
+
+<!-- Sales Category Modal -->
+<SalesCategoryModal
+  show={showSalesCategoryModal}
+  salesCategory={editingSalesCategory}
+  {loading}
+  on:save={handleSalesCategorySave}
+  on:close={closeSalesCategoryModal}
+/>
 
 {#if showDeleteConfirm}
   <ConfirmationModal

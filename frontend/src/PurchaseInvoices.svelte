@@ -5,6 +5,7 @@
   import DataTable from './components/DataTable.svelte'
   import PurchaseInvoiceModal from './components/PurchaseInvoiceModal.svelte'
   import StatusBadge from './components/StatusBadge.svelte'
+  import ConfirmationModal from './components/ConfirmationModal.svelte'
 
   /** @type {Array<any>} */
   let purchaseInvoices = []
@@ -22,6 +23,11 @@
   let loading = false
   /** @type {boolean} */
   let isLoading = false
+  
+  // Confirmation modal state
+  let showDeleteConfirm = false
+  let invoiceToDelete = null
+  let confirmLoading = false
 
   onMount(async () => {
     await loadData()
@@ -101,16 +107,35 @@
     editingInvoice = null
   }
 
-  async function handleDeleteInvoice(invoice) {
-    if (confirm(`Are you sure you want to delete invoice ${invoice.invoice_number}?`)) {
-      try {
-        await DeletePurchaseInvoice(invoice.id)
-        await loadData() // Refresh the list
-      } catch (error) {
-        console.error('Error deleting invoice:', error)
-        alert('Error deleting invoice: ' + error.message)
-      }
+  function showDeleteConfirmation(invoice) {
+    invoiceToDelete = invoice;
+    showDeleteConfirm = true;
+  }
+
+  function cancelDelete() {
+    showDeleteConfirm = false;
+    invoiceToDelete = null;
+  }
+
+  async function confirmDelete() {
+    if (!invoiceToDelete) return;
+    
+    try {
+      confirmLoading = true;
+      await DeletePurchaseInvoice(invoiceToDelete.id);
+      await loadData(); // Refresh the list
+      showDeleteConfirm = false;
+      invoiceToDelete = null;
+    } catch (error) {
+      console.error('Error deleting invoice:', error);
+      alert('Error deleting invoice: ' + error.message);
+    } finally {
+      confirmLoading = false;
     }
+  }
+
+  async function handleDeleteInvoice(invoice) {
+    showDeleteConfirmation(invoice);
   }
 
   function handleInvoiceModalClose() {
@@ -272,4 +297,16 @@
   {loading}
   on:save={handleInvoiceSave}
   on:close={handleInvoiceModalClose}
+/>
+
+<!-- Confirmation Modal -->
+<ConfirmationModal
+  show={showDeleteConfirm}
+  title="Delete Purchase Invoice"
+  message={invoiceToDelete ? `Are you sure you want to delete invoice ${invoiceToDelete.invoice_number}? This action cannot be undone.` : ''}
+  confirmText="Delete"
+  cancelText="Cancel"
+  loading={confirmLoading}
+  on:confirm={confirmDelete}
+  on:cancel={cancelDelete}
 />

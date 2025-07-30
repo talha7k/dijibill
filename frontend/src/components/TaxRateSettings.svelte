@@ -182,18 +182,6 @@
     }
   }
 
-  async function deleteTaxRate(id) {
-    if (confirm('Are you sure you want to delete this tax rate?')) {
-      try {
-        await DeleteTaxRate(id)
-        dispatch('reload')
-      } catch (error) {
-        console.error('Error deleting tax rate:', error)
-        dispatch('error', { message: 'Error deleting tax rate: ' + error.message })
-      }
-    }
-  }
-
   function resetTaxRateForm() {
     newTaxRate = { name: '', name_arabic: '', rate: 0, is_default: false, is_active: true }
     showTaxRateForm = false

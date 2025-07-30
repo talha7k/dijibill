@@ -5,6 +5,7 @@
   import DataTable from './components/DataTable.svelte'
   import SupplierModal from './components/SupplierModal.svelte'
   import StatusBadge from './components/StatusBadge.svelte'
+  import ConfirmationModal from './components/ConfirmationModal.svelte'
 
   /** @type {Array<{id: number, company_name: string, company_name_arabic: string, contact_person: string, contact_person_arabic: string, email: string, phone: string, vat_number: string, address: string, address_arabic: string, city: string, city_arabic: string, country: string, country_arabic: string, payment_terms: string, active: boolean, created_at: string}>} */
   let suppliers = []
@@ -17,6 +18,11 @@
   let editingSupplier = null
   /** @type {boolean} */
   let loading = false
+  
+  // Confirmation modal state
+  let showDeleteConfirm = false
+  let supplierToDelete = null
+  let confirmLoading = false
 
   // Load suppliers on component mount
   onMount(async () => {
@@ -65,19 +71,35 @@
     showSupplierModal = true
   }
 
-  async function handleDeleteSupplier(supplier) {
-    if (confirm(`Are you sure you want to delete ${supplier.company_name}?`)) {
-      try {
-        loading = true
-        await DeleteSupplier(supplier.id)
-        await loadSuppliers() // Reload the list
-      } catch (error) {
-        console.error('Error deleting supplier:', error)
-        alert('Error deleting supplier. Please try again.')
-      } finally {
-        loading = false
-      }
+  function showDeleteConfirmation(supplier) {
+    supplierToDelete = supplier;
+    showDeleteConfirm = true;
+  }
+
+  function cancelDelete() {
+    showDeleteConfirm = false;
+    supplierToDelete = null;
+  }
+
+  async function confirmDelete() {
+    if (!supplierToDelete) return;
+    
+    try {
+      confirmLoading = true;
+      await DeleteSupplier(supplierToDelete.id);
+      await loadSuppliers(); // Reload the list
+      showDeleteConfirm = false;
+      supplierToDelete = null;
+    } catch (error) {
+      console.error('Error deleting supplier:', error);
+      alert('Error deleting supplier. Please try again.');
+    } finally {
+      confirmLoading = false;
     }
+  }
+
+  async function handleDeleteSupplier(supplier) {
+    showDeleteConfirmation(supplier);
   }
 
   async function handleSupplierSave(event) {
@@ -244,4 +266,16 @@
   {loading}
   on:save={handleSupplierSave}
   on:close={handleSupplierModalClose}
+/>
+
+<!-- Confirmation Modal -->
+<ConfirmationModal
+  show={showDeleteConfirm}
+  title="Delete Supplier"
+  message={supplierToDelete ? `Are you sure you want to delete "${supplierToDelete.company_name}"? This action cannot be undone.` : ''}
+  confirmText="Delete"
+  cancelText="Cancel"
+  loading={confirmLoading}
+  on:confirm={confirmDelete}
+  on:cancel={cancelDelete}
 />

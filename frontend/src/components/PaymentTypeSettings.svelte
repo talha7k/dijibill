@@ -3,7 +3,7 @@
   import { database } from '../../wailsjs/go/models'
   import { createEventDispatcher } from 'svelte'
   import DataTable from './DataTable.svelte'
-  import FormField from './FormField.svelte'
+  import PaymentTypeModal from './PaymentTypeModal.svelte'
   import ConfirmationModal from './ConfirmationModal.svelte'
 
   const dispatch = createEventDispatcher()
@@ -11,63 +11,54 @@
   export let paymentTypes = []
   export let isLoading = false
 
-  let newPaymentType = { name: '', name_arabic: '', code: '', description: '', is_default: false, is_active: true }
-  let showPaymentTypeForm = false
+  let showPaymentTypeModal = false
   let editingPaymentType = null
   let showDeleteConfirm = false
   let paymentTypeToDelete = null
   let loading = false
 
-  async function addPaymentType() {
-    if (newPaymentType.name && newPaymentType.code) {
-      try {
-        const paymentTypeData = new database.PaymentType({
-          id: 0,
-          name: newPaymentType.name,
-          name_arabic: newPaymentType.name_arabic || '',
-          code: newPaymentType.code,
-          description: newPaymentType.description || '',
-          is_default: newPaymentType.is_default || false,
-          is_active: true,
-          created_at: null,
-          updated_at: null
-        });
-        await CreatePaymentType(paymentTypeData)
-        dispatch('reload')
-        resetPaymentTypeForm()
-      } catch (error) {
-        console.error('Error adding payment type:', error)
-        dispatch('error', { message: 'Error adding payment type: ' + error.message })
+  async function handlePaymentTypeSave(event) {
+    const paymentTypeData = event.detail
+    
+    try {
+      loading = true
+      const dbPaymentType = new database.PaymentType({
+        id: paymentTypeData.id || 0,
+        name: paymentTypeData.name,
+        name_arabic: paymentTypeData.name_arabic || '',
+        code: paymentTypeData.code,
+        description: paymentTypeData.description || '',
+        is_default: paymentTypeData.is_default || false,
+        is_active: paymentTypeData.is_active !== undefined ? paymentTypeData.is_active : true,
+        created_at: paymentTypeData.created_at || null,
+        updated_at: paymentTypeData.updated_at || null
+      })
+
+      if (editingPaymentType) {
+        await UpdatePaymentType(dbPaymentType)
+      } else {
+        await CreatePaymentType(dbPaymentType)
       }
+      
+      dispatch('reload')
+      closePaymentTypeModal()
+    } catch (error) {
+      console.error('Error saving payment type:', error)
+      dispatch('error', { message: 'Error saving payment type: ' + error.message })
+    } finally {
+      loading = false
     }
   }
 
   function editPaymentType(paymentType) {
-    editingPaymentType = paymentType.id
-    newPaymentType = { ...paymentType }
-    showPaymentTypeForm = true
+    editingPaymentType = paymentType
+    showPaymentTypeModal = true
   }
 
-  async function updatePaymentType() {
-    try {
-      const paymentTypeData = new database.PaymentType({
-        id: editingPaymentType,
-        name: newPaymentType.name,
-        name_arabic: newPaymentType.name_arabic || '',
-        code: newPaymentType.code,
-        description: newPaymentType.description || '',
-        is_default: newPaymentType.is_default || false,
-        is_active: newPaymentType.is_active !== undefined ? newPaymentType.is_active : true,
-        created_at: newPaymentType.created_at || null,
-        updated_at: newPaymentType.updated_at || null
-      });
-      await UpdatePaymentType(paymentTypeData)
-      dispatch('reload')
-      resetPaymentTypeForm()
-    } catch (error) {
-      console.error('Error updating payment type:', error)
-      dispatch('error', { message: 'Error updating payment type: ' + error.message })
-    }
+  function closePaymentTypeModal() {
+    showPaymentTypeModal = false
+    editingPaymentType = null
+    loading = false
   }
 
   function showDeleteConfirmation(id) {
@@ -98,9 +89,7 @@
   }
 
   function resetPaymentTypeForm() {
-    newPaymentType = { name: '', name_arabic: '', code: '', description: '', is_default: false, is_active: true }
-    showPaymentTypeForm = false
-    editingPaymentType = null
+    closePaymentTypeModal()
   }
 
   async function setDefaultPaymentType(id) {
@@ -171,15 +160,31 @@
       `
     },
     {
-      key: 'actions',
       label: 'Actions',
-      render: (paymentType) => `
-        <div class="flex items-center space-x-2">
-          ${!paymentType.is_default ? `<button class="action-btn" data-action="setDefault" data-id="${paymentType.id}">Set Default</button>` : ''}
-          <button class="action-btn" data-action="edit" data-id="${paymentType.id}">Edit</button>
-          <button class="action-btn text-red-600" data-action="delete" data-id="${paymentType.id}">Delete</button>
-        </div>
-      `
+      actions: [
+        {
+          key: 'setDefault',
+          text: 'Set Default',
+          icon: 'fa-star',
+          class: 'btn-secondary',
+          title: 'Set as default payment type',
+          condition: (item) => !item.is_default
+        },
+        {
+          key: 'edit',
+          text: 'Edit',
+          icon: 'fa-edit',
+          class: 'btn-secondary',
+          title: 'Edit payment type'
+        },
+        {
+          key: 'delete',
+          text: 'Delete',
+          icon: 'fa-trash',
+          class: 'btn-error',
+          title: 'Delete payment type'
+        }
+      ]
     }
   ]
 
@@ -190,7 +195,7 @@
 
   // Event handlers for DataTable
   function handlePrimaryAction() {
-    showPaymentTypeForm = true
+    showPaymentTypeModal = true
   }
 
   function handleSearch(event) {
@@ -198,97 +203,23 @@
   }
 
   function handleRowAction(event) {
-    const { action, id } = event.detail
-    const paymentType = paymentTypes.find(pt => pt.id === parseInt(id))
+    const { action, item } = event.detail
     
     switch (action) {
       case 'edit':
-        editPaymentType(paymentType)
+        editPaymentType(item)
         break
       case 'delete':
-        showDeleteConfirmation(parseInt(id))
+        showDeleteConfirmation(item.id)
         break
       case 'setDefault':
-        setDefaultPaymentType(parseInt(id))
+        setDefaultPaymentType(item.id)
         break
     }
   }
 </script>
 
 <div class="space-y-6">
-  <!-- Payment Type Form -->
-  {#if showPaymentTypeForm}
-    <div class=" p-6 rounded-lg border">
-      <h4 class="text-lg font-medium text-gray-100 mb-6">
-        {editingPaymentType ? 'Edit Payment Type' : 'Add New Payment Type'}
-      </h4>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <FormField
-          label="Name"
-          labelArabic="الاسم"
-          type="text"
-          bind:value={newPaymentType.name}
-          placeholder="Enter payment type name"
-          required
-        />
-
-        <FormField
-          label="Name (Arabic)"
-          labelArabic="الاسم بالعربية"
-          type="text"
-          bind:value={newPaymentType.name_arabic}
-          placeholder="اسم نوع الدفع"
-          dir="rtl"
-        />
-
-        <FormField
-          label="Code"
-          labelArabic="الرمز"
-          type="text"
-          bind:value={newPaymentType.code}
-          placeholder="Enter payment type code"
-          required
-        />
-
-        <FormField
-          label="Description"
-          labelArabic="الوصف"
-          type="text"
-          bind:value={newPaymentType.description}
-          placeholder="Enter description"
-        />
-
-        <div class="flex items-center space-x-6 col-span-2">
-          <FormField
-            type="checkbox"
-            bind:checked={newPaymentType.is_default}
-            placeholder="Set as default"
-          />
-          <FormField
-            type="checkbox"
-            bind:checked={newPaymentType.is_active}
-            placeholder="Active"
-          />
-        </div>
-      </div>
-      
-      <div class="flex justify-end space-x-3 mt-6">
-        <button
-          on:click={resetPaymentTypeForm}
-          class="px-4 py-2 border border-gray-300 text-gray-300 rounded-md hover: focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          Cancel
-        </button>
-        <button
-          on:click={editingPaymentType ? updatePaymentType : addPaymentType}
-          class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          {editingPaymentType ? 'Update' : 'Add'} Payment Type
-        </button>
-      </div>
-    </div>
-  {/if}
-
   <!-- Payment Types DataTable -->
   <DataTable
     data={filteredPaymentTypes}
@@ -305,6 +236,15 @@
     on:row-action={handleRowAction}
   />
 </div>
+
+<!-- Payment Type Modal -->
+<PaymentTypeModal
+  show={showPaymentTypeModal}
+  paymentType={editingPaymentType}
+  {loading}
+  on:save={handlePaymentTypeSave}
+  on:close={closePaymentTypeModal}
+/>
 
 {#if showDeleteConfirm}
   <ConfirmationModal

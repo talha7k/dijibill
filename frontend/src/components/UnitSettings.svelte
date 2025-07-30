@@ -201,18 +201,6 @@
     }
   }
 
-  async function deleteUnit(id) {
-    if (confirm('Are you sure you want to delete this unit?')) {
-      try {
-        await DeleteUnitOfMeasurement(id);
-        dispatch('reload')
-      } catch (error) {
-        console.error('Error deleting unit:', error);
-        dispatch('error', { message: 'Error deleting unit: ' + error.message })
-      }
-    }
-  }
-
   function resetUnitForm() {
     newUnit = { value: '', label: '', arabic: '', is_default: false, is_active: true }
     showUnitForm = false
