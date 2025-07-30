@@ -662,7 +662,7 @@ components/
 ├── ProductPriceTab.svelte      # Pricing and tax settings
 ├── ProductDescriptionTab.svelte # Product descriptions
 ├── ProductImageTab.svelte      # Product images
-└── CategoryModal.svelte        # Category management
+└── ProductCategoryModal.svelte        # Product category management
 ```
 
 ### 7.3 Wails Integration
