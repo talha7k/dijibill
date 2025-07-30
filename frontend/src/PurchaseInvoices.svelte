@@ -216,28 +216,50 @@
       labelArabic: 'الحالة',
       sortable: true,
       render: (invoice) => getStatusBadge(invoice.status)
+    },
+    {
+      actions: [
+        { key: 'edit', text: 'Edit', icon: 'fa-edit', class: 'btn-primary' },
+        { key: 'delete', text: 'Delete', icon: 'fa-trash', class: 'btn-danger' }
+      ]
     }
   ]
 </script>
 
 <PageLayout
   title="Purchase Invoices"
-  primaryButtonText="Add Invoice"
-  secondaryButtonText="Import"
-  searchPlaceholder="Search invoices..."
-  on:primary={handleAddInvoice}
-  on:secondary={handleImport}
-  on:search={handleSearch}
+  icon="fa-file-invoice"
 >
+  <svelte:fragment slot="actions">
+    <button class="btn btn-secondary-outline" on:click={handleImport}>
+      <i class="fas fa-upload"></i>
+      Import
+    </button>
+    <button class="btn btn-primary" on:click={handleAddInvoice}>
+      <i class="fas fa-plus"></i>
+      Add Invoice
+    </button>
+  </svelte:fragment>
+
   <DataTable
     data={filteredInvoices}
     {columns}
-    primaryActionText="Edit"
-    secondaryActionText="Delete"
-    emptyStateText="No purchase invoices found"
-    on:primary={(e) => handleEditInvoice(e.detail)}
-    on:secondary={(e) => handleDeleteInvoice(e.detail)}
-    on:row={(e) => handleEditInvoice(e.detail)}
+    {loading}
+    searchPlaceholder="Search invoices..."
+    emptyStateTitle="No purchase invoices found"
+    emptyStateMessage="Start by adding your first purchase invoice"
+    emptyStateIcon="fa-file-invoice"
+    primaryAction={{ text: 'Add Invoice', icon: 'fa-plus' }}
+    on:primary-action={handleAddInvoice}
+    on:search={handleSearch}
+    on:row-action={(e) => {
+      const { action, item } = e.detail
+      if (action === 'edit') {
+        handleEditInvoice(item)
+      } else if (action === 'delete') {
+        handleDeleteInvoice(item)
+      }
+    }}
   />
 </PageLayout>
 

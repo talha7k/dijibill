@@ -188,35 +188,50 @@
       render: (supplier) => supplier.active 
         ? '<span class="status-badge status-badge-success">Active</span>'
         : '<span class="status-badge status-badge-error">Inactive</span>'
+    },
+    {
+      actions: [
+        { key: 'edit', text: 'Edit', icon: 'fa-edit', class: 'btn-primary' },
+        { key: 'delete', text: 'Delete', icon: 'fa-trash', class: 'btn-danger' }
+      ]
     }
   ]
 </script>
 
 <PageLayout
   title="Suppliers"
-  titleArabic="الموردون"
-  primaryButtonText="Add Supplier"
-  primaryButtonTextArabic="إضافة مورد"
-  secondaryButtonText="Import"
-  secondaryButtonTextArabic="استيراد"
-  searchPlaceholder="Search suppliers..."
-  searchPlaceholderArabic="البحث في الموردين..."
-  on:primary={handleAddSupplier}
-  on:secondary={handleImport}
-  on:search={handleSearch}
+  icon="fa-truck"
 >
+  <svelte:fragment slot="actions">
+    <button class="btn btn-secondary-outline" on:click={handleImport}>
+      <i class="fas fa-upload"></i>
+      Import
+    </button>
+    <button class="btn btn-primary" on:click={handleAddSupplier}>
+      <i class="fas fa-plus"></i>
+      Add Supplier
+    </button>
+  </svelte:fragment>
+
   <DataTable
     data={filteredSuppliers}
     {columns}
-    primaryActionText="Edit"
-    primaryActionTextArabic="تعديل"
-    secondaryActionText="Delete"
-    secondaryActionTextArabic="حذف"
-    emptyStateText="No suppliers found"
-    emptyStateTextArabic="لم يتم العثور على موردين"
-    on:primary={(e) => handleEditSupplier(e.detail)}
-    on:secondary={(e) => handleDeleteSupplier(e.detail)}
-    on:row={(e) => handleEditSupplier(e.detail)}
+    {loading}
+    searchPlaceholder="Search suppliers..."
+    emptyStateTitle="No suppliers found"
+    emptyStateMessage="Start by adding your first supplier"
+    emptyStateIcon="fa-truck"
+    primaryAction={{ text: 'Add Supplier', icon: 'fa-plus' }}
+    on:primary-action={handleAddSupplier}
+    on:search={handleSearch}
+    on:row-action={(e) => {
+      const { action, item } = e.detail
+      if (action === 'edit') {
+        handleEditSupplier(item)
+      } else if (action === 'delete') {
+        handleDeleteSupplier(item)
+      }
+    }}
   />
 </PageLayout>
 
