@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"crypto/sha256"
 	"encoding/base64"
 	"fmt"
 	"time"
@@ -24,10 +23,9 @@ func NewZATCAQRService() *ZATCAQRService {
 type ZATCAQRData struct {
 	SellerName  string    // Tag 1: Seller's name
 	VATNumber   string    // Tag 2: VAT registration number of the seller
-	Timestamp   time.Time // Tag 3: Time stamp of the invoice (ISO 8601)
+	Timestamp   time.Time // Tag 3: Time stamp of the invoice (ZATCA format)
 	TotalAmount float64   // Tag 4: Invoice total (with VAT)
 	VATAmount   float64   // Tag 5: VAT total
-	Hash        []byte    // Tag 6: Cryptographic stamp (SHA256 hash)
 }
 
 // GenerateZATCAQRCodeOnDemand generates a ZATCA-compliant QR code in Base64 PNG format on-demand
@@ -43,7 +41,7 @@ func (q *ZATCAQRService) GenerateZATCAQRCodeOnDemand(invoice *database.Invoice, 
 	}
 
 	// Encode to TLV format (only tags 1-5 for basic compliance)
-	tlvBytes, err := q.encodeTLVBasic(qrData)
+	tlvBytes, err := q.encodeTLV(qrData)
 	if err != nil {
 		return "", fmt.Errorf("failed to encode TLV: %v", err)
 	}
@@ -68,53 +66,8 @@ func (q *ZATCAQRService) GenerateZATCAQRCodeOnDemand(invoice *database.Invoice, 
 	return qrCodeBase64, nil
 }
 
-// GenerateZATCAQRCode generates a ZATCA-compliant QR code in Base64 PNG format
-func (q *ZATCAQRService) GenerateZATCAQRCode(invoice *database.Invoice, company *database.Company) (string, error) {
-	fmt.Printf("DEBUG: Starting QR generation for invoice %d\n", invoice.ID)
-
-	// Prepare QR data with only the 5 mandatory fields as per ZATCA guidelines
-	qrData := ZATCAQRData{
-		SellerName:  company.Name,
-		VATNumber:   company.VATNumber,
-		Timestamp:   invoice.IssueDate,
-		TotalAmount: invoice.TotalAmount,
-		VATAmount:   invoice.VATAmount,
-	}
-
-	fmt.Printf("DEBUG: QR data prepared - Seller: %s, VAT: %s\n", qrData.SellerName, qrData.VATNumber)
-
-	// Encode to TLV format (only tags 1-5 for basic compliance)
-	tlvBytes, err := q.encodeTLVBasic(qrData)
-	if err != nil {
-		fmt.Printf("DEBUG: TLV encoding failed: %v\n", err)
-		return "", fmt.Errorf("failed to encode TLV: %v", err)
-	}
-	fmt.Printf("DEBUG: TLV encoded, length: %d\n", len(tlvBytes))
-
-	// Encode TLV to Base64 (this is the actual QR code content)
-	tlvBase64 := base64.StdEncoding.EncodeToString(tlvBytes)
-	fmt.Printf("DEBUG: TLV Base64 encoded, length: %d\n", len(tlvBase64))
-
-	// Validate length (max 700 characters as per ZATCA specs)
-	if len(tlvBase64) > 700 {
-		return "", fmt.Errorf("QR code exceeds maximum length of 700 characters: %d", len(tlvBase64))
-	}
-
-	// Generate QR code image from the TLV Base64 data
-	qrCodePNG, err := qrcode.Encode(tlvBase64, qrcode.Medium, 256)
-	if err != nil {
-		return "", fmt.Errorf("failed to generate QR code image: %v", err)
-	}
-
-	// Convert PNG to Base64 for embedding in HTML
-	qrCodeBase64 := base64.StdEncoding.EncodeToString(qrCodePNG)
-	fmt.Printf("DEBUG: QR code image generated, base64 length: %d\n", len(qrCodeBase64))
-
-	return qrCodeBase64, nil
-}
-
-// encodeTLVBasic encodes only the 5 mandatory QR data fields in Tag-Length-Value format according to ZATCA specifications
-func (q *ZATCAQRService) encodeTLVBasic(data ZATCAQRData) ([]byte, error) {
+// encodeTLV encodes only the 5 mandatory QR data fields in Tag-Length-Value format according to ZATCA specifications
+func (q *ZATCAQRService) encodeTLV(data ZATCAQRData) ([]byte, error) {
 	var buffer bytes.Buffer
 
 	// Tag 1: Seller's name
@@ -148,56 +101,11 @@ func (q *ZATCAQRService) encodeTLVBasic(data ZATCAQRData) ([]byte, error) {
 	return buffer.Bytes(), nil
 }
 
-// encodeTLV encodes the QR data in Tag-Length-Value format according to ZATCA specifications
-func (q *ZATCAQRService) encodeTLV(data ZATCAQRData) ([]byte, error) {
-	var buffer bytes.Buffer
-
-	// Tag 1: Seller's name
-	if err := q.addTLVField(&buffer, 1, []byte(data.SellerName)); err != nil {
-		return nil, err
-	}
-
-	// Tag 2: VAT registration number
-	if err := q.addTLVField(&buffer, 2, []byte(data.VATNumber)); err != nil {
-		return nil, err
-	}
-
-	// Tag 3: Timestamp (ISO 8601 format)
-	timestamp := data.Timestamp.Format("2006-01-02T15:04:05Z")
-	if err := q.addTLVField(&buffer, 3, []byte(timestamp)); err != nil {
-		return nil, err
-	}
-
-	// Tag 4: Invoice total (with VAT)
-	totalStr := fmt.Sprintf("%.2f", data.TotalAmount)
-	if err := q.addTLVField(&buffer, 4, []byte(totalStr)); err != nil {
-		return nil, err
-	}
-
-	// Tag 5: VAT total
-	vatStr := fmt.Sprintf("%.2f", data.VATAmount)
-	if err := q.addTLVField(&buffer, 5, []byte(vatStr)); err != nil {
-		return nil, err
-	}
-
-	// Tag 6: Cryptographic stamp (hash)
-	if err := q.addTLVField(&buffer, 6, data.Hash); err != nil {
-		return nil, err
-	}
-
-	return buffer.Bytes(), nil
-}
-
 // addTLVField adds a single TLV field to the buffer
 func (q *ZATCAQRService) addTLVField(buffer *bytes.Buffer, tag byte, value []byte) error {
 	// Validate length (must fit in one byte for tags 1-5)
-	if tag <= 5 && len(value) > 255 {
+	if len(value) > 255 {
 		return fmt.Errorf("value too long for tag %d: %d bytes (max 255)", tag, len(value))
-	}
-
-	// Tag 6 (hash) has fixed length of 32 bytes
-	if tag == 6 && len(value) != 32 {
-		return fmt.Errorf("hash must be exactly 32 bytes, got %d", len(value))
 	}
 
 	// Write tag (1 byte)
@@ -210,23 +118,6 @@ func (q *ZATCAQRService) addTLVField(buffer *bytes.Buffer, tag byte, value []byt
 	buffer.Write(value)
 
 	return nil
-}
-
-// generateCryptographicStamp generates a cryptographic stamp (simplified implementation)
-// In production, this should use proper digital signatures with ZATCA-approved certificates
-func (q *ZATCAQRService) generateCryptographicStamp(data ZATCAQRData) []byte {
-	// Create a string representation of the invoice data
-	dataString := fmt.Sprintf("%s|%s|%s|%.2f|%.2f",
-		data.SellerName,
-		data.VATNumber,
-		data.Timestamp.Format("2006-01-02T15:04:05Z"),
-		data.TotalAmount,
-		data.VATAmount,
-	)
-
-	// Generate SHA256 hash
-	hash := sha256.Sum256([]byte(dataString))
-	return hash[:]
 }
 
 // ValidateZATCAQRCode validates a ZATCA QR code format
@@ -278,9 +169,14 @@ func (q *ZATCAQRService) parseTLV(tlvBytes []byte) (*ZATCAQRData, error) {
 		case 2:
 			data.VATNumber = string(value)
 		case 3:
-			timestamp, err := time.Parse("2006-01-02T15:04:05Z", string(value))
+			// Support both ZATCA format and ISO format for parsing
+			timestamp, err := time.Parse("2006-01-02 15:04:05", string(value))
 			if err != nil {
-				return nil, fmt.Errorf("invalid timestamp format: %v", err)
+				// Try ISO format as fallback
+				timestamp, err = time.Parse("2006-01-02T15:04:05Z", string(value))
+				if err != nil {
+					return nil, fmt.Errorf("invalid timestamp format: %v", err)
+				}
 			}
 			data.Timestamp = timestamp
 		case 4:
@@ -291,12 +187,6 @@ func (q *ZATCAQRService) parseTLV(tlvBytes []byte) (*ZATCAQRData, error) {
 			if _, err := fmt.Sscanf(string(value), "%f", &data.VATAmount); err != nil {
 				return nil, fmt.Errorf("invalid VAT amount format: %v", err)
 			}
-		case 6:
-			if length != 32 {
-				return nil, fmt.Errorf("hash must be 32 bytes, got %d", length)
-			}
-			data.Hash = make([]byte, 32)
-			copy(data.Hash, value)
 		default:
 			return nil, fmt.Errorf("unknown tag: %d", tag)
 		}
@@ -314,9 +204,6 @@ func (q *ZATCAQRService) parseTLV(tlvBytes []byte) (*ZATCAQRData, error) {
 	}
 	if data.TotalAmount == 0 {
 		return nil, fmt.Errorf("missing total amount (tag 4)")
-	}
-	if len(data.Hash) == 0 {
-		return nil, fmt.Errorf("missing cryptographic stamp (tag 6)")
 	}
 
 	return data, nil
@@ -341,10 +228,9 @@ func (q *ZATCAQRService) GetQRCodeInfo(qrCodeBase64 string) (map[string]interfac
 	return map[string]interface{}{
 		"seller_name":  data.SellerName,
 		"vat_number":   data.VATNumber,
-		"timestamp":    data.Timestamp.Format("2006-01-02T15:04:05Z"),
+		"timestamp":    data.Timestamp.Format("2006-01-02 15:04:05"),
 		"total_amount": data.TotalAmount,
 		"vat_amount":   data.VATAmount,
-		"hash_present": len(data.Hash) == 32,
-		"compliance":   "ZATCA E-Invoicing Regulation",
+		"compliance":   "ZATCA E-Invoicing Regulation (5 mandatory fields)",
 	}, nil
 }

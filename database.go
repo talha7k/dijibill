@@ -686,11 +686,7 @@ func (d *Database) UpdateCompany(company *Company) error {
 	return err
 }
 
-func (d *Database) UpdateInvoiceQRCode(invoiceID int, qrCode string) error {
-	query := `UPDATE invoices SET qr_code = ? WHERE id = ?`
-	_, err := d.db.Exec(query, qrCode, invoiceID)
-	return err
-}
+
 
 func (d *Database) generateInvoiceNumber() string {
 	var count int

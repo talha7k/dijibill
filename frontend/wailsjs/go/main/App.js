@@ -170,18 +170,6 @@ export function PrintInvoiceHTML(arg1) {
   return window['go']['main']['App']['PrintInvoiceHTML'](arg1);
 }
 
-export function RegenerateAllMissingQRCodes() {
-  return window['go']['main']['App']['RegenerateAllMissingQRCodes']();
-}
-
-export function RegenerateAllQRCodes() {
-  return window['go']['main']['App']['RegenerateAllQRCodes']();
-}
-
-export function RegenerateInvoiceQRCode(arg1) {
-  return window['go']['main']['App']['RegenerateInvoiceQRCode'](arg1);
-}
-
 export function SaveInvoiceHTML(arg1) {
   return window['go']['main']['App']['SaveInvoiceHTML'](arg1);
 }
