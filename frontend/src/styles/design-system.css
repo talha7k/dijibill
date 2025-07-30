@@ -395,7 +395,7 @@
   }
 
   .table-standard thead {
-    @apply bg-gray-50 border-b border-gray-200;
+    @apply  border-b border-gray-200;
   }
 
   .table-standard th {
@@ -407,7 +407,7 @@
   }
 
   .table-standard tbody tr:hover {
-    @apply bg-gray-50;
+    @apply ;
   }
 }
 

@@ -4,6 +4,7 @@
   import { createEventDispatcher } from 'svelte'
   import DataTable from './DataTable.svelte'
   import FormField from './FormField.svelte'
+  import ConfirmationModal from './ConfirmationModal.svelte'
 
   const dispatch = createEventDispatcher()
 
@@ -14,6 +15,11 @@
   let showUnitForm = false
   let editingUnit = null
   let searchTerm = ''
+  
+  // Confirmation modal state
+  let showDeleteConfirm = false
+  let unitToDelete = null
+  let loading = false
 
   // DataTable configuration
   const columns = [
@@ -110,11 +116,38 @@
         editUnit(item)
         break
       case 'delete':
-        deleteUnit(item.id)
+        showDeleteConfirmation(item)
         break
       case 'setDefault':
         setDefaultUnit(item.id)
         break
+    }
+  }
+
+  function showDeleteConfirmation(unit) {
+    unitToDelete = unit;
+    showDeleteConfirm = true;
+  }
+
+  function cancelDelete() {
+    showDeleteConfirm = false;
+    unitToDelete = null;
+  }
+
+  async function confirmDelete() {
+    if (!unitToDelete) return;
+    
+    try {
+      loading = true;
+      await DeleteUnitOfMeasurement(unitToDelete.id);
+      dispatch('reload');
+      showDeleteConfirm = false;
+      unitToDelete = null;
+    } catch (error) {
+      console.error('Error deleting unit:', error);
+      dispatch('error', { message: 'Error deleting unit: ' + error.message });
+    } finally {
+      loading = false;
     }
   }
 
@@ -212,7 +245,7 @@
 <div class="space-y-6">
   <!-- Unit Form -->
   {#if showUnitForm}
-    <div class="bg-gray-50 p-6 rounded-lg border">
+    <div class=" p-6 rounded-lg border">
       <h4 class="text-lg font-medium text-gray-100 mb-6">
         {editingUnit ? 'Edit Unit' : 'Add New Unit'}
       </h4>
@@ -263,7 +296,7 @@
       <div class="flex justify-end space-x-3 mt-6">
         <button
           on:click={resetUnitForm}
-          class="px-4 py-2 border border-gray-300 text-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          class="px-4 py-2 border border-gray-300 text-gray-300 rounded-md hover: focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           Cancel
         </button>
@@ -293,4 +326,16 @@
      on:search={handleSearch}
      on:row-action={handleRowAction}
    />
+
+   <!-- Delete Confirmation Modal -->
+    <ConfirmationModal
+      show={showDeleteConfirm}
+      title="Delete Unit"
+      message={unitToDelete ? `Are you sure you want to delete "${unitToDelete.label}"? This action cannot be undone.` : ''}
+      confirmText="Delete"
+      cancelText="Cancel"
+      loading={loading}
+      on:confirm={confirmDelete}
+      on:cancel={cancelDelete}
+    />
 </div>

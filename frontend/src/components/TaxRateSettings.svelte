@@ -4,6 +4,7 @@
   import { createEventDispatcher } from 'svelte'
   import DataTable from './DataTable.svelte'
   import FormField from './FormField.svelte'
+  import ConfirmationModal from './ConfirmationModal.svelte'
 
   const dispatch = createEventDispatcher()
 
@@ -20,6 +21,11 @@
   let editingTaxRate = null
   /** @type {string} */
   let searchTerm = ''
+  
+  // Confirmation modal state
+  let showDeleteConfirm = false
+  let taxRateToDelete = null
+  let loading = false
 
   // DataTable configuration
   /** @type {Array<{label: string, key?: string, class?: string, render?: Function, actions?: Array<{key: string, text: string, icon?: string, class?: string, title?: string}>}>} */
@@ -149,6 +155,33 @@
     }
   }
 
+  function showDeleteConfirmation(taxRate) {
+    taxRateToDelete = taxRate;
+    showDeleteConfirm = true;
+  }
+
+  function cancelDelete() {
+    showDeleteConfirm = false;
+    taxRateToDelete = null;
+  }
+
+  async function confirmDelete() {
+    if (!taxRateToDelete) return;
+    
+    try {
+      loading = true;
+      await DeleteTaxRate(taxRateToDelete.id);
+      dispatch('reload');
+      showDeleteConfirm = false;
+      taxRateToDelete = null;
+    } catch (error) {
+      console.error('Error deleting tax rate:', error);
+      dispatch('error', { message: 'Error deleting tax rate: ' + error.message });
+    } finally {
+      loading = false;
+    }
+  }
+
   async function deleteTaxRate(id) {
     if (confirm('Are you sure you want to delete this tax rate?')) {
       try {
@@ -214,7 +247,7 @@
         editTaxRate(item)
         break
       case 'delete':
-        deleteTaxRate(item.id)
+        showDeleteConfirmation(item)
         break
       case 'setDefault':
         if (!item.is_default) {
@@ -228,7 +261,7 @@
 <div class="space-y-6">
   <!-- Tax Rate Form -->
   {#if showTaxRateForm}
-    <div class="bg-gray-50 p-6 rounded-lg border">
+    <div class=" p-6 rounded-lg border">
       <h4 class="text-lg font-medium text-gray-100 mb-6">
         {editingTaxRate ? 'Edit Tax Rate' : 'Add New Tax Rate'}
       </h4>
@@ -281,7 +314,7 @@
       <div class="flex justify-end space-x-3 mt-6">
         <button
           on:click={resetTaxRateForm}
-          class="px-4 py-2 border border-gray-300 text-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          class="px-4 py-2 border border-gray-300 text-gray-300 rounded-md hover: focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           Cancel
         </button>
@@ -311,3 +344,15 @@
     on:row-action={handleRowAction}
   />
 </div>
+
+<!-- Confirmation Modal -->
+<ConfirmationModal
+  show={showDeleteConfirm}
+  title="Delete Tax Rate"
+  message={taxRateToDelete ? `Are you sure you want to delete "${taxRateToDelete.name}"? This action cannot be undone.` : ''}
+  confirmText="Delete"
+  cancelText="Cancel"
+  loading={loading}
+  on:confirm={confirmDelete}
+  on:cancel={cancelDelete}
+/>

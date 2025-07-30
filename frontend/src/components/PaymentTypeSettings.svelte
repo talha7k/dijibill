@@ -218,7 +218,7 @@
 <div class="space-y-6">
   <!-- Payment Type Form -->
   {#if showPaymentTypeForm}
-    <div class="bg-gray-50 p-6 rounded-lg border">
+    <div class=" p-6 rounded-lg border">
       <h4 class="text-lg font-medium text-gray-100 mb-6">
         {editingPaymentType ? 'Edit Payment Type' : 'Add New Payment Type'}
       </h4>
@@ -275,7 +275,7 @@
       <div class="flex justify-end space-x-3 mt-6">
         <button
           on:click={resetPaymentTypeForm}
-          class="px-4 py-2 border border-gray-300 text-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          class="px-4 py-2 border border-gray-300 text-gray-300 rounded-md hover: focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           Cancel
         </button>
