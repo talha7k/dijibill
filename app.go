@@ -226,6 +226,17 @@ func (a *App) DeleteUnitOfMeasurement(id int) error {
 	return a.db.DeleteUnitOfMeasurement(id)
 }
 
+// Default Product Settings Management Methods
+
+func (a *App) GetDefaultProductSettings() (*DefaultProductSettings, error) {
+	return a.db.GetDefaultProductSettings()
+}
+
+func (a *App) UpdateDefaultProductSettings(settings DefaultProductSettings) error {
+	settings.UpdatedAt = time.Now()
+	return a.db.UpdateDefaultProductSettings(&settings)
+}
+
 // PDF Generation Methods
 
 func (a *App) GenerateInvoicePDF(invoiceID int) (string, error) {

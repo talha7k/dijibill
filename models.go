@@ -158,3 +158,20 @@ type UnitOfMeasurement struct {
 	CreatedAt  time.Time `json:"created_at"`
 	UpdatedAt  time.Time `json:"updated_at"`
 }
+
+// DefaultProductSettings represents default settings for creating new products
+type DefaultProductSettings struct {
+	ID                    int     `json:"id"`
+	DefaultStock          int     `json:"default_stock"`           // Default stock quantity
+	DefaultTaxRateID      int     `json:"default_tax_rate_id"`     // Default tax rate ID
+	DefaultUnitID         int     `json:"default_unit_id"`         // Default unit of measurement ID
+	DefaultPaymentTypeID  int     `json:"default_payment_type_id"` // Default payment type ID
+	DefaultSalesCategoryID int    `json:"default_sales_category_id"` // Default sales category ID
+	DefaultProductType    string  `json:"default_product_type"`    // "product" or "service"
+	DefaultProductStatus  bool    `json:"default_product_status"`  // true = active, false = inactive
+	DefaultMarkup         float64 `json:"default_markup"`          // Default markup percentage
+	DefaultPriceIncludesTax bool  `json:"default_price_includes_tax"` // Whether default price includes tax
+	DefaultPriceChangeAllowed bool `json:"default_price_change_allowed"` // Whether price changes are allowed
+	CreatedAt             time.Time `json:"created_at"`
+	UpdatedAt             time.Time `json:"updated_at"`
+}

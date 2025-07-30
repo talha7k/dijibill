@@ -96,6 +96,62 @@ export namespace main {
 		    return a;
 		}
 	}
+	export class DefaultProductSettings {
+	    id: number;
+	    default_stock: number;
+	    default_tax_rate_id: number;
+	    default_unit_id: number;
+	    default_payment_type_id: number;
+	    default_sales_category_id: number;
+	    default_product_type: string;
+	    default_product_status: boolean;
+	    default_markup: number;
+	    default_price_includes_tax: boolean;
+	    default_price_change_allowed: boolean;
+	    // Go type: time
+	    created_at: any;
+	    // Go type: time
+	    updated_at: any;
+	
+	    static createFrom(source: any = {}) {
+	        return new DefaultProductSettings(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.default_stock = source["default_stock"];
+	        this.default_tax_rate_id = source["default_tax_rate_id"];
+	        this.default_unit_id = source["default_unit_id"];
+	        this.default_payment_type_id = source["default_payment_type_id"];
+	        this.default_sales_category_id = source["default_sales_category_id"];
+	        this.default_product_type = source["default_product_type"];
+	        this.default_product_status = source["default_product_status"];
+	        this.default_markup = source["default_markup"];
+	        this.default_price_includes_tax = source["default_price_includes_tax"];
+	        this.default_price_change_allowed = source["default_price_change_allowed"];
+	        this.created_at = this.convertValues(source["created_at"], null);
+	        this.updated_at = this.convertValues(source["updated_at"], null);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	export class ProductCategory {
 	    id: number;
 	    name: string;

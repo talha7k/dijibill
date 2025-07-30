@@ -74,6 +74,10 @@ export function GetCustomers() {
   return window['go']['main']['App']['GetCustomers']();
 }
 
+export function GetDefaultProductSettings() {
+  return window['go']['main']['App']['GetDefaultProductSettings']();
+}
+
 export function GetInvoiceByID(arg1) {
   return window['go']['main']['App']['GetInvoiceByID'](arg1);
 }
@@ -140,6 +144,10 @@ export function UpdateCompany(arg1) {
 
 export function UpdateCustomer(arg1) {
   return window['go']['main']['App']['UpdateCustomer'](arg1);
+}
+
+export function UpdateDefaultProductSettings(arg1) {
+  return window['go']['main']['App']['UpdateDefaultProductSettings'](arg1);
 }
 
 export function UpdatePaymentType(arg1) {

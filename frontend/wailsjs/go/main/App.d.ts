@@ -38,6 +38,8 @@ export function GetCustomerByID(arg1:number):Promise<main.Customer>;
 
 export function GetCustomers():Promise<Array<main.Customer>>;
 
+export function GetDefaultProductSettings():Promise<main.DefaultProductSettings>;
+
 export function GetInvoiceByID(arg1:number):Promise<main.Invoice>;
 
 export function GetInvoices():Promise<Array<main.Invoice>>;
@@ -71,6 +73,8 @@ export function ShowSaveDialog(arg1:string):Promise<string>;
 export function UpdateCompany(arg1:main.Company):Promise<void>;
 
 export function UpdateCustomer(arg1:main.Customer):Promise<void>;
+
+export function UpdateDefaultProductSettings(arg1:main.DefaultProductSettings):Promise<void>;
 
 export function UpdatePaymentType(arg1:main.PaymentType):Promise<void>;
 
