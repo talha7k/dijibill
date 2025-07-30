@@ -87,15 +87,17 @@
       
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div class="form-control">
-          <label class="label-glass">Price Options</label>
-          <div class="space-y-3">
+          <label id="price-options-label" class="label-glass">Price Options</label>
+          <div class="space-y-3" role="group" aria-labelledby="price-options-label">
             <FormField
+              label="Price includes tax"
               type="checkbox"
               bind:checked={productForm.price_includes_tax}
               placeholder="Price includes tax"
             />
             
             <FormField
+              label="Price change allowed"
               type="checkbox"
               bind:checked={productForm.price_change_allowed}
               placeholder="Price change allowed"
@@ -105,8 +107,8 @@
 
         <!-- Price Calculation Info -->
         <div class="form-control">
-          <label class="label-glass">Price Calculation</label>
-          <div class="bg-white/5 p-4 rounded-lg border border-white/10">
+          <label id="price-calculation-label" class="label-glass">Price Calculation</label>
+          <div class="bg-white/5 p-4 rounded-lg border border-white/10" role="region" aria-labelledby="price-calculation-label">
             <div class="space-y-2 text-sm text-white/70">
               <div class="flex justify-between">
                 <span>Cost:</span>

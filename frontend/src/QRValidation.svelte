@@ -1,5 +1,6 @@
 <script>
   import { ValidateZATCAQRCode, GetQRCodeInfo, GenerateSampleQRCode } from '../wailsjs/go/main/App.js'
+  import FormField from './components/FormField.svelte'
 
   let qrCodeInput = ''
   let validationResult = null
@@ -76,19 +77,16 @@
         QR Code Input
       </h2>
       
-      <div class="form-control w-full">
-        <label class="label" for="qr-input">
-          <span class="label-text font-semibold">Base64 Encoded QR Code</span>
-          <span class="label-text-alt">Paste your ZATCA QR code here</span>
-        </label>
-        <textarea
-          id="qr-input"
-          class="textarea textarea-bordered h-32 font-mono text-sm"
-          placeholder="Paste your Base64 encoded ZATCA QR code here..."
-          bind:value={qrCodeInput}
-          disabled={isLoading}
-        ></textarea>
-      </div>
+      <FormField
+        type="textarea"
+        label="Base64 Encoded QR Code"
+        labelArabic="كود QR مُرمز بـ Base64"
+        placeholder="Paste your Base64 encoded ZATCA QR code here..."
+        bind:value={qrCodeInput}
+        disabled={isLoading}
+        rows={4}
+        id="qr-input"
+      />
       
       <div class="card-actions justify-end mt-4 gap-2">
         <button 

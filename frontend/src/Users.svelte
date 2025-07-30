@@ -1,7 +1,10 @@
 <script>
+  import FormField from './components/FormField.svelte'
+  
   // Users functionality will be implemented here
   let users = []
   let isLoading = false
+  let searchTerm = ''
 </script>
 
 <div class="p-6">
@@ -30,7 +33,12 @@
           </button>
         </div>
         <div class="form-control">
-          <input type="text" placeholder="Search users..." class="input input-bordered bg-white/10 border-white/20 text-white placeholder-white/60" />
+          <FormField
+            type="text"
+            placeholder="Search users..."
+            bind:value={searchTerm}
+            label=""
+          />
         </div>
       </div>
 

@@ -1,5 +1,6 @@
 <script>
   import { createEventDispatcher } from 'svelte'
+  import FormField from './FormField.svelte'
   
   /** @type {Array<any>} */
   export let data = []
@@ -83,13 +84,13 @@
       {#if showSearch}
         <div class="search-container">
           <i class="fas fa-search search-icon"></i>
-          <input
+          <FormField
             type="text"
             placeholder={searchPlaceholder}
-            class="search-input"
-            value={searchTerm}
-            on:input={handleSearch}
+            bind:value={searchTerm}
             disabled={loading}
+            label=""
+            on:input={handleSearch}
           />
         </div>
       {/if}

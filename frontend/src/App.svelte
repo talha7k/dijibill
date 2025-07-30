@@ -10,11 +10,13 @@
   import Users from './Users.svelte'
   import GeneralSettings from './GeneralSettings.svelte'
   import Administration from './Administration.svelte'
+  import FormField from './components/FormField.svelte'
   import {Greet} from '../wailsjs/go/main/App.js'
 
   let currentView = 'dashboard' // Default to dashboard
   let resultText = "Welcome to DijiBill - ZATCA Compliant Invoicing"
   let name = ''
+  let searchTerm = ''
 
   function greet() {
     Greet(name).then(result => resultText = result)
@@ -205,7 +207,12 @@
         <div class="flex items-center gap-4">
           <!-- Search -->
           <div class="form-control">
-            <input type="text" placeholder="Search..." class="input input-sm bg-white/10 border-white/20 text-white placeholder-white/60" />
+            <FormField
+              type="text"
+              placeholder="Search..."
+              bind:value={searchTerm}
+              label=""
+            />
           </div>
           
           <!-- User Menu -->
