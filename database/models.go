@@ -55,6 +55,12 @@ type ProductCategory struct {
 	UpdatedAt         time.Time `json:"updated_at"`
 }
 
+// ProductCategoryWithCount represents a product category with product count
+type ProductCategoryWithCount struct {
+	ProductCategory
+	ProductCount int `json:"product_count"`
+}
+
 // Product represents a product that can be sold
 type Product struct {
 	ID                     int       `json:"id"`

@@ -1,43 +1,5 @@
 package database
 
-// ProductCategory operations
-func (d *Database) CreateProductCategory(category *ProductCategory) error {
-	query := `INSERT INTO product_categories (name, name_arabic, description, description_arabic) VALUES (?, ?, ?, ?)`
-
-	result, err := d.db.Exec(query, category.Name, category.NameArabic, category.Description, category.DescriptionArabic)
-	if err != nil {
-		return err
-	}
-
-	id, err := result.LastInsertId()
-	if err != nil {
-		return err
-	}
-	category.ID = int(id)
-	return nil
-}
-
-func (d *Database) GetProductCategories() ([]ProductCategory, error) {
-	query := `SELECT id, name, name_arabic, description, description_arabic, created_at, updated_at FROM product_categories ORDER BY name`
-
-	rows, err := d.db.Query(query)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var categories []ProductCategory
-	for rows.Next() {
-		var c ProductCategory
-		err := rows.Scan(&c.ID, &c.Name, &c.NameArabic, &c.Description, &c.DescriptionArabic, &c.CreatedAt, &c.UpdatedAt)
-		if err != nil {
-			return nil, err
-		}
-		categories = append(categories, c)
-	}
-	return categories, nil
-}
-
 // Product operations
 func (d *Database) CreateProduct(product *Product) error {
 	query := `

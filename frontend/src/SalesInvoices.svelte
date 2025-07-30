@@ -164,13 +164,14 @@
     { key: 'issue_date', label: 'Issue Date', render: (item) => formatDate(item.issue_date) },
     { key: 'due_date', label: 'Due Date', render: (item) => formatDate(item.due_date) },
     { key: 'total_amount', label: 'Amount', render: (item) => `<span class="font-medium">${formatCurrency(item.total_amount)}</span>` },
+    { key: 'status', label: 'Status' },
     { 
-      key: 'status', 
-      label: 'Status',
+      key: 'actions', 
+      label: 'Actions',
       actions: [
-        { key: 'view', icon: 'fa-eye', class: 'btn-info', title: 'View HTML' },
-        { key: 'edit', icon: 'fa-edit', class: 'btn-warning', title: 'Edit Invoice' },
-        { key: 'save', icon: 'fa-download', class: 'btn-success', title: 'Save/Print' }
+        { key: 'view', text: 'View', icon: 'fa-eye', class: 'btn-info', title: 'View HTML' },
+        { key: 'edit', text: 'Edit', icon: 'fa-edit', class: 'btn-warning', title: 'Edit Invoice' },
+        { key: 'save', text: 'Save', icon: 'fa-download', class: 'btn-success', title: 'Save/Print' }
       ]
     }
   ]
