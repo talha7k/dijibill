@@ -84,6 +84,8 @@ export function Greet(arg1:string):Promise<string>;
 
 export function OpenPDFInViewer(arg1:string):Promise<void>;
 
+export function PopulateSampleData():Promise<void>;
+
 export function PrintInvoiceHTML(arg1:number):Promise<void>;
 
 export function SaveInvoiceHTML(arg1:number):Promise<void>;
@@ -99,6 +101,8 @@ export function ShowError(arg1:string,arg2:string):Promise<void>;
 export function ShowMessage(arg1:string,arg2:string):Promise<void>;
 
 export function ShowSaveDialog(arg1:string):Promise<string>;
+
+export function TestCustomerNAHandling():Promise<void>;
 
 export function UpdateCompany(arg1:database.Company):Promise<void>;
 

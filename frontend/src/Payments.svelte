@@ -24,35 +24,50 @@
 	};
 
 	onMount(async () => {
-		await loadPayments();
-		await loadPaymentTypes();
-		await loadInvoices();
+		loading = true;
+		try {
+			await Promise.all([
+				loadPayments(),
+				loadPaymentTypes(),
+				loadInvoices()
+			]);
+		} catch (error) {
+			console.error('Error loading payment data:', error);
+		} finally {
+			loading = false;
+		}
 	});
 
 	async function loadPayments() {
 		try {
-			loading = true;
+			console.log('Loading payments...');
 			payments = await GetPayments();
+			console.log('Payments loaded:', payments.length);
 		} catch (error) {
 			console.error('Error loading payments:', error);
-		} finally {
-			loading = false;
+			payments = []; // Ensure payments is always an array
 		}
 	}
 
 	async function loadPaymentTypes() {
 		try {
+			console.log('Loading payment types...');
 			paymentTypes = await GetPaymentTypes();
+			console.log('Payment types loaded:', paymentTypes.length);
 		} catch (error) {
 			console.error('Error loading payment types:', error);
+			paymentTypes = []; // Ensure paymentTypes is always an array
 		}
 	}
 
 	async function loadInvoices() {
 		try {
+			console.log('Loading invoices...');
 			invoices = await GetInvoices();
+			console.log('Invoices loaded:', invoices.length);
 		} catch (error) {
 			console.error('Error loading invoices:', error);
+			invoices = []; // Ensure invoices is always an array
 		}
 	}
 
@@ -152,11 +167,13 @@
 	}
 
 	function getInvoiceNumber(invoiceId) {
+		if (!invoices || invoices.length === 0) return `Invoice #${invoiceId}`;
 		const invoice = invoices.find(inv => inv.id === invoiceId);
 		return invoice ? invoice.invoice_number : `Invoice #${invoiceId}`;
 	}
 
 	function getPaymentTypeName(paymentTypeId) {
+		if (!paymentTypes || paymentTypes.length === 0) return 'Unknown';
 		const paymentType = paymentTypes.find(pt => pt.id === paymentTypeId);
 		return paymentType ? paymentType.name : 'Unknown';
 	}
@@ -171,20 +188,37 @@
 		}
 	}
 
-	$: filteredPayments = payments.filter(payment => {
-		if (!searchTerm) return true;
-		const searchLower = searchTerm.toLowerCase();
-		const invoiceNumber = getInvoiceNumber(payment.invoice_id).toLowerCase();
-		const paymentTypeName = getPaymentTypeName(payment.payment_type_id).toLowerCase();
-		const reference = (payment.reference || '').toLowerCase();
-		const notes = (payment.notes || '').toLowerCase();
+	$: filteredPayments = (() => {
+		console.log('Filtering payments:', { 
+			paymentsLength: payments.length, 
+			invoicesLength: invoices.length, 
+			paymentTypesLength: paymentTypes.length,
+			searchTerm,
+			loading 
+		});
 		
-		return invoiceNumber.includes(searchLower) ||
-			   paymentTypeName.includes(searchLower) ||
-			   reference.includes(searchLower) ||
-			   notes.includes(searchLower) ||
-			   payment.status.toLowerCase().includes(searchLower);
-	});
+		if (!payments || payments.length === 0) {
+			return [];
+		}
+		
+		if (!searchTerm) {
+			return payments;
+		}
+		
+		return payments.filter(payment => {
+			const searchLower = searchTerm.toLowerCase();
+			const invoiceNumber = getInvoiceNumber(payment.invoice_id).toLowerCase();
+			const paymentTypeName = getPaymentTypeName(payment.payment_type_id).toLowerCase();
+			const reference = (payment.reference || '').toLowerCase();
+			const notes = (payment.notes || '').toLowerCase();
+			
+			return invoiceNumber.includes(searchLower) ||
+				   paymentTypeName.includes(searchLower) ||
+				   reference.includes(searchLower) ||
+				   notes.includes(searchLower) ||
+				   payment.status.toLowerCase().includes(searchLower);
+		});
+	})();
 </script>
 
 <div class="p-6">

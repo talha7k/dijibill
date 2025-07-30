@@ -166,6 +166,10 @@ export function OpenPDFInViewer(arg1) {
   return window['go']['main']['App']['OpenPDFInViewer'](arg1);
 }
 
+export function PopulateSampleData() {
+  return window['go']['main']['App']['PopulateSampleData']();
+}
+
 export function PrintInvoiceHTML(arg1) {
   return window['go']['main']['App']['PrintInvoiceHTML'](arg1);
 }
@@ -196,6 +200,10 @@ export function ShowMessage(arg1, arg2) {
 
 export function ShowSaveDialog(arg1) {
   return window['go']['main']['App']['ShowSaveDialog'](arg1);
+}
+
+export function TestCustomerNAHandling() {
+  return window['go']['main']['App']['TestCustomerNAHandling']();
 }
 
 export function UpdateCompany(arg1) {

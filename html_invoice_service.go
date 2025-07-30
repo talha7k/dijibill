@@ -49,6 +49,65 @@ type InvoiceItemData struct {
 	Product *database.Product
 }
 
+// sanitizeCustomerData replaces empty string fields with "n/a"
+func (h *HTMLInvoiceService) sanitizeCustomerData(customer *database.Customer) *database.Customer {
+	if customer == nil {
+		return &database.Customer{
+			Name:          "n/a",
+			NameArabic:    "غير متوفر",
+			Address:       "n/a",
+			AddressArabic: "غير متوفر",
+			City:          "n/a",
+			CityArabic:    "غير متوفر",
+			Country:       "n/a",
+			CountryArabic: "غير متوفر",
+			VATNumber:     "n/a",
+			Email:         "n/a",
+			Phone:         "n/a",
+		}
+	}
+
+	// Create a copy to avoid modifying the original
+	sanitized := *customer
+
+	// Replace empty strings with "n/a"
+	if sanitized.Name == "" {
+		sanitized.Name = "n/a"
+	}
+	if sanitized.NameArabic == "" {
+		sanitized.NameArabic = "غير متوفر"
+	}
+	if sanitized.Address == "" {
+		sanitized.Address = "n/a"
+	}
+	if sanitized.AddressArabic == "" {
+		sanitized.AddressArabic = "غير متوفر"
+	}
+	if sanitized.City == "" {
+		sanitized.City = "n/a"
+	}
+	if sanitized.CityArabic == "" {
+		sanitized.CityArabic = "غير متوفر"
+	}
+	if sanitized.Country == "" {
+		sanitized.Country = "n/a"
+	}
+	if sanitized.CountryArabic == "" {
+		sanitized.CountryArabic = "غير متوفر"
+	}
+	if sanitized.VATNumber == "" {
+		sanitized.VATNumber = "n/a"
+	}
+	if sanitized.Email == "" {
+		sanitized.Email = "n/a"
+	}
+	if sanitized.Phone == "" {
+		sanitized.Phone = "n/a"
+	}
+
+	return &sanitized
+}
+
 // GenerateInvoiceHTML generates HTML content for an invoice with on-demand QR code generation
 func (h *HTMLInvoiceService) GenerateInvoiceHTML(invoiceID int) (string, error) {
 	return h.GenerateInvoiceHTMLWithLanguage(invoiceID, "english")
@@ -88,21 +147,38 @@ func (h *HTMLInvoiceService) GenerateInvoiceHTMLWithLanguage(invoiceID int, lang
 		if err != nil {
 			// Log the error but don't fail - create a placeholder customer
 			customer = &database.Customer{
-				Name:    "Walk-in Customer",
-				Address: "N/A",
-				City:    "N/A",
-				Country: "N/A",
+				Name:          "Walk-in Customer",
+				NameArabic:    "عميل عادي",
+				Address:       "",
+				AddressArabic: "",
+				City:          "",
+				CityArabic:    "",
+				Country:       "",
+				CountryArabic: "",
+				VATNumber:     "",
+				Email:         "",
+				Phone:         "",
 			}
 		}
 	} else {
 		// No customer ID provided - create a placeholder
 		customer = &database.Customer{
-			Name:    "Walk-in Customer",
-			Address: "N/A",
-			City:    "N/A",
-			Country: "N/A",
+			Name:          "Walk-in Customer",
+			NameArabic:    "عميل عادي",
+			Address:       "",
+			AddressArabic: "",
+			City:          "",
+			CityArabic:    "",
+			Country:       "",
+			CountryArabic: "",
+			VATNumber:     "",
+			Email:         "",
+			Phone:         "",
 		}
 	}
+
+	// Sanitize customer data to replace empty strings with "n/a"
+	customer = h.sanitizeCustomerData(customer)
 	invoice.Customer = customer
 
 	// Generate QR code on-demand

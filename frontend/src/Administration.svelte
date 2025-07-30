@@ -1,4 +1,6 @@
 <script>
+  import { PopulateSampleData } from '../wailsjs/go/main/App.js'
+  
   // Administration functionality will be implemented here
   let systemInfo = {
     version: '1.0.0',
@@ -7,6 +9,22 @@
     zatcaStatus: 'Active'
   }
   let isLoading = false
+  let sampleDataLoading = false
+  let sampleDataMessage = ''
+
+  async function populateSampleData() {
+    sampleDataLoading = true
+    sampleDataMessage = ''
+    
+    try {
+      await PopulateSampleData()
+      sampleDataMessage = 'Sample data populated successfully! Created 5 customers, 5 products, 5 payment types, and 5 invoices.'
+    } catch (error) {
+      sampleDataMessage = `Error: ${error}`
+    } finally {
+      sampleDataLoading = false
+    }
+  }
 </script>
 
 <div class="p-6">
@@ -55,6 +73,18 @@
             <h3 class="card-title text-white text-lg mb-4">System Actions</h3>
             
             <div class="space-y-3">
+              <button 
+                class="btn btn-outline btn-success w-full" 
+                class:loading={sampleDataLoading}
+                disabled={sampleDataLoading}
+                on:click={populateSampleData}
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+                {sampleDataLoading ? 'Populating...' : 'Populate Sample Data (5 each)'}
+              </button>
+              
               <button class="btn btn-outline btn-info w-full">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4-4m0 0L8 8m4-4v12"></path>
@@ -83,6 +113,22 @@
                 System Maintenance
               </button>
             </div>
+
+            <!-- Sample Data Message -->
+            {#if sampleDataMessage}
+              <div class="alert mt-4" class:alert-success={!sampleDataMessage.includes('Error')} class:alert-error={sampleDataMessage.includes('Error')}>
+                <div>
+                  <svg class="w-6 h-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
+                    {#if sampleDataMessage.includes('Error')}
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    {:else}
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    {/if}
+                  </svg>
+                  <span>{sampleDataMessage}</span>
+                </div>
+              </div>
+            {/if}
           </div>
         </div>
       </div>
