@@ -523,6 +523,59 @@ func (a *App) RegenerateAllMissingQRCodes() error {
 	return nil
 }
 
+// ClearQRCodeCache clears all stored QR codes from the database to force fresh generation
+func (a *App) ClearQRCodeCache() error {
+	// Clear all QR codes from invoices
+	query := `UPDATE invoices SET qr_code = '' WHERE qr_code IS NOT NULL AND qr_code != ''`
+	_, err := a.db.db.Exec(query)
+	if err != nil {
+		return fmt.Errorf("failed to clear QR code cache: %v", err)
+	}
+
+	log.Printf("Cleared QR code cache - all invoices will generate fresh QR codes")
+	return nil
+}
+
+// RegenerateAllQRCodes regenerates QR codes for ALL invoices to ensure ZATCA compliance
+func (a *App) RegenerateAllQRCodes() error {
+	// Get all invoices
+	invoices, err := a.db.GetInvoices()
+	if err != nil {
+		return fmt.Errorf("failed to get invoices: %v", err)
+	}
+
+	// Get company data
+	company, err := a.db.GetCompany()
+	if err != nil {
+		return fmt.Errorf("failed to get company: %v", err)
+	}
+
+	qrService := NewZATCAQRService()
+	regeneratedCount := 0
+
+	for _, invoice := range invoices {
+		// Generate new ZATCA-compliant QR code (regardless of existing QR code)
+		qrCodeBase64, err := qrService.GenerateZATCAQRCode(&invoice, company)
+		if err != nil {
+			log.Printf("Warning: Could not generate QR code for invoice %d: %v", invoice.ID, err)
+			continue
+		}
+
+		// Update invoice with new QR code
+		err = a.db.UpdateInvoiceQRCode(invoice.ID, qrCodeBase64)
+		if err != nil {
+			log.Printf("Warning: Could not update invoice %d with QR code: %v", invoice.ID, err)
+			continue
+		}
+
+		regeneratedCount++
+		log.Printf("Regenerated QR code for invoice %d (%s)", invoice.ID, invoice.InvoiceNumber)
+	}
+
+	log.Printf("Regenerated QR codes for %d invoices", regeneratedCount)
+	return nil
+}
+
 // Utility Methods
 
 func (a *App) ShowSaveDialog(defaultFilename string) (string, error) {

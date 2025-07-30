@@ -174,6 +174,10 @@ export function RegenerateAllMissingQRCodes() {
   return window['go']['main']['App']['RegenerateAllMissingQRCodes']();
 }
 
+export function RegenerateAllQRCodes() {
+  return window['go']['main']['App']['RegenerateAllQRCodes']();
+}
+
 export function RegenerateInvoiceQRCode(arg1) {
   return window['go']['main']['App']['RegenerateInvoiceQRCode'](arg1);
 }

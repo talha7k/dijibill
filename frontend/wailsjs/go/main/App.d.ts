@@ -88,6 +88,8 @@ export function PrintInvoiceHTML(arg1:number):Promise<void>;
 
 export function RegenerateAllMissingQRCodes():Promise<void>;
 
+export function RegenerateAllQRCodes():Promise<void>;
+
 export function RegenerateInvoiceQRCode(arg1:number):Promise<string>;
 
 export function SaveInvoiceHTML(arg1:number):Promise<void>;
