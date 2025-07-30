@@ -32,24 +32,36 @@
 
   onMount(async () => {
     try {
-      // Load data from backend
-      const [customersData, invoicesData, productsData] = await Promise.all([
-      GetCustomers(),
-      GetInvoices(),
-      GetProducts()
-    ])
+      // Check if Wails runtime is available
+      if (typeof window !== 'undefined' && window['go'] && window['go']['main'] && window['go']['main']['App']) {
+        // Load data from backend
+        const [customersData, invoicesData, productsData] = await Promise.all([
+          GetCustomers(),
+          GetInvoices(),
+          GetProducts()
+        ])
 
-      customers = customersData || []
-      invoices = invoicesData || []
-      
-      // Calculate stats
-      stats.customers = customers.length
-      stats.items = productsData?.length || 0
+        customers = customersData || []
+        invoices = invoicesData || []
+        
+        // Calculate stats
+        stats.customers = customers.length
+        stats.items = productsData?.length || 0
         stats.products = productsData?.length || 0
-      stats.payments = (invoices || []).filter(inv => inv.status === 'paid').length
-
+        stats.payments = (invoices || []).filter(inv => inv.status === 'paid').length
+      } else {
+        console.warn('Wails runtime not available, using mock data')
+        // Use mock data when Wails runtime is not available
+        customers = []
+        invoices = []
+        stats = { items: 0, customers: 0, products: 0, payments: 0 }
+      }
     } catch (error) {
       console.error('Error loading dashboard data:', error)
+      // Fallback to empty data
+      customers = []
+      invoices = []
+      stats = { items: 0, customers: 0, products: 0, payments: 0 }
     } finally {
       isLoading = false
     }

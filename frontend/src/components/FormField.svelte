@@ -6,6 +6,7 @@
   export let placeholder = ''
   export let required = false
   export let disabled = false
+  export let readonly = false
   export let dir = 'ltr'
   export let id = ''
   export let name = ''
@@ -91,6 +92,7 @@
       {placeholder}
       {required}
       {disabled}
+      {readonly}
       {dir}
       {min}
       {max}

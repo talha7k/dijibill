@@ -101,7 +101,7 @@
 
 <div class="min-h-screen bg-gradient-to-br from-primary to-secondary flex" data-theme="dijibill">
   <!-- Sidebar -->
-  <div class="w-64 bg-base-100/10 backdrop-blur-lg border-r border-white/20 flex flex-col">
+  <div class="w-64 flex-shrink-0 bg-base-100/10 backdrop-blur-lg border-r border-white/20 flex flex-col">
     <!-- Logo/Header -->
     <div class="p-4 border-b border-white/20">
       <div class="flex items-center gap-3">
@@ -170,7 +170,7 @@
   </div>
 
   <!-- Main Content Area -->
-  <div class="flex-1 flex flex-col">
+  <div class="flex-1 min-w-0 flex flex-col">
     <!-- Top Header -->
     <header class="bg-base-100/10 backdrop-blur-lg border-b border-white/20 p-4">
       <div class="flex items-center justify-between">

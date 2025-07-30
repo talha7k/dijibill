@@ -82,14 +82,14 @@
   </div>
 {:else}
   <!-- Standard variant (for General Settings page) -->
-  <div class="bg-white border-b border-gray-200">
+  <div class="bg-white/10 backdrop-blur-lg border-b border-white/20">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="relative flex items-center">
         <!-- Left scroll button -->
         {#if showScrollButtons}
           <button
             on:click={scrollLeft}
-            class="flex-shrink-0 p-2 text-gray-300 hover:text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="flex-shrink-0 p-2 text-white/60 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={!canScrollLeft}
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -124,7 +124,7 @@
         {#if showScrollButtons}
           <button
             on:click={scrollRight}
-            class="flex-shrink-0 p-2 text-gray-300 hover:text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="flex-shrink-0 p-2 text-white/60 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={!canScrollRight}
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
