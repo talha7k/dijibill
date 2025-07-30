@@ -194,6 +194,26 @@ func (a *App) GetQRCodeInfo(qrCodeBase64 string) (map[string]interface{}, error)
 	return qrService.GetQRCodeInfo(qrCodeBase64)
 }
 
+func (a *App) GenerateSampleQRCode() (string, error) {
+	qrService := NewZATCAQRService()
+	
+	// Create sample invoice data
+	sampleInvoice := &Invoice{
+		InvoiceNumber: "INV-2024-001",
+		IssueDate:     time.Now(),
+		TotalAmount:   115.0,
+		VATAmount:     15.0,
+	}
+	
+	// Create sample company data
+	sampleCompany := &Company{
+		Name:      "Sample Company Ltd",
+		VATNumber: "300000000000003",
+	}
+	
+	return qrService.GenerateZATCAQRCode(sampleInvoice, sampleCompany)
+}
+
 func (a *App) RegenerateInvoiceQRCode(invoiceID int) (string, error) {
 	// Get invoice and company data
 	invoice, err := a.db.GetInvoiceByID(invoiceID)

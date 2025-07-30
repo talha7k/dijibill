@@ -16,5 +16,8 @@
     "svelte": "^3.49.0",
     "tailwindcss": "^4.1.11",
     "vite": "^3.0.7"
+  },
+  "dependencies": {
+    "@tailwindcss/postcss": "^4.1.11"
   }
 }

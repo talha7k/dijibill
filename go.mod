@@ -2,7 +2,12 @@ module dijinvoice
 
 go 1.23
 
-require github.com/wailsapp/wails/v2 v2.10.2
+require (
+	github.com/jung-kurt/gofpdf v1.16.2
+	github.com/mattn/go-sqlite3 v1.14.29
+	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
+	github.com/wailsapp/wails/v2 v2.10.2
+)
 
 require (
 	github.com/bep/debounce v1.2.1 // indirect
