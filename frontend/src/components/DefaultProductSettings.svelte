@@ -2,6 +2,7 @@
   import { createEventDispatcher, onMount } from 'svelte'
   import { GetDefaultProductSettings, UpdateDefaultProductSettings, GetTaxRates, GetUnitsOfMeasurement } from '../../wailsjs/go/main/App.js'
    import { database } from '../../wailsjs/go/models'
+  import FormField from './FormField.svelte'
 
   const dispatch = createEventDispatcher()
 
@@ -23,6 +24,34 @@
   // Reference data
   let taxRates = []
   let units = []
+
+  // Computed properties for string conversion
+  $: stockValue = defaultProductSettings.default_stock?.toString() || '0'
+  $: markupValue = defaultProductSettings.default_markup?.toString() || '0'
+  $: taxRateValue = defaultProductSettings.default_tax_rate_id?.toString() || '1'
+  $: unitValue = defaultProductSettings.default_unit_id?.toString() || '1'
+  $: statusValue = defaultProductSettings.default_product_status?.toString() || 'true'
+
+  // Handle input changes
+  function handleStockChange(event) {
+    defaultProductSettings.default_stock = parseFloat(event.target.value) || 0
+  }
+
+  function handleMarkupChange(event) {
+    defaultProductSettings.default_markup = parseFloat(event.target.value) || 0
+  }
+
+  function handleTaxRateChange(event) {
+    defaultProductSettings.default_tax_rate_id = parseInt(event.target.value) || 1
+  }
+
+  function handleUnitChange(event) {
+    defaultProductSettings.default_unit_id = parseInt(event.target.value) || 1
+  }
+
+  function handleStatusChange(event) {
+    defaultProductSettings.default_product_status = event.target.value === 'true'
+  }
 
   onMount(async () => {
     await loadData()
@@ -84,8 +113,8 @@
 
 <div class="space-y-6">
   <div>
-    <h3 class="text-lg leading-6 font-medium text-gray-900">Default Product Settings</h3>
-    <p class="mt-1 text-sm text-gray-500">
+    <h3 class="text-lg leading-6 font-medium text-gray-100">Default Product Settings</h3>
+    <p class="mt-1 text-sm text-gray-300">
       Configure default values that will be pre-filled when creating new products
     </p>
   </div>
@@ -93,149 +122,86 @@
   <form on:submit|preventDefault={saveDefaultProductSettings} class="space-y-6">
     <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
       <!-- Default Stock -->
-      <div>
-        <label for="default_stock" class="block text-sm font-medium text-gray-700">
-          Default Stock Quantity
-        </label>
-        <div class="mt-1">
-          <input
-            type="number"
-            id="default_stock"
-            bind:value={defaultProductSettings.default_stock}
-            min="0"
-            step="0.01"
-            class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
-            placeholder="0"
-          />
-        </div>
-        <p class="mt-1 text-xs text-gray-500">Initial stock quantity for new products</p>
-      </div>
+      <FormField
+        label="Default Stock Quantity"
+        type="number"
+        value={stockValue}
+        on:input={handleStockChange}
+        min="0"
+        step="0.01"
+        placeholder="0"
+      />
+      <p class="text-xs text-gray-300 -mt-4">Initial stock quantity for new products</p>
 
       <!-- Default Tax Rate -->
-      <div>
-        <label for="default_tax_rate" class="block text-sm font-medium text-gray-700">
-          Default Tax Rate
-        </label>
-        <div class="mt-1">
-          <select
-            id="default_tax_rate"
-            bind:value={defaultProductSettings.default_tax_rate_id}
-            class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
-          >
-            {#each taxRates as taxRate}
-              <option value={taxRate.id}>{taxRate.name} ({taxRate.rate}%)</option>
-            {/each}
-          </select>
-        </div>
-      </div>
+      <FormField
+        label="Default Tax Rate"
+        type="select"
+        value={taxRateValue}
+        on:input={handleTaxRateChange}
+        options={taxRates.map(rate => ({ value: rate.id.toString(), label: `${rate.name} (${rate.rate}%)` }))}
+      />
 
       <!-- Default Unit -->
-      <div>
-        <label for="default_unit" class="block text-sm font-medium text-gray-700">
-          Default Unit of Measurement
-        </label>
-        <div class="mt-1">
-          <select
-            id="default_unit"
-            bind:value={defaultProductSettings.default_unit_id}
-            class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
-          >
-            {#each units as unit}
-              <option value={unit.id}>{unit.name} ({unit.symbol})</option>
-            {/each}
-          </select>
-        </div>
-      </div>
+      <FormField
+        label="Default Unit of Measurement"
+        type="select"
+        value={unitValue}
+        on:input={handleUnitChange}
+        options={units.map(unit => ({ value: unit.id.toString(), label: `${unit.name} (${unit.symbol})` }))}
+      />
 
       <!-- Default Product Type -->
-      <div>
-        <label for="default_product_type" class="block text-sm font-medium text-gray-700">
-          Default Product Type
-        </label>
-        <div class="mt-1">
-          <select
-            id="default_product_type"
-            bind:value={defaultProductSettings.default_product_type}
-            class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
-          >
-            <option value="product">Product</option>
-            <option value="service">Service</option>
-          </select>
-        </div>
-      </div>
+      <FormField
+        label="Default Product Type"
+        type="select"
+        bind:value={defaultProductSettings.default_product_type}
+        options={[
+          { value: 'product', label: 'Product' },
+          { value: 'service', label: 'Service' }
+        ]}
+      />
 
       <!-- Default Markup -->
-      <div>
-        <label for="default_markup" class="block text-sm font-medium text-gray-700">
-          Default Markup (%)
-        </label>
-        <div class="mt-1">
-          <input
-            type="number"
-            id="default_markup"
-            bind:value={defaultProductSettings.default_markup}
-            min="0"
-            step="0.01"
-            class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
-            placeholder="0"
-          />
-        </div>
-        <p class="mt-1 text-xs text-gray-500">Default markup percentage for pricing</p>
-      </div>
+      <FormField
+        label="Default Markup (%)"
+        type="number"
+        value={markupValue}
+        on:input={handleMarkupChange}
+        min="0"
+        step="0.01"
+        placeholder="0"
+      />
+      <p class="text-xs text-gray-300 -mt-4">Default markup percentage for pricing</p>
 
       <!-- Default Status -->
-      <div>
-        <label for="default_status" class="block text-sm font-medium text-gray-700">
-          Default Product Status
-        </label>
-        <div class="mt-1">
-          <select
-            id="default_status"
-            bind:value={defaultProductSettings.default_product_status}
-            class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
-          >
-            <option value={true}>Active</option>
-            <option value={false}>Inactive</option>
-          </select>
-        </div>
-      </div>
+      <FormField
+        label="Default Product Status"
+        type="select"
+        value={statusValue}
+        on:input={handleStatusChange}
+        options={[
+          { value: 'true', label: 'Active' },
+          { value: 'false', label: 'Inactive' }
+        ]}
+      />
     </div>
 
     <!-- Checkboxes -->
     <div class="space-y-4">
-      <div class="flex items-start">
-        <div class="flex items-center h-5">
-          <input
-            id="price_includes_tax"
-            type="checkbox"
-            bind:checked={defaultProductSettings.default_price_includes_tax}
-            class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
-          />
-        </div>
-        <div class="ml-3 text-sm">
-          <label for="price_includes_tax" class="font-medium text-gray-700">
-            Price includes tax by default
-          </label>
-          <p class="text-gray-500">When enabled, product prices will include tax by default</p>
-        </div>
-      </div>
+      <FormField
+        label="Price includes tax by default"
+        type="checkbox"
+        bind:checked={defaultProductSettings.default_price_includes_tax}
+      />
+      <p class="text-xs text-gray-300 -mt-2">When enabled, product prices will include tax by default</p>
 
-      <div class="flex items-start">
-        <div class="flex items-center h-5">
-          <input
-            id="allow_price_change"
-            type="checkbox"
-            bind:checked={defaultProductSettings.default_price_change_allowed}
-            class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
-          />
-        </div>
-        <div class="ml-3 text-sm">
-          <label for="allow_price_change" class="font-medium text-gray-700">
-            Allow price changes by default
-          </label>
-          <p class="text-gray-500">When enabled, product prices can be modified during sales</p>
-        </div>
-      </div>
+      <FormField
+        label="Allow price changes by default"
+        type="checkbox"
+        bind:checked={defaultProductSettings.default_price_change_allowed}
+      />
+      <p class="text-xs text-gray-300 -mt-2">When enabled, product prices can be modified during sales</p>
     </div>
 
     <!-- Save Button -->

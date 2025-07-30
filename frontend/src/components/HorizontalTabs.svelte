@@ -89,7 +89,7 @@
         {#if showScrollButtons}
           <button
             on:click={scrollLeft}
-            class="flex-shrink-0 p-2 text-gray-400 hover:text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="flex-shrink-0 p-2 text-gray-300 hover:text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={!canScrollLeft}
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -124,7 +124,7 @@
         {#if showScrollButtons}
           <button
             on:click={scrollRight}
-            class="flex-shrink-0 p-2 text-gray-400 hover:text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="flex-shrink-0 p-2 text-gray-300 hover:text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={!canScrollRight}
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -401,78 +401,83 @@
   {/if}
   
   <form on:submit|preventDefault={saveInvoice} class="space-y-6">
-    <!-- Customer and Invoice Details -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <!-- Left Column -->
-      <div class="space-y-6">
-        <!-- Customer Selection -->
-        <FormField
-          label="Customer"
-          labelArabic="العميل"
-          type="select"
-          bind:value={customerIdString}
-          options={customerOptions}
-          placeholder="Select Customer (Optional)"
-          error={formErrors.customer_id}
-        />
-        
-        <!-- Sales Category Selection -->
-        <FormField
-          label="Sales Category"
-          labelArabic="فئة المبيعات"
-          type="select"
-          bind:value={salesCategoryIdString}
-          options={salesCategoryOptions}
-          placeholder="Select Sales Category (Optional)"
-          error={formErrors.sales_category_id}
-        />
+    <!-- Invoice Header Information -->
+    <div class="glass-card p-6">
+      <h3 class="text-lg font-semibold text-white mb-4">Invoice Information</h3>
+      
+      <!-- Customer and Invoice Details -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Left Column -->
+        <div class="space-y-6">
+          <!-- Customer Selection -->
+          <FormField
+            label="Customer"
+            labelArabic="العميل"
+            type="select"
+            bind:value={customerIdString}
+            options={customerOptions}
+            placeholder="Select Customer (Optional)"
+            error={formErrors.customer_id}
+          />
+          
+          <!-- Sales Category Selection -->
+          <FormField
+            label="Sales Category"
+            labelArabic="فئة المبيعات"
+            type="select"
+            bind:value={salesCategoryIdString}
+            options={salesCategoryOptions}
+            placeholder="Select Sales Category (Optional)"
+            error={formErrors.sales_category_id}
+          />
 
-        <!-- Invoice Date -->
-        <FormField
-          label="Invoice Date"
-          labelArabic="تاريخ الفاتورة"
-          type="date"
-          bind:value={invoiceData.issue_date}
-          required={true}
-          error={formErrors.issue_date}
-        />
-      </div>
+          <!-- Invoice Date -->
+          <FormField
+            label="Invoice Date"
+            labelArabic="تاريخ الفاتورة"
+            type="date"
+            bind:value={invoiceData.issue_date}
+            required={true}
+            error={formErrors.issue_date}
+          />
+        </div>
 
-      <!-- Right Column -->
-      <div class="space-y-6">
-        <!-- Due Date -->
-        <FormField
-          label="Due Date"
-          labelArabic="تاريخ الاستحقاق"
-          type="date"
-          bind:value={invoiceData.due_date}
-          placeholder="Optional"
-        />
-        
-        <!-- Status -->
-        <FormField
-          label="Status"
-          labelArabic="الحالة"
-          type="select"
-          bind:value={invoiceData.status}
-          options={statusOptions}
-          placeholder="Select Status"
-        />
+        <!-- Right Column -->
+        <div class="space-y-6">
+          <!-- Due Date -->
+          <FormField
+            label="Due Date"
+            labelArabic="تاريخ الاستحقاق"
+            type="date"
+            bind:value={invoiceData.due_date}
+            placeholder="Optional"
+          />
+          
+          <!-- Status -->
+          <FormField
+            label="Status"
+            labelArabic="الحالة"
+            type="select"
+            bind:value={invoiceData.status}
+            options={statusOptions}
+            placeholder="Select Status"
+          />
 
-        <!-- Payment Terms -->
-        <FormField
-          label="Payment Terms"
-          labelArabic="شروط الدفع"
-          type="text"
-          bind:value={invoiceData.payment_terms}
-          placeholder="e.g., Net 30, Due on receipt (Optional)"
-        />
+          <!-- Payment Terms -->
+          <FormField
+            label="Payment Terms"
+            labelArabic="شروط الدفع"
+            type="text"
+            bind:value={invoiceData.payment_terms}
+            placeholder="e.g., Net 30, Due on receipt (Optional)"
+          />
+        </div>
       </div>
     </div>
     
-    <!-- Invoice Items -->
-    <div class="space-y-4">
-      <div class="flex items-center justify-between">
+    <!-- Item Details Section -->
+    <div class="glass-card p-6">
+      <div class="flex justify-between items-center mb-4">
         <h3 class="text-lg font-semibold text-white">Item Details</h3>
         <button 
           type="button"
@@ -483,124 +488,125 @@
         </button>
       </div>
       
-      <!-- Items Table Header -->
-      <div class="hidden lg:grid lg:grid-cols-12 gap-4 p-4 bg-white/5 rounded-lg border border-white/10">
-        <div class="col-span-4 text-sm font-medium text-white/70">Item Details</div>
-        <div class="col-span-2 text-sm font-medium text-white/70">Quantity</div>
-        <div class="col-span-2 text-sm font-medium text-white/70">Unit Price</div>
-        <div class="col-span-1 text-sm font-medium text-white/70">VAT %</div>
-        <div class="col-span-2 text-sm font-medium text-white/70">Total</div>
-        <div class="col-span-1 text-sm font-medium text-white/70">Action</div>
+      <!-- Items Table -->
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead>
+            <tr class="border-b border-white/20">
+              <th class="text-left py-3 px-2 text-sm font-medium text-white/70 min-w-[200px]">Product</th>
+              <th class="text-left py-3 px-2 text-sm font-medium text-white/70 w-24">Quantity</th>
+              <th class="text-left py-3 px-2 text-sm font-medium text-white/70 w-28">Unit Price</th>
+              <th class="text-left py-3 px-2 text-sm font-medium text-white/70 w-20">VAT %</th>
+              <th class="text-left py-3 px-2 text-sm font-medium text-white/70 w-28">Total</th>
+              <th class="text-left py-3 px-2 text-sm font-medium text-white/70 w-16">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {#each invoiceItems as item, index}
+              <tr class="border-b border-white/10">
+                <!-- Product Selection -->
+                <td class="py-3 px-2">
+                  <select 
+                    id="product-{index}"
+                    bind:value={item.product_id}
+                    on:change={(e) => handleProductChange(index, e)}
+                    class="select-glass w-full text-sm"
+                    required
+                  >
+                    <option value={0}>Select Product</option>
+                    {#each products as product}
+                      <option value={product.id}>{product.name}</option>
+                    {/each}
+                  </select>
+                  {#if formErrors.items[index]?.product_id}
+                    <p class="text-error text-xs mt-1">{formErrors.items[index].product_id}</p>
+                  {/if}
+                </td>
+                
+                <!-- Quantity -->
+                <td class="py-3 px-2">
+                  <input 
+                    id="quantity-{index}"
+                    type="number"
+                    bind:value={item.quantity}
+                    on:input={calculateTotals}
+                    min="1"
+                    step="0.01"
+                    class="input-glass w-full text-sm"
+                    required
+                  />
+                  {#if formErrors.items[index]?.quantity}
+                    <p class="text-error text-xs mt-1">{formErrors.items[index].quantity}</p>
+                  {/if}
+                </td>
+                
+                <!-- Unit Price -->
+                <td class="py-3 px-2">
+                  <input 
+                    id="unit-price-{index}"
+                    type="number"
+                    bind:value={item.unit_price}
+                    on:input={calculateTotals}
+                    min="0"
+                    step="0.01"
+                    class="input-glass w-full text-sm"
+                    required
+                  />
+                  {#if formErrors.items[index]?.unit_price}
+                    <p class="text-error text-xs mt-1">{formErrors.items[index].unit_price}</p>
+                  {/if}
+                </td>
+                
+                <!-- VAT Rate -->
+                <td class="py-3 px-2">
+                  <input 
+                    id="vat-rate-{index}"
+                    type="number"
+                    bind:value={item.vat_rate}
+                    on:input={calculateTotals}
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    class="input-glass w-full text-sm"
+                  />
+                </td>
+                
+                <!-- Total -->
+                <td class="py-3 px-2">
+                  <div class="input-glass w-full bg-white/5 text-white/70 text-sm px-3 py-2">
+                    {calculateItemTotal(item).toFixed(2)}
+                  </div>
+                </td>
+                
+                <!-- Remove Button -->
+                <td class="py-3 px-2">
+                  <button 
+                    type="button"
+                    class="btn-icon text-error hover:bg-error/20 p-2"
+                    on:click={() => removeItem(index)}
+                    disabled={invoiceItems.length === 1}
+                    aria-label="Remove item {index + 1}"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                  </button>
+                </td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
       </div>
-      
-      <!-- Invoice Items -->
-      {#each invoiceItems as item, index}
-        <div class="glass-card p-4">
-          <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
-            <!-- Product Selection -->
-            <div class="col-span-1 lg:col-span-4">
-              <label for="product-{index}" class="label-standard lg:hidden">Product</label>
-              <select 
-                id="product-{index}"
-                bind:value={item.product_id}
-                on:change={(e) => handleProductChange(index, e)}
-                class="select-glass w-full"
-                required
-              >
-                <option value={0}>Select Product</option>
-                {#each products as product}
-                  <option value={product.id}>{product.name}</option>
-                {/each}
-              </select>
-              {#if formErrors.items[index]?.product_id}
-                <p class="text-error text-sm mt-1">{formErrors.items[index].product_id}</p>
-              {/if}
-            </div>
-            
-            <!-- Quantity -->
-            <div class="col-span-1 lg:col-span-2">
-              <label for="quantity-{index}" class="label-standard lg:hidden">Quantity</label>
-              <input 
-                id="quantity-{index}"
-                type="number"
-                bind:value={item.quantity}
-                on:input={calculateTotals}
-                min="1"
-                step="0.01"
-                class="input-glass w-full"
-                required
-              />
-              {#if formErrors.items[index]?.quantity}
-                <p class="text-error text-sm mt-1">{formErrors.items[index].quantity}</p>
-              {/if}
-            </div>
-            
-            <!-- Unit Price -->
-            <div class="col-span-1 lg:col-span-2">
-              <label for="unit-price-{index}" class="label-standard lg:hidden">Unit Price</label>
-              <input 
-                id="unit-price-{index}"
-                type="number"
-                bind:value={item.unit_price}
-                on:input={calculateTotals}
-                min="0"
-                step="0.01"
-                class="input-glass w-full"
-                required
-              />
-              {#if formErrors.items[index]?.unit_price}
-                <p class="text-error text-sm mt-1">{formErrors.items[index].unit_price}</p>
-              {/if}
-            </div>
-            
-            <!-- VAT Rate -->
-            <div class="col-span-1 lg:col-span-1">
-              <label for="vat-rate-{index}" class="label-standard lg:hidden">VAT %</label>
-              <input 
-                id="vat-rate-{index}"
-                type="number"
-                bind:value={item.vat_rate}
-                on:input={calculateTotals}
-                min="0"
-                max="100"
-                step="0.01"
-                class="input-glass w-full"
-              />
-            </div>
-            
-            <!-- Total -->
-            <div class="col-span-1 lg:col-span-2">
-              <div class="text-sm font-medium text-white/70 mb-2 lg:hidden">Total</div>
-              <div class="input-glass w-full bg-white/5 text-white/70 flex items-center">
-                {calculateItemTotal(item).toFixed(2)}
-              </div>
-            </div>
-            
-            <!-- Remove Button -->
-            <div class="col-span-1 lg:col-span-1 flex items-end">
-              <button 
-                type="button"
-                class="btn-icon text-error hover:bg-error/20 w-full lg:w-auto"
-                on:click={() => removeItem(index)}
-                disabled={invoiceItems.length === 1}
-                aria-label="Remove item {index + 1}"
-              >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-      {/each}
     </div>
     
     <!-- Totals Section -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <!-- Left Column: Notes and Additional Charges -->
-      <div class="space-y-4">
+      <div class="glass-card p-6">
+        <h3 class="text-lg font-semibold text-white mb-4">Additional Information</h3>
+        
         <!-- Notes -->
-        <div class="form-group">
+        <div class="form-group mb-6">
           <label for="invoice-notes" class="label-standard">Notes <span class="text-white/50">(Optional)</span></label>
           <textarea 
             id="invoice-notes"
@@ -611,7 +617,7 @@
         </div>
         
         <!-- Additional Charges -->
-        <div class="glass-card p-4 space-y-3">
+        <div class="space-y-4">
           <h4 class="text-sm font-medium text-white/70 mb-3">Additional Charges</h4>
           
           <!-- Discount -->
@@ -647,28 +653,31 @@
       </div>
       
       <!-- Right Column: Invoice Summary -->
-      <div class="glass-card p-4 space-y-3">
-        <h4 class="text-sm font-medium text-white/70 mb-3">Invoice Summary</h4>
-        <div class="flex justify-between text-white/70">
-          <span>Subtotal</span>
-          <span>{subtotal.toFixed(2)}</span>
-        </div>
-        <div class="flex justify-between text-white/70">
-          <span>Discount</span>
-          <span>-{discount.toFixed(2)}</span>
-        </div>
-        <div class="flex justify-between text-white/70">
-          <span>VAT</span>
-          <span>{vatTotal.toFixed(2)}</span>
-        </div>
-        <div class="flex justify-between text-white/70">
-          <span>Delivery Fees</span>
-          <span>{deliveryFees.toFixed(2)}</span>
-        </div>
-        <div class="border-t border-white/20 pt-3">
-          <div class="flex justify-between text-lg font-semibold text-white">
-            <span>Total Price</span>
-            <span>{totalPrice.toFixed(2)}</span>
+      <div class="glass-card p-6">
+        <h3 class="text-lg font-semibold text-white mb-4">Invoice Summary</h3>
+        
+        <div class="space-y-3">
+          <div class="flex justify-between text-white/70">
+            <span>Subtotal</span>
+            <span class="font-medium">{subtotal.toFixed(2)}</span>
+          </div>
+          <div class="flex justify-between text-white/70">
+            <span>Discount</span>
+            <span class="font-medium text-green-400">-{discount.toFixed(2)}</span>
+          </div>
+          <div class="flex justify-between text-white/70">
+            <span>VAT</span>
+            <span class="font-medium">{vatTotal.toFixed(2)}</span>
+          </div>
+          <div class="flex justify-between text-white/70">
+            <span>Delivery Fees</span>
+            <span class="font-medium">{deliveryFees.toFixed(2)}</span>
+          </div>
+          <div class="border-t border-white/20 pt-3 mt-4">
+            <div class="flex justify-between text-xl font-bold text-white">
+              <span>Total Amount</span>
+              <span class="text-primary">{totalPrice.toFixed(2)}</span>
+            </div>
           </div>
         </div>
       </div>

@@ -1,5 +1,6 @@
 <script>
   import { createEventDispatcher, onMount } from 'svelte'
+  import FormField from './FormField.svelte'
 
   const dispatch = createEventDispatcher()
 
@@ -39,8 +40,8 @@
 
 <div class="space-y-6">
   <div>
-    <h3 class="text-lg leading-6 font-medium text-gray-900">System Settings</h3>
-    <p class="mt-1 text-sm text-gray-500">
+    <h3 class="text-lg leading-6 font-medium text-gray-100">System Settings</h3>
+    <p class="mt-1 text-sm text-gray-300">
       Configure general system preferences and features
     </p>
   </div>
@@ -48,94 +49,71 @@
   <form on:submit|preventDefault={saveSystemSettings} class="space-y-6">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <!-- Currency -->
-      <div>
-        <label for="currency" class="block text-sm font-medium text-gray-700">
-          Currency
-        </label>
-        <div class="mt-1">
-          <select
-            id="currency"
-            bind:value={systemSettings.currency}
-            class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
-          >
-            <option value="SAR">Saudi Riyal (SAR)</option>
-            <option value="USD">US Dollar (USD)</option>
-            <option value="EUR">Euro (EUR)</option>
-            <option value="AED">UAE Dirham (AED)</option>
-          </select>
-        </div>
-      </div>
+      <FormField
+        label="Currency"
+        labelArabic="العملة"
+        type="select"
+        bind:value={systemSettings.currency}
+        options={[
+          { value: 'SAR', label: 'Saudi Riyal (SAR)' },
+          { value: 'USD', label: 'US Dollar (USD)' },
+          { value: 'EUR', label: 'Euro (EUR)' },
+          { value: 'AED', label: 'UAE Dirham (AED)' }
+        ]}
+      />
 
       <!-- Language -->
-      <div>
-        <label for="language" class="block text-sm font-medium text-gray-700">
-          Language
-        </label>
-        <div class="mt-1">
-          <select
-            id="language"
-            bind:value={systemSettings.language}
-            class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
-          >
-            <option value="en">English</option>
-            <option value="ar">Arabic</option>
-          </select>
-        </div>
-      </div>
+      <FormField
+        label="Language"
+        labelArabic="اللغة"
+        type="select"
+        bind:value={systemSettings.language}
+        options={[
+          { value: 'en', label: 'English' },
+          { value: 'ar', label: 'Arabic' }
+        ]}
+      />
 
       <!-- Timezone -->
-      <div>
-        <label for="timezone" class="block text-sm font-medium text-gray-700">
-          Timezone
-        </label>
-        <div class="mt-1">
-          <select
-            id="timezone"
-            bind:value={systemSettings.timezone}
-            class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
-          >
-            <option value="Asia/Riyadh">Asia/Riyadh</option>
-            <option value="Asia/Dubai">Asia/Dubai</option>
-            <option value="UTC">UTC</option>
-          </select>
-        </div>
-      </div>
+      <FormField
+        label="Timezone"
+        labelArabic="المنطقة الزمنية"
+        type="select"
+        bind:value={systemSettings.timezone}
+        options={[
+          { value: 'Asia/Riyadh', label: 'Asia/Riyadh' },
+          { value: 'Asia/Dubai', label: 'Asia/Dubai' },
+          { value: 'UTC', label: 'UTC' }
+        ]}
+      />
 
       <!-- Date Format -->
-      <div>
-        <label for="date-format" class="block text-sm font-medium text-gray-700">
-          Date Format
-        </label>
-        <div class="mt-1">
-          <select
-            id="date-format"
-            bind:value={systemSettings.date_format}
-            class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
-          >
-            <option value="DD/MM/YYYY">DD/MM/YYYY</option>
-            <option value="MM/DD/YYYY">MM/DD/YYYY</option>
-            <option value="YYYY-MM-DD">YYYY-MM-DD</option>
-          </select>
-        </div>
-      </div>
+      <FormField
+        label="Date Format"
+        labelArabic="تنسيق التاريخ"
+        type="select"
+        bind:value={systemSettings.date_format}
+        options={[
+          { value: 'DD/MM/YYYY', label: 'DD/MM/YYYY' },
+          { value: 'MM/DD/YYYY', label: 'MM/DD/YYYY' },
+          { value: 'YYYY-MM-DD', label: 'YYYY-MM-DD' }
+        ]}
+      />
 
       <!-- Invoice Language -->
-      <div>
-        <label for="invoice-language" class="block text-sm font-medium text-gray-700">
-          Invoice Language
-        </label>
-        <div class="mt-1">
-          <select
-            id="invoice-language"
-            bind:value={systemSettings.invoice_language}
-            class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
-          >
-            <option value="english">English</option>
-            <option value="arabic">Arabic</option>
-            <option value="bilingual">Bilingual (Arabic + English)</option>
-          </select>
-        </div>
-        <p class="mt-1 text-xs text-gray-500">
+      <div class="col-span-2">
+        <FormField
+          label="Invoice Language"
+          labelArabic="لغة الفاتورة"
+          type="select"
+          bind:value={systemSettings.invoice_language}
+          options={[
+            { value: 'english', label: 'English' },
+            { value: 'arabic', label: 'Arabic' },
+            { value: 'bilingual', label: 'Bilingual (Arabic + English)' }
+          ]}
+        />
+        <p class="mt-1 text-xs text-gray-300">
           Default language for all invoice printouts and PDFs
         </p>
       </div>
@@ -143,59 +121,54 @@
 
     <!-- System Features -->
     <div class="space-y-4">
-      <h4 class="text-md font-medium text-gray-900">System Features</h4>
+      <h4 class="text-md font-medium text-gray-100">System Features</h4>
       
       <div class="space-y-4">
         <div class="flex items-start">
           <div class="flex items-center h-5">
-            <input
-              id="zatca_enabled"
+            <FormField
               type="checkbox"
               bind:checked={systemSettings.zatca_enabled}
-              class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
+              placeholder="Enable ZATCA Integration"
             />
           </div>
           <div class="ml-3 text-sm">
-            <label for="zatca_enabled" class="font-medium text-gray-700">
+            <label class="font-medium text-gray-300">
               Enable ZATCA Integration
             </label>
-            <p class="text-gray-500">Enable Saudi Arabia's ZATCA e-invoicing compliance</p>
+            <p class="text-gray-300">Enable Saudi Arabia's ZATCA e-invoicing compliance</p>
           </div>
         </div>
 
         <div class="flex items-start">
           <div class="flex items-center h-5">
-            <input
-              id="auto_backup"
+            <FormField
               type="checkbox"
               bind:checked={systemSettings.auto_backup}
-              class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
+              placeholder="Enable Auto Backup"
             />
           </div>
           <div class="ml-3 text-sm">
-            <label for="auto_backup" class="font-medium text-gray-700">
+            <label class="font-medium text-gray-300">
               Enable Auto Backup
             </label>
-            <p class="text-gray-500">Automatically backup your data at regular intervals</p>
+            <p class="text-gray-300">Automatically backup your data at regular intervals</p>
           </div>
         </div>
 
         {#if systemSettings.auto_backup}
           <div class="ml-7">
-            <label for="backup_frequency" class="block text-sm font-medium text-gray-700">
-              Backup Frequency
-            </label>
-            <div class="mt-1">
-              <select
-                id="backup_frequency"
-                bind:value={systemSettings.backup_frequency}
-                class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
-              >
-                <option value="daily">Daily</option>
-                <option value="weekly">Weekly</option>
-                <option value="monthly">Monthly</option>
-              </select>
-            </div>
+            <FormField
+              label="Backup Frequency"
+              labelArabic="تكرار النسخ الاحتياطي"
+              type="select"
+              bind:value={systemSettings.backup_frequency}
+              options={[
+                { value: 'daily', label: 'Daily' },
+                { value: 'weekly', label: 'Weekly' },
+                { value: 'monthly', label: 'Monthly' }
+              ]}
+            />
           </div>
         {/if}
       </div>

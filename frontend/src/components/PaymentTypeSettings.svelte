@@ -1,7 +1,9 @@
 <script>
   import { GetPaymentTypes, CreatePaymentType, UpdatePaymentType, DeletePaymentType } from '../../wailsjs/go/main/App.js'
-   import { database } from '../../wailsjs/go/models'
+  import { database } from '../../wailsjs/go/models'
   import { createEventDispatcher } from 'svelte'
+  import DataTable from './DataTable.svelte'
+  import FormField from './FormField.svelte'
 
   const dispatch = createEventDispatcher()
 
@@ -103,87 +105,158 @@
       dispatch('error', { message: 'Error setting default payment type: ' + error.message })
     }
   }
+
+  // DataTable configuration
+  let searchTerm = ''
+  
+  $: filteredPaymentTypes = paymentTypes.filter(paymentType => 
+    paymentType.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (paymentType.name_arabic && paymentType.name_arabic.includes(searchTerm)) ||
+    paymentType.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (paymentType.description && paymentType.description.toLowerCase().includes(searchTerm.toLowerCase()))
+  )
+
+  const columns = [
+    {
+      key: 'name',
+      label: 'Name',
+      sortable: true,
+      render: (paymentType) => `
+        <div>
+          <div class="font-medium text-gray-100">${paymentType.name}</div>
+          ${paymentType.name_arabic ? `<div class="text-sm text-gray-300">${paymentType.name_arabic}</div>` : ''}
+        </div>
+      `
+    },
+    {
+      key: 'code',
+      label: 'Code',
+      sortable: true,
+      render: (paymentType) => `<span class="font-mono text-sm">${paymentType.code}</span>`
+    },
+    {
+      key: 'description',
+      label: 'Description',
+      render: (paymentType) => paymentType.description || '-'
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      render: (paymentType) => `
+        <div class="flex items-center space-x-2">
+          ${paymentType.is_default ? '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Default</span>' : ''}
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${paymentType.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+            ${paymentType.is_active ? 'Active' : 'Inactive'}
+          </span>
+        </div>
+      `
+    },
+    {
+      key: 'actions',
+      label: 'Actions',
+      render: (paymentType) => `
+        <div class="flex items-center space-x-2">
+          ${!paymentType.is_default ? `<button class="action-btn" data-action="setDefault" data-id="${paymentType.id}">Set Default</button>` : ''}
+          <button class="action-btn" data-action="edit" data-id="${paymentType.id}">Edit</button>
+          <button class="action-btn text-red-600" data-action="delete" data-id="${paymentType.id}">Delete</button>
+        </div>
+      `
+    }
+  ]
+
+  const primaryAction = {
+    label: 'Add Payment Type',
+    icon: 'fa-plus'
+  }
+
+  // Event handlers for DataTable
+  function handlePrimaryAction() {
+    showPaymentTypeForm = true
+  }
+
+  function handleSearch(event) {
+    searchTerm = event.detail.searchTerm
+  }
+
+  function handleRowAction(event) {
+    const { action, id } = event.detail
+    const paymentType = paymentTypes.find(pt => pt.id === parseInt(id))
+    
+    switch (action) {
+      case 'edit':
+        editPaymentType(paymentType)
+        break
+      case 'delete':
+        deletePaymentType(parseInt(id))
+        break
+      case 'setDefault':
+        setDefaultPaymentType(parseInt(id))
+        break
+    }
+  }
 </script>
 
 <div class="space-y-6">
-  <!-- Add Payment Type Button -->
-  <div class="flex justify-between items-center">
-    <h3 class="text-lg font-medium text-gray-900">Payment Types</h3>
-    <button
-      on:click={() => showPaymentTypeForm = true}
-      class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-    >
-      Add Payment Type
-    </button>
-  </div>
-
   <!-- Payment Type Form -->
   {#if showPaymentTypeForm}
-    <div class="bg-gray-50 p-4 rounded-lg">
-      <h4 class="text-md font-medium text-gray-900 mb-4">
+    <div class="bg-gray-50 p-6 rounded-lg border">
+      <h4 class="text-lg font-medium text-gray-100 mb-6">
         {editingPaymentType ? 'Edit Payment Type' : 'Add New Payment Type'}
       </h4>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Name</label>
-          <input
-            type="text"
-            bind:value={newPaymentType.name}
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Enter payment type name"
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <FormField
+          label="Name"
+          labelArabic="الاسم"
+          type="text"
+          bind:value={newPaymentType.name}
+          placeholder="Enter payment type name"
+          required
+        />
+
+        <FormField
+          label="Name (Arabic)"
+          labelArabic="الاسم بالعربية"
+          type="text"
+          bind:value={newPaymentType.name_arabic}
+          placeholder="اسم نوع الدفع"
+          dir="rtl"
+        />
+
+        <FormField
+          label="Code"
+          labelArabic="الرمز"
+          type="text"
+          bind:value={newPaymentType.code}
+          placeholder="Enter payment type code"
+          required
+        />
+
+        <FormField
+          label="Description"
+          labelArabic="الوصف"
+          type="text"
+          bind:value={newPaymentType.description}
+          placeholder="Enter description"
+        />
+
+        <div class="flex items-center space-x-6 col-span-2">
+          <FormField
+            type="checkbox"
+            bind:checked={newPaymentType.is_default}
+            placeholder="Set as default"
           />
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Name (Arabic)</label>
-          <input
-            type="text"
-            bind:value={newPaymentType.name_arabic}
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="اسم نوع الدفع"
-            dir="rtl"
+          <FormField
+            type="checkbox"
+            bind:checked={newPaymentType.is_active}
+            placeholder="Active"
           />
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Code</label>
-          <input
-            type="text"
-            bind:value={newPaymentType.code}
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Enter payment type code"
-          />
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
-          <input
-            type="text"
-            bind:value={newPaymentType.description}
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Enter description"
-          />
-        </div>
-        <div class="flex items-center space-x-4 col-span-2">
-          <label class="flex items-center">
-            <input
-              type="checkbox"
-              bind:checked={newPaymentType.is_default}
-              class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-            />
-            <span class="ml-2 text-sm text-gray-700">Default</span>
-          </label>
-          <label class="flex items-center">
-            <input
-              type="checkbox"
-              bind:checked={newPaymentType.is_active}
-              class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-            />
-            <span class="ml-2 text-sm text-gray-700">Active</span>
-          </label>
         </div>
       </div>
-      <div class="flex justify-end space-x-2 mt-4">
+      
+      <div class="flex justify-end space-x-3 mt-6">
         <button
           on:click={resetPaymentTypeForm}
-          class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          class="px-4 py-2 border border-gray-300 text-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           Cancel
         </button>
@@ -197,63 +270,19 @@
     </div>
   {/if}
 
-  <!-- Payment Types Table -->
-  <div class="bg-white shadow overflow-hidden sm:rounded-md">
-    <ul class="divide-y divide-gray-200">
-      {#each paymentTypes as paymentType (paymentType.id)}
-        <li class="px-6 py-4">
-          <div class="flex items-center justify-between">
-            <div class="flex-1">
-              <div class="flex items-center">
-                <div class="flex-1">
-                  <p class="text-sm font-medium text-gray-900">
-                    {paymentType.name}
-                    {#if paymentType.name_arabic}
-                      <span class="text-gray-500">({paymentType.name_arabic})</span>
-                    {/if}
-                  </p>
-                  <p class="text-sm text-gray-500">Code: {paymentType.code}</p>
-                  {#if paymentType.description}
-                    <p class="text-sm text-gray-500">{paymentType.description}</p>
-                  {/if}
-                </div>
-                <div class="flex items-center space-x-2">
-                  {#if paymentType.is_default}
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      Default
-                    </span>
-                  {/if}
-                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {paymentType.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
-                    {paymentType.is_active ? 'Active' : 'Inactive'}
-                  </span>
-                </div>
-              </div>
-            </div>
-            <div class="flex items-center space-x-2">
-              {#if !paymentType.is_default}
-                <button
-                  on:click={() => setDefaultPaymentType(paymentType.id)}
-                  class="text-sm text-blue-600 hover:text-blue-900"
-                >
-                  Set Default
-                </button>
-              {/if}
-              <button
-                on:click={() => editPaymentType(paymentType)}
-                class="text-sm text-indigo-600 hover:text-indigo-900"
-              >
-                Edit
-              </button>
-              <button
-                on:click={() => deletePaymentType(paymentType.id)}
-                class="text-sm text-red-600 hover:text-red-900"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </li>
-      {/each}
-    </ul>
-  </div>
+  <!-- Payment Types DataTable -->
+  <DataTable
+    data={filteredPaymentTypes}
+    {columns}
+    {primaryAction}
+    loading={isLoading}
+    searchTerm={searchTerm}
+    searchPlaceholder="Search payment types..."
+    emptyStateTitle="No payment types found"
+    emptyStateMessage="Start by adding your first payment type"
+    emptyStateIcon="fa-credit-card"
+    on:primary-action={handlePrimaryAction}
+    on:search={handleSearch}
+    on:row-action={handleRowAction}
+  />
 </div>

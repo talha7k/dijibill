@@ -2,6 +2,8 @@
   import { GetSalesCategories, CreateSalesCategory, UpdateSalesCategory, DeleteSalesCategory } from '../../wailsjs/go/main/App.js'
   import { database } from '../../wailsjs/go/models'
   import { createEventDispatcher } from 'svelte'
+  import DataTable from './DataTable.svelte'
+  import FormField from './FormField.svelte'
 
   const dispatch = createEventDispatcher()
 
@@ -105,97 +107,175 @@
       dispatch('error', { message: 'Error setting default sales category: ' + error.message })
     }
   }
+
+  // DataTable configuration
+  let searchTerm = ''
+  
+  $: filteredSalesCategories = salesCategories.filter(salesCategory => 
+    salesCategory.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (salesCategory.name_arabic && salesCategory.name_arabic.includes(searchTerm)) ||
+    salesCategory.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (salesCategory.description && salesCategory.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (salesCategory.description_arabic && salesCategory.description_arabic.includes(searchTerm))
+  )
+
+  const columns = [
+    {
+      key: 'name',
+      label: 'Name',
+      sortable: true,
+      render: (salesCategory) => `
+        <div>
+          <div class="font-medium text-gray-100">${salesCategory.name}</div>
+          ${salesCategory.name_arabic ? `<div class="text-sm text-gray-300">${salesCategory.name_arabic}</div>` : ''}
+        </div>
+      `
+    },
+    {
+      key: 'code',
+      label: 'Code',
+      sortable: true,
+      render: (salesCategory) => `<span class="font-mono text-sm">${salesCategory.code}</span>`
+    },
+    {
+      key: 'description',
+      label: 'Description',
+      render: (salesCategory) => `
+        <div>
+          ${salesCategory.description ? `<div>${salesCategory.description}</div>` : ''}
+          ${salesCategory.description_arabic ? `<div class="text-sm text-gray-300" dir="rtl">${salesCategory.description_arabic}</div>` : ''}
+        </div>
+      `
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      render: (salesCategory) => `
+        <div class="flex items-center space-x-2">
+          ${salesCategory.is_default ? '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Default</span>' : ''}
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${salesCategory.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+            ${salesCategory.is_active ? 'Active' : 'Inactive'}
+          </span>
+        </div>
+      `
+    },
+    {
+      key: 'actions',
+      label: 'Actions',
+      render: (salesCategory) => `
+        <div class="flex items-center space-x-2">
+          ${!salesCategory.is_default ? `<button class="action-btn" data-action="setDefault" data-id="${salesCategory.id}">Set Default</button>` : ''}
+          <button class="action-btn" data-action="edit" data-id="${salesCategory.id}">Edit</button>
+          <button class="action-btn text-red-600" data-action="delete" data-id="${salesCategory.id}">Delete</button>
+        </div>
+      `
+    }
+  ]
+
+  const primaryAction = {
+    label: 'Add Sales Category',
+    icon: 'fa-plus'
+  }
+
+  // Event handlers for DataTable
+  function handlePrimaryAction() {
+    showSalesCategoryForm = true
+  }
+
+  function handleSearch(event) {
+    searchTerm = event.detail.searchTerm
+  }
+
+  function handleRowAction(event) {
+    const { action, id } = event.detail
+    const salesCategory = salesCategories.find(sc => sc.id === parseInt(id))
+    
+    switch (action) {
+      case 'edit':
+        editSalesCategory(salesCategory)
+        break
+      case 'delete':
+        deleteSalesCategory(parseInt(id))
+        break
+      case 'setDefault':
+        setDefaultSalesCategory(parseInt(id))
+        break
+    }
+  }
 </script>
 
 <div class="space-y-6">
-  <!-- Add Sales Category Button -->
-  <div class="flex justify-between items-center">
-    <h3 class="text-lg font-medium text-gray-900">Sales Categories</h3>
-    <button
-      on:click={() => showSalesCategoryForm = true}
-      class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-    >
-      Add Sales Category
-    </button>
-  </div>
-
   <!-- Sales Category Form -->
   {#if showSalesCategoryForm}
-    <div class="bg-gray-50 p-4 rounded-lg">
-      <h4 class="text-md font-medium text-gray-900 mb-4">
+    <div class="bg-gray-50 p-6 rounded-lg border">
+      <h4 class="text-lg font-medium text-gray-100 mb-6">
         {editingSalesCategory ? 'Edit Sales Category' : 'Add New Sales Category'}
       </h4>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Name</label>
-          <input
-            type="text"
-            bind:value={newSalesCategory.name}
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Enter category name"
-          />
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Name (Arabic)</label>
-          <input
-            type="text"
-            bind:value={newSalesCategory.name_arabic}
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="اسم الفئة"
-            dir="rtl"
-          />
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Code</label>
-          <input
-            type="text"
-            bind:value={newSalesCategory.code}
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Enter category code"
-          />
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
-          <input
-            type="text"
-            bind:value={newSalesCategory.description}
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Enter description"
-          />
-        </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <FormField
+          label="Name"
+          labelArabic="الاسم"
+          type="text"
+          bind:value={newSalesCategory.name}
+          placeholder="Enter category name"
+          required
+        />
+
+        <FormField
+          label="Name (Arabic)"
+          labelArabic="الاسم بالعربية"
+          type="text"
+          bind:value={newSalesCategory.name_arabic}
+          placeholder="اسم الفئة"
+          dir="rtl"
+        />
+
+        <FormField
+          label="Code"
+          labelArabic="الرمز"
+          type="text"
+          bind:value={newSalesCategory.code}
+          placeholder="Enter category code"
+          required
+        />
+
+        <FormField
+          label="Description"
+          labelArabic="الوصف"
+          type="text"
+          bind:value={newSalesCategory.description}
+          placeholder="Enter description"
+        />
+
         <div class="col-span-2">
-          <label class="block text-sm font-medium text-gray-700 mb-2">Description (Arabic)</label>
-          <input
+          <FormField
+            label="Description (Arabic)"
+            labelArabic="الوصف بالعربية"
             type="text"
             bind:value={newSalesCategory.description_arabic}
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="الوصف"
             dir="rtl"
           />
         </div>
-        <div class="flex items-center space-x-4 col-span-2">
-          <label class="flex items-center">
-            <input
-              type="checkbox"
-              bind:checked={newSalesCategory.is_default}
-              class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-            />
-            <span class="ml-2 text-sm text-gray-700">Default</span>
-          </label>
-          <label class="flex items-center">
-            <input
-              type="checkbox"
-              bind:checked={newSalesCategory.is_active}
-              class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-            />
-            <span class="ml-2 text-sm text-gray-700">Active</span>
-          </label>
+
+        <div class="flex items-center space-x-6 col-span-2">
+          <FormField
+            type="checkbox"
+            bind:checked={newSalesCategory.is_default}
+            placeholder="Set as default"
+          />
+          <FormField
+            type="checkbox"
+            bind:checked={newSalesCategory.is_active}
+            placeholder="Active"
+          />
         </div>
       </div>
-      <div class="flex justify-end space-x-2 mt-4">
+      
+      <div class="flex justify-end space-x-3 mt-6">
         <button
           on:click={resetSalesCategoryForm}
-          class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          class="px-4 py-2 border border-gray-300 text-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           Cancel
         </button>
@@ -209,63 +289,19 @@
     </div>
   {/if}
 
-  <!-- Sales Categories Table -->
-  <div class="bg-white shadow overflow-hidden sm:rounded-md">
-    <ul class="divide-y divide-gray-200">
-      {#each salesCategories as salesCategory (salesCategory.id)}
-        <li class="px-6 py-4">
-          <div class="flex items-center justify-between">
-            <div class="flex-1">
-              <div class="flex items-center">
-                <div class="flex-1">
-                  <p class="text-sm font-medium text-gray-900">
-                    {salesCategory.name}
-                    {#if salesCategory.name_arabic}
-                      <span class="text-gray-500">({salesCategory.name_arabic})</span>
-                    {/if}
-                  </p>
-                  <p class="text-sm text-gray-500">Code: {salesCategory.code}</p>
-                  {#if salesCategory.description}
-                    <p class="text-sm text-gray-500">{salesCategory.description}</p>
-                  {/if}
-                </div>
-                <div class="flex items-center space-x-2">
-                  {#if salesCategory.is_default}
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      Default
-                    </span>
-                  {/if}
-                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {salesCategory.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
-                    {salesCategory.is_active ? 'Active' : 'Inactive'}
-                  </span>
-                </div>
-              </div>
-            </div>
-            <div class="flex items-center space-x-2">
-              {#if !salesCategory.is_default}
-                <button
-                  on:click={() => setDefaultSalesCategory(salesCategory.id)}
-                  class="text-sm text-blue-600 hover:text-blue-900"
-                >
-                  Set Default
-                </button>
-              {/if}
-              <button
-                on:click={() => editSalesCategory(salesCategory)}
-                class="text-sm text-indigo-600 hover:text-indigo-900"
-              >
-                Edit
-              </button>
-              <button
-                on:click={() => deleteSalesCategory(salesCategory.id)}
-                class="text-sm text-red-600 hover:text-red-900"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </li>
-      {/each}
-    </ul>
-  </div>
+  <!-- Sales Categories DataTable -->
+  <DataTable
+    data={filteredSalesCategories}
+    {columns}
+    {primaryAction}
+    loading={isLoading}
+    searchTerm={searchTerm}
+    searchPlaceholder="Search sales categories..."
+    emptyStateTitle="No sales categories found"
+    emptyStateMessage="Start by adding your first sales category"
+    emptyStateIcon="fa-tags"
+    on:primary-action={handlePrimaryAction}
+    on:search={handleSearch}
+    on:row-action={handleRowAction}
+  />
 </div>

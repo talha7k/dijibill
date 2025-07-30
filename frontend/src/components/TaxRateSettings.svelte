@@ -2,6 +2,8 @@
   import { GetTaxRates, CreateTaxRate, UpdateTaxRate, DeleteTaxRate } from '../../wailsjs/go/main/App.js'
    import { database } from '../../wailsjs/go/models'
   import { createEventDispatcher } from 'svelte'
+  import DataTable from './DataTable.svelte'
+  import FormField from './FormField.svelte'
 
   const dispatch = createEventDispatcher()
 
@@ -11,6 +13,80 @@
   let newTaxRate = { name: '', name_arabic: '', rate: 0, is_default: false, is_active: true }
   let showTaxRateForm = false
   let editingTaxRate = null
+  let searchTerm = ''
+
+  // DataTable configuration
+  const columns = [
+    {
+      key: 'name',
+      label: 'Name',
+      render: (item) => {
+        let html = `<div class="font-medium">${item.name}</div>`
+        if (item.name_arabic) {
+          html += `<div class="text-sm text-gray-300">${item.name_arabic}</div>`
+        }
+        return html
+      }
+    },
+    {
+      key: 'rate',
+      label: 'Rate',
+      render: (item) => `${item.rate}%`
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      render: (item) => {
+        let badges = ''
+        if (item.is_default) {
+          badges += '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 mr-2">Default</span>'
+        }
+        badges += `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${item.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${item.is_active ? 'Active' : 'Inactive'}</span>`
+        return badges
+      }
+    },
+    {
+      actions: [
+        {
+          key: 'setDefault',
+          text: 'Set Default',
+          icon: 'fa-star',
+          class: 'btn-secondary',
+          title: 'Set as default tax rate'
+        },
+        {
+          key: 'edit',
+          text: 'Edit',
+          icon: 'fa-edit',
+          class: 'btn-secondary',
+          title: 'Edit tax rate'
+        },
+        {
+          key: 'delete',
+          text: 'Delete',
+          icon: 'fa-trash',
+          class: 'btn-danger',
+          title: 'Delete tax rate'
+        }
+      ]
+    }
+  ]
+
+  const primaryAction = {
+    text: 'Add Tax Rate',
+    icon: 'fa-plus'
+  }
+
+  // Filter tax rates based on search term
+  $: filteredTaxRates = taxRates.filter(taxRate => {
+    if (!searchTerm) return true
+    const searchLower = searchTerm.toLowerCase()
+    return (
+      taxRate.name.toLowerCase().includes(searchLower) ||
+      (taxRate.name_arabic && taxRate.name_arabic.includes(searchTerm)) ||
+      taxRate.rate.toString().includes(searchTerm)
+    )
+  })
 
   async function addTaxRate() {
     if (newTaxRate.name && newTaxRate.rate >= 0) {
@@ -103,81 +179,100 @@
       dispatch('error', { message: 'Error setting default tax rate: ' + error.message })
     }
   }
+
+  // Computed properties for FormField string conversion
+  $: rateValue = newTaxRate.rate?.toString() || ''
+  
+  function handleRateChange(event) {
+    const value = parseFloat(event.target.value)
+    newTaxRate.rate = isNaN(value) ? 0 : value
+  }
+
+  // DataTable event handlers
+  function handlePrimaryAction() {
+    showTaxRateForm = true
+  }
+
+  function handleSearch(event) {
+    searchTerm = event.detail.searchTerm
+  }
+
+  function handleRowAction(event) {
+    const { action, item } = event.detail
+    
+    switch (action) {
+      case 'edit':
+        editTaxRate(item)
+        break
+      case 'delete':
+        deleteTaxRate(item.id)
+        break
+      case 'setDefault':
+        if (!item.is_default) {
+          setDefaultTaxRate(item.id)
+        }
+        break
+    }
+  }
 </script>
 
 <div class="space-y-6">
-  <!-- Add Tax Rate Button -->
-  <div class="flex justify-between items-center">
-    <h3 class="text-lg font-medium text-gray-900">Tax Rates</h3>
-    <button
-      on:click={() => showTaxRateForm = true}
-      class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-    >
-      Add Tax Rate
-    </button>
-  </div>
-
   <!-- Tax Rate Form -->
   {#if showTaxRateForm}
-    <div class="bg-gray-50 p-4 rounded-lg">
-      <h4 class="text-md font-medium text-gray-900 mb-4">
+    <div class="bg-gray-50 p-6 rounded-lg border">
+      <h4 class="text-lg font-medium text-gray-100 mb-6">
         {editingTaxRate ? 'Edit Tax Rate' : 'Add New Tax Rate'}
       </h4>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Name</label>
-          <input
-            type="text"
-            bind:value={newTaxRate.name}
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Enter tax rate name"
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <FormField
+          label="Name"
+          labelArabic="الاسم"
+          type="text"
+          bind:value={newTaxRate.name}
+          placeholder="Enter tax rate name"
+          required
+        />
+
+        <FormField
+          label="Name (Arabic)"
+          labelArabic="الاسم بالعربية"
+          type="text"
+          bind:value={newTaxRate.name_arabic}
+          placeholder="اسم معدل الضريبة"
+          dir="rtl"
+        />
+
+        <FormField
+           label="Rate (%)"
+           labelArabic="المعدل (%)"
+           type="number"
+           value={rateValue}
+           placeholder="Enter tax rate percentage"
+           min="0"
+           max="100"
+           step="0.01"
+           required
+           on:input={handleRateChange}
+         />
+
+        <div class="flex items-center space-x-6">
+          <FormField
+            type="checkbox"
+            bind:checked={newTaxRate.is_default}
+            placeholder="Set as default"
           />
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Name (Arabic)</label>
-          <input
-            type="text"
-            bind:value={newTaxRate.name_arabic}
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="اسم معدل الضريبة"
-            dir="rtl"
+          <FormField
+            type="checkbox"
+            bind:checked={newTaxRate.is_active}
+            placeholder="Active"
           />
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Rate (%)</label>
-          <input
-            type="number"
-            step="0.01"
-            min="0"
-            max="100"
-            bind:value={newTaxRate.rate}
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Enter tax rate percentage"
-          />
-        </div>
-        <div class="flex items-center space-x-4">
-          <label class="flex items-center">
-            <input
-              type="checkbox"
-              bind:checked={newTaxRate.is_default}
-              class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-            />
-            <span class="ml-2 text-sm text-gray-700">Default</span>
-          </label>
-          <label class="flex items-center">
-            <input
-              type="checkbox"
-              bind:checked={newTaxRate.is_active}
-              class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-            />
-            <span class="ml-2 text-sm text-gray-700">Active</span>
-          </label>
         </div>
       </div>
-      <div class="flex justify-end space-x-2 mt-4">
+      
+      <div class="flex justify-end space-x-3 mt-6">
         <button
           on:click={resetTaxRateForm}
-          class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          class="px-4 py-2 border border-gray-300 text-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           Cancel
         </button>
@@ -191,60 +286,19 @@
     </div>
   {/if}
 
-  <!-- Tax Rates Table -->
-  <div class="bg-white shadow overflow-hidden sm:rounded-md">
-    <ul class="divide-y divide-gray-200">
-      {#each taxRates as taxRate (taxRate.id)}
-        <li class="px-6 py-4">
-          <div class="flex items-center justify-between">
-            <div class="flex-1">
-              <div class="flex items-center">
-                <div class="flex-1">
-                  <p class="text-sm font-medium text-gray-900">
-                    {taxRate.name}
-                    {#if taxRate.name_arabic}
-                      <span class="text-gray-500">({taxRate.name_arabic})</span>
-                    {/if}
-                  </p>
-                  <p class="text-sm text-gray-500">Rate: {taxRate.rate}%</p>
-                </div>
-                <div class="flex items-center space-x-2">
-                  {#if taxRate.is_default}
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      Default
-                    </span>
-                  {/if}
-                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {taxRate.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
-                    {taxRate.is_active ? 'Active' : 'Inactive'}
-                  </span>
-                </div>
-              </div>
-            </div>
-            <div class="flex items-center space-x-2">
-              {#if !taxRate.is_default}
-                <button
-                  on:click={() => setDefaultTaxRate(taxRate.id)}
-                  class="text-sm text-blue-600 hover:text-blue-900"
-                >
-                  Set Default
-                </button>
-              {/if}
-              <button
-                on:click={() => editTaxRate(taxRate)}
-                class="text-sm text-indigo-600 hover:text-indigo-900"
-              >
-                Edit
-              </button>
-              <button
-                on:click={() => deleteTaxRate(taxRate.id)}
-                class="text-sm text-red-600 hover:text-red-900"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </li>
-      {/each}
-    </ul>
-  </div>
+  <!-- Tax Rates DataTable -->
+  <DataTable
+    data={filteredTaxRates}
+    {columns}
+    {primaryAction}
+    loading={isLoading}
+    searchTerm={searchTerm}
+    searchPlaceholder="Search tax rates..."
+    emptyStateTitle="No tax rates found"
+    emptyStateMessage="Start by adding your first tax rate"
+    emptyStateIcon="fa-percentage"
+    on:primary-action={handlePrimaryAction}
+    on:search={handleSearch}
+    on:row-action={handleRowAction}
+  />
 </div>
