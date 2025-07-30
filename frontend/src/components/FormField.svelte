@@ -15,12 +15,17 @@
   export let options = [] // For select fields
   export let rows = 3 // For textarea
   export let error = ''
+  export let checked = false // For checkbox fields
 
   // Generate unique ID if not provided
   const fieldId = id || `field-${Math.random().toString(36).substr(2, 9)}`
 
   function handleInput(event) {
     value = event.target.value
+  }
+
+  function handleCheckboxChange(event) {
+    checked = event.target.checked
   }
 </script>
 
@@ -37,7 +42,7 @@
   
   {#if type === 'select'}
     <select 
-      {id}
+      id={fieldId}
       {name}
       class="select-glass {error ? 'border-error' : ''}"
       bind:value
@@ -51,7 +56,7 @@
     </select>
   {:else if type === 'textarea'}
     <textarea
-      {id}
+      id={fieldId}
       {name}
       class="textarea-glass {error ? 'border-error' : ''}"
       bind:value
@@ -65,21 +70,22 @@
   {:else if type === 'checkbox'}
     <label class="checkbox-glass">
       <input 
-        {id}
+        id={fieldId}
         {name}
         type="checkbox"
         class="checkbox-primary"
-        bind:checked={value}
+        bind:checked
         {required}
         {disabled}
+        on:change={handleCheckboxChange}
       />
       <span>{placeholder}</span>
     </label>
-  {:else}
+  {:else if type === 'number'}
     <input 
-      {id}
+      id={fieldId}
       {name}
-      {type}
+      type="number"
       class="input-glass {error ? 'border-error' : ''}"
       bind:value
       {placeholder}
@@ -89,6 +95,45 @@
       {min}
       {max}
       {step}
+      on:input={handleInput}
+    />
+  {:else if type === 'email'}
+    <input 
+      id={fieldId}
+      {name}
+      type="email"
+      class="input-glass {error ? 'border-error' : ''}"
+      bind:value
+      {placeholder}
+      {required}
+      {disabled}
+      {dir}
+      on:input={handleInput}
+    />
+  {:else if type === 'tel'}
+    <input 
+      id={fieldId}
+      {name}
+      type="tel"
+      class="input-glass {error ? 'border-error' : ''}"
+      bind:value
+      {placeholder}
+      {required}
+      {disabled}
+      {dir}
+      on:input={handleInput}
+    />
+  {:else}
+    <input 
+      id={fieldId}
+      {name}
+      type="text"
+      class="input-glass {error ? 'border-error' : ''}"
+      bind:value
+      {placeholder}
+      {required}
+      {disabled}
+      {dir}
       on:input={handleInput}
     />
   {/if}
