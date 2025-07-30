@@ -70,6 +70,10 @@ export function DownloadInvoicePDF(arg1) {
   return window['go']['main']['App']['DownloadInvoicePDF'](arg1);
 }
 
+export function GenerateInvoiceHTML(arg1) {
+  return window['go']['main']['App']['GenerateInvoiceHTML'](arg1);
+}
+
 export function GenerateInvoicePDF(arg1) {
   return window['go']['main']['App']['GenerateInvoicePDF'](arg1);
 }
@@ -150,8 +154,16 @@ export function OpenPDFInViewer(arg1) {
   return window['go']['main']['App']['OpenPDFInViewer'](arg1);
 }
 
+export function PrintInvoiceHTML(arg1) {
+  return window['go']['main']['App']['PrintInvoiceHTML'](arg1);
+}
+
 export function RegenerateInvoiceQRCode(arg1) {
   return window['go']['main']['App']['RegenerateInvoiceQRCode'](arg1);
+}
+
+export function SaveInvoiceHTML(arg1) {
+  return window['go']['main']['App']['SaveInvoiceHTML'](arg1);
 }
 
 export function ShowError(arg1, arg2) {
@@ -204,6 +216,10 @@ export function UpdateUnitOfMeasurement(arg1) {
 
 export function ValidateZATCAQRCode(arg1) {
   return window['go']['main']['App']['ValidateZATCAQRCode'](arg1);
+}
+
+export function ViewInvoiceHTML(arg1) {
+  return window['go']['main']['App']['ViewInvoiceHTML'](arg1);
 }
 
 export function ViewInvoicePDF(arg1) {

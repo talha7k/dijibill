@@ -1,6 +1,6 @@
 <script>
   import { onMount } from 'svelte'
-  import { GetInvoices, GenerateInvoicePDF, ViewInvoicePDF, DownloadInvoicePDF } from '../wailsjs/go/main/App.js'
+  import { GetInvoices, GenerateInvoiceHTML, ViewInvoiceHTML, SaveInvoiceHTML } from '../wailsjs/go/main/App.js'
   import InvoiceModal from './InvoiceModal.svelte'
   
   let invoices = []
@@ -68,27 +68,27 @@
     }
   }
 
-  async function downloadInvoicePDF(invoiceId) {
-    console.log('downloadInvoicePDF called with ID:', invoiceId)
+  async function downloadInvoiceHTML(invoiceId) {
+    console.log('downloadInvoiceHTML called with ID:', invoiceId)
     try {
-      console.log('Downloading PDF for invoice:', invoiceId)
-      await DownloadInvoicePDF(invoiceId)
-      console.log('PDF download completed')
+      console.log('Saving HTML for invoice:', invoiceId)
+      await SaveInvoiceHTML(invoiceId)
+      console.log('HTML save completed')
     } catch (error) {
-      console.error('Error downloading PDF:', error)
-      alert('Failed to download PDF. Please try again.')
+      console.error('Error saving HTML:', error)
+      alert('Failed to save HTML. Please try again.')
     }
   }
 
-  async function viewInvoicePDF(invoiceId) {
-    console.log('viewInvoicePDF called with ID:', invoiceId)
+  async function viewInvoiceHTML(invoiceId) {
+    console.log('viewInvoiceHTML called with ID:', invoiceId)
     try {
-      console.log('Opening PDF preview for invoice:', invoiceId)
-      await ViewInvoicePDF(invoiceId)
-      console.log('PDF preview opened')
+      console.log('Opening HTML preview for invoice:', invoiceId)
+      await ViewInvoiceHTML(invoiceId)
+      console.log('HTML preview opened')
     } catch (error) {
-      console.error('Error viewing PDF:', error)
-      alert('Failed to open PDF preview. Please try again.')
+      console.error('Error viewing HTML:', error)
+      alert('Failed to open HTML preview. Please try again.')
     }
   }
 
@@ -214,8 +214,8 @@
                     <div class="flex gap-2">
                       <button 
                         class="btn-icon btn-sm text-info hover:bg-info/20" 
-                        title="View PDF"
-                        on:click={() => viewInvoicePDF(invoice.id)}
+                        title="View HTML"
+                        on:click={() => viewInvoiceHTML(invoice.id)}
                       >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -233,8 +233,8 @@
                       </button>
                       <button 
                         class="btn-icon btn-sm text-success hover:bg-success/20" 
-                        title="Download PDF"
-                        on:click={() => downloadInvoicePDF(invoice.id)}
+                        title="Save HTML"
+                        on:click={() => downloadInvoiceHTML(invoice.id)}
                       >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>

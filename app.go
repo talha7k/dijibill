@@ -15,9 +15,9 @@ import (
 
 // App struct
 type App struct {
-	ctx        context.Context
-	db         *database.Database
-	pdfService *PDFService
+	ctx                context.Context
+	db                 *database.Database
+	htmlInvoiceService *HTMLInvoiceService
 }
 
 // NewApp creates a new App application struct
@@ -42,8 +42,8 @@ func (a *App) startup(ctx context.Context) {
 		log.Fatal("Failed to initialize database:", err)
 	}
 
-	// Initialize PDF service
-	a.pdfService = NewPDFService(a.db)
+	// Initialize HTML invoice service
+	a.htmlInvoiceService = NewHTMLInvoiceService(a.ctx, a.db)
 
 	// Create sample data for testing
 	if err := a.CreateSampleData(); err != nil {
@@ -287,15 +287,33 @@ func (a *App) UpdateDefaultProductSettings(settings database.DefaultProductSetti
 	return a.db.UpdateDefaultProductSettings(&settings)
 }
 
-// PDF Generation Methods
+// HTML Invoice Generation Methods
 
+func (a *App) GenerateInvoiceHTML(invoiceID int) (string, error) {
+	return a.htmlInvoiceService.GenerateInvoiceHTML(invoiceID)
+}
+
+func (a *App) ViewInvoiceHTML(invoiceID int) error {
+	return a.htmlInvoiceService.ViewInvoiceHTML(invoiceID)
+}
+
+func (a *App) PrintInvoiceHTML(invoiceID int) error {
+	return a.htmlInvoiceService.PrintInvoiceHTML(invoiceID)
+}
+
+func (a *App) SaveInvoiceHTML(invoiceID int) error {
+	return a.htmlInvoiceService.SaveInvoiceHTML(invoiceID)
+}
+
+// Legacy PDF methods - kept for backward compatibility but now generate HTML
 func (a *App) GenerateInvoicePDF(invoiceID int) (string, error) {
-	pdfBytes, err := a.pdfService.GenerateInvoicePDF(invoiceID)
+	// Generate HTML and save as .html file instead
+	htmlContent, err := a.htmlInvoiceService.GenerateInvoiceHTML(invoiceID)
 	if err != nil {
 		return "", err
 	}
 
-	// Save PDF to user's Documents folder
+	// Save HTML to user's Documents folder
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		return "", err
@@ -311,76 +329,24 @@ func (a *App) GenerateInvoicePDF(invoiceID int) (string, error) {
 		return "", err
 	}
 
-	filename := fmt.Sprintf("Invoice_%s_%s.pdf", invoice.InvoiceNumber, time.Now().Format("20060102_150405"))
+	filename := fmt.Sprintf("Invoice_%s_%s.html", invoice.InvoiceNumber, time.Now().Format("20060102_150405"))
 	filepath := filepath.Join(documentsDir, filename)
 
-	if err := os.WriteFile(filepath, pdfBytes, 0644); err != nil {
+	if err := os.WriteFile(filepath, []byte(htmlContent), 0644); err != nil {
 		return "", err
 	}
 
 	return filepath, nil
 }
 
-// ViewInvoicePDF generates PDF and opens it in browser for preview
+// ViewInvoicePDF generates HTML and opens it in browser for preview (legacy method name)
 func (a *App) ViewInvoicePDF(invoiceID int) error {
-	pdfBytes, err := a.pdfService.GenerateInvoicePDF(invoiceID)
-	if err != nil {
-		return err
-	}
-
-	// Create a temporary file for viewing
-	tempDir := os.TempDir()
-	invoice, err := a.db.GetInvoiceByID(invoiceID)
-	if err != nil {
-		return err
-	}
-
-	filename := fmt.Sprintf("Invoice_%s_preview.pdf", invoice.InvoiceNumber)
-	tempFilePath := filepath.Join(tempDir, filename)
-
-	if err := os.WriteFile(tempFilePath, pdfBytes, 0644); err != nil {
-		return err
-	}
-
-	// Open in browser
-	return a.OpenPDFInViewer(tempFilePath)
+	return a.htmlInvoiceService.ViewInvoiceHTML(invoiceID)
 }
 
-// DownloadInvoicePDF generates PDF and allows user to save it where they want
+// DownloadInvoicePDF generates HTML and allows user to save it where they want (legacy method name)
 func (a *App) DownloadInvoicePDF(invoiceID int) error {
-	// Get invoice details for default filename
-	invoice, err := a.db.GetInvoiceByID(invoiceID)
-	if err != nil {
-		return err
-	}
-
-	defaultFilename := fmt.Sprintf("Invoice_%s_%s.pdf", invoice.InvoiceNumber, time.Now().Format("20060102_150405"))
-	
-	// Show save dialog
-	savePath, err := a.ShowSaveDialog(defaultFilename)
-	if err != nil {
-		return err
-	}
-
-	// If user cancelled the dialog, savePath will be empty
-	if savePath == "" {
-		return nil // User cancelled, not an error
-	}
-
-	// Generate PDF
-	pdfBytes, err := a.pdfService.GenerateInvoicePDF(invoiceID)
-	if err != nil {
-		return err
-	}
-
-	// Save to chosen location
-	if err := os.WriteFile(savePath, pdfBytes, 0644); err != nil {
-		return err
-	}
-
-	// Show success message
-	a.ShowMessage("Success", fmt.Sprintf("Invoice PDF saved successfully to:\n%s", savePath))
-	return nil
+	return a.htmlInvoiceService.SaveInvoiceHTML(invoiceID)
 }
 
 // OpenPDFInViewer opens a PDF file in the default system viewer
@@ -489,26 +455,26 @@ func (a *App) CreateSampleData() error {
 	if err != nil {
 		return err
 	}
-	
+
 	if len(invoices) > 0 {
 		return nil // Already have data
 	}
 
 	// Create a sample customer first
 	customer := database.Customer{
-		Name:        "Sample Customer",
-		NameArabic:  "عميل تجريبي",
-		VATNumber:   "123456789012345",
-		Email:       "customer@example.com",
-		Phone:       "+966501234567",
-		Address:     "123 Customer Street",
+		Name:          "Sample Customer",
+		NameArabic:    "عميل تجريبي",
+		VATNumber:     "123456789012345",
+		Email:         "customer@example.com",
+		Phone:         "+966501234567",
+		Address:       "123 Customer Street",
 		AddressArabic: "شارع العميل ١٢٣",
-		City:        "Riyadh",
-		CityArabic:  "الرياض",
-		Country:     "Saudi Arabia",
+		City:          "Riyadh",
+		CityArabic:    "الرياض",
+		Country:       "Saudi Arabia",
 		CountryArabic: "المملكة العربية السعودية",
 	}
-	
+
 	if err := a.CreateCustomer(customer); err != nil {
 		return err
 	}
@@ -518,7 +484,7 @@ func (a *App) CreateSampleData() error {
 	if err != nil {
 		return err
 	}
-	
+
 	if len(customers) == 0 {
 		return fmt.Errorf("no customers found")
 	}
@@ -528,7 +494,7 @@ func (a *App) CreateSampleData() error {
 	if err != nil {
 		return err
 	}
-	
+
 	if len(salesCategories) == 0 {
 		return fmt.Errorf("no sales categories found")
 	}
@@ -546,7 +512,7 @@ func (a *App) CreateSampleData() error {
 		Stock:       10,
 		IsActive:    true,
 	}
-	
+
 	if err := a.CreateProduct(product); err != nil {
 		return err
 	}
@@ -556,27 +522,27 @@ func (a *App) CreateSampleData() error {
 	if err != nil {
 		return err
 	}
-	
+
 	if len(products) == 0 {
 		return fmt.Errorf("no products found")
 	}
 
 	// Create sample invoice
 	invoice := database.Invoice{
-		InvoiceNumber:    "INV-2024-001",
-		CustomerID:       customers[0].ID,
-		SalesCategoryID:  salesCategories[0].ID,
-		IssueDate:        time.Now(),
-		DueDate:          time.Now().AddDate(0, 0, 30), // 30 days from now
-		Status:           "draft",
-		Notes:            "This is a sample invoice for testing",
-		NotesArabic:      "هذه فاتورة تجريبية للاختبار",
+		InvoiceNumber:   "INV-2024-001",
+		CustomerID:      customers[0].ID,
+		SalesCategoryID: salesCategories[0].ID,
+		IssueDate:       time.Now(),
+		DueDate:         time.Now().AddDate(0, 0, 30), // 30 days from now
+		Status:          "draft",
+		Notes:           "This is a sample invoice for testing",
+		NotesArabic:     "هذه فاتورة تجريبية للاختبار",
 		Items: []database.InvoiceItem{
 			{
-				ProductID:   products[0].ID,
-				Quantity:    2,
-				UnitPrice:   100.0,
-				VATRate:     15.0,
+				ProductID: products[0].ID,
+				Quantity:  2,
+				UnitPrice: 100.0,
+				VATRate:   15.0,
 			},
 		},
 	}

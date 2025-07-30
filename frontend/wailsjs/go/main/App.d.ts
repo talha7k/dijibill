@@ -36,6 +36,8 @@ export function DeleteUnitOfMeasurement(arg1:number):Promise<void>;
 
 export function DownloadInvoicePDF(arg1:number):Promise<void>;
 
+export function GenerateInvoiceHTML(arg1:number):Promise<string>;
+
 export function GenerateInvoicePDF(arg1:number):Promise<string>;
 
 export function GenerateSampleQRCode():Promise<string>;
@@ -76,7 +78,11 @@ export function Greet(arg1:string):Promise<string>;
 
 export function OpenPDFInViewer(arg1:string):Promise<void>;
 
+export function PrintInvoiceHTML(arg1:number):Promise<void>;
+
 export function RegenerateInvoiceQRCode(arg1:number):Promise<string>;
+
+export function SaveInvoiceHTML(arg1:number):Promise<void>;
 
 export function ShowError(arg1:string,arg2:string):Promise<void>;
 
@@ -103,5 +109,7 @@ export function UpdateTaxRate(arg1:database.TaxRate):Promise<void>;
 export function UpdateUnitOfMeasurement(arg1:database.UnitOfMeasurement):Promise<void>;
 
 export function ValidateZATCAQRCode(arg1:string):Promise<void>;
+
+export function ViewInvoiceHTML(arg1:number):Promise<void>;
 
 export function ViewInvoicePDF(arg1:number):Promise<void>;
