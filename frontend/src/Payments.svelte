@@ -2,6 +2,9 @@
 	import { onMount } from 'svelte';
 	import { GetPayments, CreatePayment, UpdatePayment, DeletePayment, GetPaymentTypes, GetInvoices } from '../wailsjs/go/main/App.js';
 	import { database } from '../wailsjs/go/models';
+	import PageLayout from './components/PageLayout.svelte';
+	import DataTable from './components/DataTable.svelte';
+	import StatusBadge from './components/StatusBadge.svelte';
 
 	let payments = [];
 	let paymentTypes = [];
@@ -178,16 +181,6 @@
 		return paymentType ? paymentType.name : 'Unknown';
 	}
 
-	function getStatusBadgeClass(status) {
-		switch (status) {
-			case 'completed': return 'badge-success';
-			case 'pending': return 'badge-warning';
-			case 'failed': return 'badge-error';
-			case 'cancelled': return 'badge-neutral';
-			default: return 'badge-neutral';
-		}
-	}
-
 	$: filteredPayments = (() => {
 		console.log('Filtering payments:', { 
 			paymentsLength: payments.length, 
@@ -219,297 +212,94 @@
 				   payment.status.toLowerCase().includes(searchLower);
 		});
 	})();
+
+	// Table configuration
+	const columns = [
+		{ key: 'id', label: 'Payment ID', render: (item) => `#${item.id}` },
+		{ key: 'invoice_id', label: 'Invoice', render: (item) => getInvoiceNumber(item.invoice_id) },
+		{ key: 'amount', label: 'Amount', render: (item) => `<span class="font-semibold">${formatCurrency(item.amount)}</span>`, class: 'font-semibold' },
+		{ key: 'payment_type_id', label: 'Method', render: (item) => getPaymentTypeName(item.payment_type_id) },
+		{ key: 'payment_date', label: 'Date', render: (item) => formatDate(item.payment_date) },
+		{ key: 'reference', label: 'Reference', render: (item) => item.reference || '-' },
+		{ 
+			key: 'status', 
+			label: 'Status',
+			actions: [
+				{ key: 'edit', icon: 'fa-edit', class: 'btn-secondary', title: 'Edit Payment' },
+				{ key: 'delete', icon: 'fa-trash', class: 'btn-error', title: 'Delete Payment' }
+			]
+		}
+	];
+
+	const primaryAction = {
+		text: 'Record Payment',
+		icon: 'fa-plus'
+	};
+
+	const secondaryActions = [
+		{
+			text: 'Reports',
+			icon: 'fa-chart-bar'
+		}
+	];
+
+	function handlePrimaryAction() {
+		openModal();
+	}
+
+	function handleSecondaryAction(action) {
+		if (action.text === 'Reports') {
+			console.log('Reports clicked');
+		}
+	}
+
+	function handleRowAction(event) {
+		const { action, item } = event.detail;
+		if (action === 'edit') {
+			openModal(item);
+		} else if (action === 'delete') {
+			deletePayment(item.id);
+		}
+	}
+
+	function handleSearch(event) {
+		searchTerm = event.detail.searchTerm;
+	}
 </script>
 
-<div class="p-6">
-	<div class="card bg-base-100/20 backdrop-blur-lg border border-white/20 shadow-xl">
-		<div class="card-body">
-			<h2 class="card-title text-white text-2xl mb-4">
-				<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
-				</svg>
-				Payments
-				<div class="ml-auto">
-					<div class="w-4 h-4 bg-accent rounded-full flex items-center justify-center">
-						<svg class="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 8 8">
-							<circle cx="4" cy="4" r="3"/>
-						</svg>
-					</div>
-				</div>
-			</h2>
-			
-			<div class="flex justify-between items-center mb-6">
-				<div class="flex gap-2">
-					<button class="btn btn-primary" on:click={() => openModal()}>
-						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-						</svg>
-						Record Payment
-					</button>
-					<button class="btn btn-outline btn-secondary">
-						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-						</svg>
-						Reports
-					</button>
-				</div>
-				<div class="form-control">
-					<input 
-						type="text" 
-						placeholder="Search payments..." 
-						class="input input-bordered bg-white/10 border-white/20 text-white placeholder-white/60"
-						bind:value={searchTerm}
-					/>
-				</div>
-			</div>
+<PageLayout 
+	title="Payments" 
+	icon="fa-credit-card" 
+	showIndicator={true}
+>
+	<svelte:fragment slot="actions">
+		<!-- Actions are handled by DataTable -->
+	</svelte:fragment>
 
-			<div class="overflow-x-auto">
-				<table class="table table-zebra">
-					<thead>
-						<tr class="text-white/80">
-							<th>Payment ID</th>
-							<th>Invoice</th>
-							<th>Amount</th>
-							<th>Method</th>
-							<th>Date</th>
-							<th>Reference</th>
-							<th>Status</th>
-							<th>Actions</th>
-						</tr>
-					</thead>
-					<tbody class="text-white/70">
-						{#if loading}
-							<tr>
-								<td colspan="8" class="text-center py-8">
-									<span class="loading loading-spinner loading-md"></span>
-									Loading payments...
-								</td>
-							</tr>
-						{:else if filteredPayments.length === 0}
-							<tr>
-								<td colspan="8" class="text-center py-8">
-									<div class="flex flex-col items-center gap-2">
-										<svg class="w-12 h-12 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
-										</svg>
-										<p class="text-white/60">
-											{searchTerm ? 'No payments found matching your search.' : 'No payments recorded'}
-										</p>
-										{#if !searchTerm}
-											<button class="btn btn-primary btn-sm" on:click={() => openModal()}>
-												Record your first payment
-											</button>
-										{/if}
-									</div>
-								</td>
-							</tr>
-						{:else}
-							{#each filteredPayments as payment (payment.id)}
-								<tr>
-									<td>#{payment.id}</td>
-									<td>{getInvoiceNumber(payment.invoice_id)}</td>
-									<td class="font-semibold">{formatCurrency(payment.amount)}</td>
-									<td>{getPaymentTypeName(payment.payment_type_id)}</td>
-									<td>{formatDate(payment.payment_date)}</td>
-									<td>{payment.reference || '-'}</td>
-									<td>
-										<span class="badge {getStatusBadgeClass(payment.status)}">
-											{payment.status}
-										</span>
-									</td>
-									<td>
-										<div class="flex gap-2">
-											<button 
-												class="btn btn-sm btn-ghost text-white/70 hover:text-white"
-												on:click={() => openModal(payment)}
-												title="Edit Payment"
-											>
-												<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-												</svg>
-											</button>
-											<button 
-												class="btn btn-sm btn-ghost text-red-400 hover:text-red-300"
-												on:click={() => deletePayment(payment.id)}
-												title="Delete Payment"
-											>
-												<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-												</svg>
-											</button>
-										</div>
-									</td>
-								</tr>
-							{/each}
-						{/if}
-					</tbody>
-				</table>
-			</div>
-		</div>
-	</div>
-</div>
-
-{#if showModal}
-	<div class="modal modal-open">
-		<div class="modal-box max-w-2xl bg-base-100/90 backdrop-blur-lg border border-white/20">
-			<h3 class="font-bold text-lg mb-4 text-white">
-				{editingPayment ? 'Edit Payment' : 'Record New Payment'}
-			</h3>
-
-			<form on:submit|preventDefault={savePayment}>
-				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-					<div class="form-control">
-						<label class="label" for="invoice_id">
-							<span class="label-text text-white/80">Invoice *</span>
-						</label>
-						<select 
-							id="invoice_id"
-							class="select select-bordered bg-white/10 border-white/20 text-white"
-							bind:value={paymentData.invoice_id}
-							required
-						>
-							<option value={0}>Select Invoice</option>
-							{#each invoices as invoice}
-								<option value={invoice.id}>
-									{invoice.invoice_number} - {formatCurrency(invoice.total_amount)}
-								</option>
-							{/each}
-						</select>
-					</div>
-
-					<div class="form-control">
-						<label class="label" for="payment_type_id">
-							<span class="label-text text-white/80">Payment Method *</span>
-						</label>
-						<select 
-							id="payment_type_id"
-							class="select select-bordered bg-white/10 border-white/20 text-white"
-							bind:value={paymentData.payment_type_id}
-							required
-						>
-							<option value={0}>Select Payment Method</option>
-							{#each paymentTypes as paymentType}
-								<option value={paymentType.id}>{paymentType.name}</option>
-							{/each}
-						</select>
-					</div>
-
-					<div class="form-control">
-						<label class="label" for="amount">
-							<span class="label-text text-white/80">Amount *</span>
-						</label>
-						<input 
-							id="amount"
-							type="number" 
-							step="0.01"
-							min="0"
-							class="input input-bordered bg-white/10 border-white/20 text-white placeholder-white/60"
-							bind:value={paymentData.amount}
-							required
-						/>
-					</div>
-
-					<div class="form-control">
-						<label class="label" for="payment_date">
-							<span class="label-text text-white/80">Payment Date *</span>
-						</label>
-						<input 
-							id="payment_date"
-							type="date"
-							class="input input-bordered bg-white/10 border-white/20 text-white"
-							bind:value={paymentData.payment_date}
-							required
-						/>
-					</div>
-
-					<div class="form-control">
-						<label class="label" for="reference">
-							<span class="label-text text-white/80">Reference</span>
-						</label>
-						<input 
-							id="reference"
-							type="text"
-							class="input input-bordered bg-white/10 border-white/20 text-white placeholder-white/60"
-							placeholder="Check number, transaction ID, etc."
-							bind:value={paymentData.reference}
-						/>
-					</div>
-
-					<div class="form-control">
-						<label class="label" for="status">
-							<span class="label-text text-white/80">Status *</span>
-						</label>
-						<select 
-							id="status"
-							class="select select-bordered bg-white/10 border-white/20 text-white"
-							bind:value={paymentData.status}
-							required
-						>
-							<option value="completed">Completed</option>
-							<option value="pending">Pending</option>
-							<option value="failed">Failed</option>
-							<option value="cancelled">Cancelled</option>
-						</select>
-					</div>
-
-					<div class="form-control md:col-span-2">
-						<label class="label" for="notes">
-							<span class="label-text text-white/80">Notes</span>
-						</label>
-						<textarea 
-							id="notes"
-							class="textarea textarea-bordered bg-white/10 border-white/20 text-white placeholder-white/60"
-							placeholder="Additional notes about this payment"
-							bind:value={paymentData.notes}
-						></textarea>
-					</div>
-
-					<div class="form-control md:col-span-2">
-						<label class="label" for="notes_arabic">
-							<span class="label-text text-white/80">Notes (Arabic)</span>
-						</label>
-						<textarea 
-							id="notes_arabic"
-							class="textarea textarea-bordered bg-white/10 border-white/20 text-white placeholder-white/60"
-							placeholder="ملاحظات إضافية حول هذه الدفعة"
-							bind:value={paymentData.notes_arabic}
-							dir="rtl"
-						></textarea>
-					</div>
-				</div>
-
-				<div class="modal-action">
-					<button type="button" class="btn btn-ghost text-white/70" on:click={closeModal}>Cancel</button>
-					<button 
-						type="submit" 
-						class="btn btn-primary"
-						disabled={loading}
-					>
-						{#if loading}
-							<span class="loading loading-spinner loading-sm"></span>
-						{/if}
-						{editingPayment ? 'Update Payment' : 'Record Payment'}
-					</button>
-				</div>
-			</form>
-		</div>
-	</div>
-{/if}
-
-<style>
-	.badge-success {
-		@apply bg-green-100 text-green-800 border-green-200;
-	}
-
-	.badge-warning {
-		@apply bg-yellow-100 text-yellow-800 border-yellow-200;
-	}
-
-	.badge-error {
-		@apply bg-red-100 text-red-800 border-red-200;
-	}
-
-	.badge-neutral {
-		@apply bg-gray-100 text-gray-800 border-gray-200;
-	}
-</style>
+	<DataTable
+		data={filteredPayments}
+		{columns}
+		{loading}
+		{searchTerm}
+		searchPlaceholder="Search payments..."
+		emptyStateTitle="No payments recorded"
+		emptyStateMessage="Start by recording your first payment"
+		emptyStateIcon="fa-credit-card"
+		{primaryAction}
+		{secondaryActions}
+		on:primary-action={handlePrimaryAction}
+		on:secondary-action={handleSecondaryAction}
+		on:row-action={handleRowAction}
+		on:search={handleSearch}
+	>
+		<svelte:fragment slot="cell" let:item let:column>
+			{#if column.key === 'status'}
+				<StatusBadge status={item.status} />
+			{:else if column.render}
+				{@html column.render(item)}
+			{:else}
+				{item[column.key] || '-'}
+			{/if}
+		</svelte:fragment>
+	</DataTable>
+</PageLayout>

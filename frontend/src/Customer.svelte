@@ -1,240 +1,201 @@
 <script>
-  import { onMount } from 'svelte'
-  import CustomerModal from './components/CustomerModal.svelte'
+	import { onMount } from 'svelte';
+	import { GetCustomers, CreateCustomer, UpdateCustomer, DeleteCustomer } from '../wailsjs/go/main/App.js';
+	import { database } from '../wailsjs/go/models';
+	import PageLayout from './components/PageLayout.svelte';
+	import DataTable from './components/DataTable.svelte';
+	import StatusBadge from './components/StatusBadge.svelte';
+	import CustomerModal from './components/CustomerModal.svelte';
 
-  let customers = []
-  let loading = false
-  let searchTerm = ''
-  let showModal = false
-  let editingCustomer = null
-  let modalLoading = false
+	let customers = [];
+	let searchTerm = '';
+	let showModal = false;
+	let editingCustomer = null;
+	let loading = false;
 
-  onMount(async () => {
-    await loadCustomers()
-  })
+	onMount(async () => {
+		await loadCustomers();
+	});
 
-  async function loadCustomers() {
-    loading = true
-    try {
-      const response = await fetch('/api/customers')
-      if (response.ok) {
-        customers = await response.json()
-      } else {
-        console.error('Failed to load customers:', response.statusText)
-      }
-    } catch (error) {
-      console.error('Error loading customers:', error)
-    } finally {
-      loading = false
-    }
-  }
+	async function loadCustomers() {
+		loading = true;
+		try {
+			customers = await GetCustomers();
+		} catch (error) {
+			console.error('Error loading customers:', error);
+			customers = [];
+		} finally {
+			loading = false;
+		}
+	}
 
-  function openModal(customer = null) {
-    editingCustomer = customer
-    showModal = true
-  }
+	function openModal(customer = null) {
+		editingCustomer = customer;
+		showModal = true;
+	}
 
-  function closeModal() {
-    showModal = false
-    editingCustomer = null
-    modalLoading = false
-  }
+	function closeModal() {
+		showModal = false;
+		editingCustomer = null;
+	}
 
-  async function handleSaveCustomer(event) {
-    const { customer, isEditing } = event.detail
-    modalLoading = true
+	async function handleSaveCustomer(event) {
+		const customerData = event.detail;
+		loading = true;
+		
+		try {
+			const customer = new database.Customer();
+			Object.assign(customer, customerData);
 
-    try {
-      const url = isEditing ? `/api/customers/${editingCustomer.id}` : '/api/customers'
-      const method = isEditing ? 'PUT' : 'POST'
-      
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(customer)
-      })
+			if (editingCustomer) {
+				customer.id = editingCustomer.id;
+				await UpdateCustomer(customer);
+			} else {
+				await CreateCustomer(customer);
+			}
 
-      if (response.ok) {
-        await loadCustomers()
-        closeModal()
-      } else {
-        console.error('Failed to save customer:', response.statusText)
-      }
-    } catch (error) {
-      console.error('Error saving customer:', error)
-    } finally {
-      modalLoading = false
-    }
-  }
+			await loadCustomers();
+			closeModal();
+		} catch (error) {
+			console.error('Error saving customer:', error);
+			alert('Error saving customer: ' + error.message);
+		} finally {
+			loading = false;
+		}
+	}
 
-  async function deleteCustomer(customerId) {
-    if (!confirm('Are you sure you want to delete this customer?')) {
-      return
-    }
+	async function deleteCustomer(id) {
+		if (confirm('Are you sure you want to delete this customer?')) {
+			loading = true;
+			try {
+				await DeleteCustomer(id);
+				await loadCustomers();
+			} catch (error) {
+				console.error('Error deleting customer:', error);
+				alert('Error deleting customer: ' + error.message);
+			} finally {
+				loading = false;
+			}
+		}
+	}
 
-    try {
-      const response = await fetch(`/api/customers/${customerId}`, {
-        method: 'DELETE'
-      })
+	$: filteredCustomers = customers.filter(customer => {
+		if (!searchTerm) return true;
+		const searchLower = searchTerm.toLowerCase();
+		return (
+			customer.name?.toLowerCase().includes(searchLower) ||
+			customer.name_arabic?.toLowerCase().includes(searchLower) ||
+			customer.email?.toLowerCase().includes(searchLower) ||
+			customer.phone?.toLowerCase().includes(searchLower) ||
+			customer.company?.toLowerCase().includes(searchLower) ||
+			customer.city?.toLowerCase().includes(searchLower)
+		);
+	});
 
-      if (response.ok) {
-        await loadCustomers()
-      } else {
-        console.error('Failed to delete customer:', response.statusText)
-      }
-    } catch (error) {
-      console.error('Error deleting customer:', error)
-    }
-  }
+	// Table configuration
+	const columns = [
+		{ key: 'name', label: 'Name', render: (item) => `<div><div class="font-medium">${item.name || '-'}</div><div class="text-sm opacity-70">${item.name_arabic || ''}</div></div>` },
+		{ key: 'email', label: 'Email', render: (item) => item.email || '-' },
+		{ key: 'phone', label: 'Phone', render: (item) => item.phone || '-' },
+		{ key: 'company', label: 'Company', render: (item) => item.company || '-' },
+		{ key: 'city', label: 'City', render: (item) => `${item.city || '-'}, ${item.country || ''}` },
+		{ 
+			key: 'status', 
+			label: 'Status',
+			actions: [
+				{ key: 'edit', icon: 'fa-edit', class: 'btn-secondary', title: 'Edit Customer' },
+				{ key: 'delete', icon: 'fa-trash', class: 'btn-error', title: 'Delete Customer' }
+			]
+		}
+	];
 
-  $: filteredCustomers = customers.filter(customer => {
-    if (!searchTerm) return true
-    const search = searchTerm.toLowerCase()
-    return (
-      customer.name?.toLowerCase().includes(search) ||
-      customer.name_arabic?.toLowerCase().includes(search) ||
-      customer.email?.toLowerCase().includes(search) ||
-      customer.phone?.toLowerCase().includes(search) ||
-      customer.vat_number?.toLowerCase().includes(search)
-    )
-  })
+	const primaryAction = {
+		text: 'Add Customer',
+		icon: 'fa-plus'
+	};
+
+	const secondaryActions = [
+		{
+			text: 'Import',
+			icon: 'fa-upload'
+		},
+		{
+			text: 'Export',
+			icon: 'fa-download'
+		}
+	];
+
+	function handlePrimaryAction() {
+		openModal();
+	}
+
+	function handleSecondaryAction(action) {
+		if (action.text === 'Import') {
+			console.log('Import clicked');
+		} else if (action.text === 'Export') {
+			console.log('Export clicked');
+		}
+	}
+
+	function handleRowAction(event) {
+		const { action, item } = event.detail;
+		if (action === 'edit') {
+			openModal(item);
+		} else if (action === 'delete') {
+			deleteCustomer(item.id);
+		}
+	}
+
+	function handleSearch(event) {
+		searchTerm = event.detail.searchTerm;
+	}
 </script>
 
-<div class="page-container">
-  <div class="page-header">
-    <h1 class="page-title">Customers</h1>
-    <div class="header-actions">
-      <button class="btn btn-secondary" type="button">
-        <i class="fas fa-upload"></i>
-        Import
-      </button>
-      <button class="btn btn-primary" type="button" on:click={() => openModal()}>
-        <i class="fas fa-plus"></i>
-        Add Customer
-      </button>
-    </div>
-  </div>
+<PageLayout 
+	title="Customers" 
+	icon="fa-users" 
+	showIndicator={true}
+>
+	<svelte:fragment slot="actions">
+		<!-- Actions are handled by DataTable -->
+	</svelte:fragment>
 
-  <div class="glass-card">
-    <div class="card-header">
-      <div class="search-container">
-        <i class="fas fa-search search-icon"></i>
-        <input
-          type="text"
-          placeholder="Search customers..."
-          class="search-input"
-          bind:value={searchTerm}
-        />
-      </div>
-    </div>
+	<DataTable
+		data={filteredCustomers}
+		{columns}
+		{loading}
+		{searchTerm}
+		searchPlaceholder="Search customers..."
+		emptyStateTitle="No customers found"
+		emptyStateMessage="Start by adding your first customer"
+		emptyStateIcon="fa-users"
+		{primaryAction}
+		{secondaryActions}
+		on:primary-action={handlePrimaryAction}
+		on:secondary-action={handleSecondaryAction}
+		on:row-action={handleRowAction}
+		on:search={handleSearch}
+	>
+		<svelte:fragment slot="cell" let:item let:column>
+			{#if column.key === 'status'}
+				<StatusBadge status={item.active ? 'active' : 'inactive'} />
+			{:else if column.render}
+				{@html column.render(item)}
+			{:else}
+				{item[column.key] || '-'}
+			{/if}
+		</svelte:fragment>
+	</DataTable>
+</PageLayout>
 
-    <div class="table-container">
-      {#if loading}
-        <div class="loading-state">
-          <i class="fas fa-spinner fa-spin"></i>
-          Loading customers...
-        </div>
-      {:else if filteredCustomers.length === 0}
-        <div class="empty-state">
-          <i class="fas fa-users"></i>
-          <h3>No customers found</h3>
-          <p>
-            {searchTerm ? 'No customers match your search criteria.' : 'Start by adding your first customer.'}
-          </p>
-          {#if !searchTerm}
-            <button class="btn btn-primary" on:click={() => openModal()}>
-              <i class="fas fa-plus"></i>
-              Add Customer
-            </button>
-          {/if}
-        </div>
-      {:else}
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Phone</th>
-              <th>VAT Number</th>
-              <th>City</th>
-              <th>Country</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {#each filteredCustomers as customer (customer.id)}
-              <tr>
-                <td>
-                  <div class="customer-name">
-                    <div class="name-primary">{customer.name}</div>
-                    {#if customer.name_arabic}
-                      <div class="name-secondary">{customer.name_arabic}</div>
-                    {/if}
-                  </div>
-                </td>
-                <td>{customer.email || '-'}</td>
-                <td>{customer.phone || '-'}</td>
-                <td>{customer.vat_number || '-'}</td>
-                <td>
-                  {#if customer.city}
-                    <div class="city-info">
-                      <div>{customer.city}</div>
-                      {#if customer.city_arabic}
-                        <div class="city-arabic">{customer.city_arabic}</div>
-                      {/if}
-                    </div>
-                  {:else}
-                    -
-                  {/if}
-                </td>
-                <td>
-                  {#if customer.country}
-                    <div class="country-info">
-                      <div>{customer.country}</div>
-                      {#if customer.country_arabic}
-                        <div class="country-arabic">{customer.country_arabic}</div>
-                      {/if}
-                    </div>
-                  {:else}
-                    -
-                  {/if}
-                </td>
-                <td>
-                  <div class="action-buttons">
-                    <button
-                      class="btn btn-sm btn-secondary"
-                      on:click={() => openModal(customer)}
-                      title="Edit customer"
-                    >
-                      <i class="fas fa-edit"></i>
-                    </button>
-                    <button
-                      class="btn btn-sm btn-danger"
-                      on:click={() => deleteCustomer(customer.id)}
-                      title="Delete customer"
-                    >
-                      <i class="fas fa-trash"></i>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            {/each}
-          </tbody>
-        </table>
-      {/if}
-    </div>
-  </div>
-</div>
-
-<CustomerModal
-  show={showModal}
-  {editingCustomer}
-  loading={modalLoading}
-  on:save={handleSaveCustomer}
-  on:close={closeModal}
-/>
+{#if showModal}
+	<CustomerModal
+		{editingCustomer}
+		{loading}
+		on:save={handleSaveCustomer}
+		on:close={closeModal}
+	/>
+{/if}
 
 <style>
   .customer-name .name-primary {
