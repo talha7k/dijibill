@@ -1,4 +1,6 @@
 <script>
+  import FormField from './FormField.svelte'
+  
   export let productForm = {}
 </script>
 
@@ -10,25 +12,24 @@
       
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- English Description -->
-        <div class="form-control">
-          <label class="label-glass">Description (English)</label>
-          <textarea 
-            bind:value={productForm.description}
-            placeholder="Enter product description" 
-            class="textarea-glass h-32"
-          ></textarea>
-        </div>
+        <FormField
+          label="Description (English)"
+          type="textarea"
+          bind:value={productForm.description}
+          placeholder="Enter product description"
+          rows={5}
+        />
 
         <!-- Arabic Description -->
-        <div class="form-control">
-          <label class="label-glass">Description (Arabic)</label>
-          <textarea 
-            bind:value={productForm.description_arabic}
-            placeholder="أدخل وصف المنتج" 
-            class="textarea-glass h-32"
-            dir="rtl"
-          ></textarea>
-        </div>
+        <FormField
+          label="Description (Arabic)"
+          labelArabic="الوصف (عربي)"
+          type="textarea"
+          bind:value={productForm.description_arabic}
+          placeholder="أدخل وصف المنتج"
+          rows={5}
+          dir="rtl"
+        />
       </div>
     </div>
   </div>
@@ -40,25 +41,24 @@
       
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- English Notes -->
-        <div class="form-control">
-          <label class="label-glass">Additional Notes (English)</label>
-          <textarea 
-            bind:value={productForm.additional_notes}
-            placeholder="Any additional notes or specifications" 
-            class="textarea-glass h-24"
-          ></textarea>
-        </div>
+        <FormField
+          label="Additional Notes (English)"
+          type="textarea"
+          bind:value={productForm.additional_notes}
+          placeholder="Any additional notes or specifications"
+          rows={3}
+        />
 
         <!-- Arabic Notes -->
-        <div class="form-control">
-          <label class="label-glass">Additional Notes (Arabic)</label>
-          <textarea 
-            bind:value={productForm.additional_notes_arabic}
-            placeholder="أي ملاحظات أو مواصفات إضافية" 
-            class="textarea-glass h-24"
-            dir="rtl"
-          ></textarea>
-        </div>
+        <FormField
+          label="Additional Notes (Arabic)"
+          labelArabic="ملاحظات إضافية (عربي)"
+          type="textarea"
+          bind:value={productForm.additional_notes_arabic}
+          placeholder="أي ملاحظات أو مواصفات إضافية"
+          rows={3}
+          dir="rtl"
+        />
       </div>
     </div>
   </div>

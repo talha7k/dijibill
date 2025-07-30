@@ -1,5 +1,6 @@
 <script>
   import { createEventDispatcher } from 'svelte'
+  import FormField from './FormField.svelte'
   
   export let productForm = {}
   export let categories = []
@@ -8,6 +9,10 @@
   export let generateBarcode = () => {}
 
   const dispatch = createEventDispatcher()
+
+  // Transform categories and units for FormField options
+  $: categoryOptions = (categories || []).map(cat => ({ value: cat.id, label: cat.name }))
+  $: unitOptions = (units || []).map(unit => ({ value: unit.value, label: unit.label }))
 </script>
 
 <div class="space-y-6">
@@ -18,28 +23,23 @@
       
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Product Name -->
-        <div class="form-control">
-          <label class="label-glass">Product Name</label>
-          <input 
-            type="text" 
-            class="input-glass"
-            bind:value={productForm.name}
-            placeholder="Enter product name"
-            required
-          />
-        </div>
+        <FormField
+          label="Product Name"
+          type="text"
+          bind:value={productForm.name}
+          placeholder="Enter product name"
+          required={true}
+        />
 
         <!-- Product Name Arabic -->
-        <div class="form-control">
-          <label class="label-glass">Product Name (Arabic)</label>
-          <input 
-            type="text" 
-            class="input-glass"
-            bind:value={productForm.name_arabic}
-            placeholder="أدخل اسم المنتج"
-            dir="rtl"
-          />
-        </div>
+        <FormField
+          label="Product Name"
+          labelArabic="اسم المنتج"
+          type="text"
+          bind:value={productForm.name_arabic}
+          placeholder="أدخل اسم المنتج"
+          dir="rtl"
+        />
 
         <!-- SKU -->
         <div class="form-control">
@@ -111,14 +111,14 @@
         </div>
 
         <!-- Unit of Measurement -->
-         <div class="form-control">
-           <label class="label-glass">Unit of Measurement</label>
-           <select class="select-glass" bind:value={productForm.unit}>
-             {#each (units || []) as unit}
-               <option value={unit.value}>{unit.label}</option>
-             {/each}
-           </select>
-         </div>
+        <FormField
+          label="Unit of Measurement"
+          labelArabic="وحدة القياس"
+          type="select"
+          bind:value={productForm.unit}
+          options={unitOptions}
+          placeholder="Select unit"
+        />
        </div>
      </div>
    </div>
@@ -130,28 +130,24 @@
        
        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
          <!-- Current Stock -->
-         <div class="form-control">
-           <label class="label-glass">Current Stock</label>
-           <input 
-             type="number" 
-             class="input-glass"
-             bind:value={productForm.stock}
-             placeholder="0"
-             min="0"
-           />
-         </div>
+         <FormField
+           label="Current Stock"
+           labelArabic="المخزون الحالي"
+           type="number"
+           bind:value={productForm.stock}
+           placeholder="0"
+           min={0}
+         />
 
          <!-- Minimum Stock Alert -->
-         <div class="form-control">
-           <label class="label-glass">Minimum Stock Alert</label>
-           <input 
-             type="number" 
-             class="input-glass"
-             bind:value={productForm.min_stock}
-             placeholder="0"
-             min="0"
-           />
-         </div>
+         <FormField
+           label="Minimum Stock Alert"
+           labelArabic="تنبيه الحد الأدنى للمخزون"
+           type="number"
+           bind:value={productForm.min_stock}
+           placeholder="0"
+           min={0}
+         />
        </div>
 
        <!-- Status Checkboxes -->
@@ -159,23 +155,17 @@
          <div class="form-control">
            <label class="label-glass">Product Status</label>
            <div class="space-y-3">
-             <label class="checkbox-glass">
-               <input 
-                 type="checkbox" 
-                 class="checkbox-primary"
-                 bind:checked={productForm.is_active}
-               />
-               <span>Active Product</span>
-             </label>
+             <FormField
+               type="checkbox"
+               bind:checked={productForm.is_active}
+               placeholder="Active Product"
+             />
              
-             <label class="checkbox-glass">
-               <input 
-                 type="checkbox" 
-                 class="checkbox-primary"
-                 bind:checked={productForm.service_not_using_stock}
-               />
-               <span>Service (not using stock)</span>
-             </label>
+             <FormField
+               type="checkbox"
+               bind:checked={productForm.service_not_using_stock}
+               placeholder="Service (not using stock)"
+             />
            </div>
          </div>
        </div>

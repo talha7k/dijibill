@@ -1,6 +1,14 @@
 <script>
+  import FormField from './FormField.svelte'
+  
   export let productForm = {}
   export let taxRates = []
+
+  // Transform tax rates for FormField options
+  $: taxRateOptions = (taxRates || []).map(rate => ({ 
+    value: rate.rate, 
+    label: `${rate.name} (${rate.rate}%)` 
+  }))
 
   // Calculate sale price based on cost and markup
   $: if (productForm.cost && productForm.markup) {
@@ -36,43 +44,37 @@
         </div>
 
         <!-- Cost -->
-        <div class="form-control">
-          <label class="label-glass">Cost</label>
-          <input 
-            type="number" 
-            bind:value={productForm.cost}
-            placeholder="0.00" 
-            class="input-glass"
-            min="0"
-            step="0.01"
-          />
-        </div>
+        <FormField
+          label="Cost"
+          labelArabic="التكلفة"
+          type="number"
+          bind:value={productForm.cost}
+          placeholder="0.00"
+          min={0}
+          step={0.01}
+        />
 
         <!-- Markup -->
-        <div class="form-control">
-          <label class="label-glass">Markup (%)</label>
-          <input 
-            type="number" 
-            bind:value={productForm.markup}
-            placeholder="0" 
-            class="input-glass"
-            min="0"
-            step="0.01"
-          />
-        </div>
+        <FormField
+          label="Markup (%)"
+          labelArabic="هامش الربح (%)"
+          type="number"
+          bind:value={productForm.markup}
+          placeholder="0"
+          min={0}
+          step={0.01}
+        />
 
         <!-- Sale Price -->
-        <div class="form-control">
-          <label class="label-glass">Sale Price</label>
-          <input 
-            type="number" 
-            bind:value={productForm.unit_price}
-            placeholder="0.00" 
-            class="input-glass"
-            min="0"
-            step="0.01"
-          />
-        </div>
+        <FormField
+          label="Sale Price"
+          labelArabic="سعر البيع"
+          type="number"
+          bind:value={productForm.unit_price}
+          placeholder="0.00"
+          min={0}
+          step={0.01}
+        />
       </div>
     </div>
   </div>
@@ -86,23 +88,17 @@
         <div class="form-control">
           <label class="label-glass">Price Options</label>
           <div class="space-y-3">
-            <label class="checkbox-glass">
-              <input 
-                type="checkbox" 
-                class="checkbox-primary"
-                bind:checked={productForm.price_includes_tax}
-              />
-              <span>Price includes tax</span>
-            </label>
+            <FormField
+              type="checkbox"
+              bind:checked={productForm.price_includes_tax}
+              placeholder="Price includes tax"
+            />
             
-            <label class="checkbox-glass">
-              <input 
-                type="checkbox" 
-                class="checkbox-primary"
-                bind:checked={productForm.price_change_allowed}
-              />
-              <span>Price change allowed</span>
-            </label>
+            <FormField
+              type="checkbox"
+              bind:checked={productForm.price_change_allowed}
+              placeholder="Price change allowed"
+            />
           </div>
         </div>
 

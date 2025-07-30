@@ -12,7 +12,7 @@
     SaveInvoiceHTMLArabic,
     SaveInvoiceHTMLBilingual
   } from '../wailsjs/go/main/App.js'
-  import InvoiceModal from './InvoiceModal.svelte'
+  import SalesInvoiceModal from './SalesInvoiceModal.svelte'
   import PageLayout from './components/PageLayout.svelte'
   import DataTable from './components/DataTable.svelte'
   import StatusBadge from './components/StatusBadge.svelte'
@@ -251,8 +251,8 @@
 </PageLayout>
 
 <!-- Invoice Modal -->
-<InvoiceModal 
+<SalesInvoiceModal
   bind:isOpen={showInvoiceModal}
   on:close={closeInvoiceModal}
-  on:saved={handleInvoiceSaved}
+  on:save={handleInvoiceSaved}
 />

@@ -1,7 +1,10 @@
 <script>
+  import FormField from './FormField.svelte'
+  
   export let productForm = {}
 
-  let imagePreview = null
+  let fileInput
+  let imagePreview = productForm.image_url || ''
 
   function handleImageUpload(event) {
     const file = event.target.files[0]
@@ -15,141 +18,120 @@
     }
   }
 
+  function handleImageUrlChange() {
+    imagePreview = productForm.image_url
+  }
+
+  function selectColor(color) {
+    productForm.color = color
+  }
+
+  // Predefined colors
+  const quickColors = [
+    '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
+    '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9'
+  ]
+
   function removeImage() {
     imagePreview = null
     productForm.image_url = ''
   }
 </script>
 
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-  <!-- Left Column - Image -->
-  <div class="space-y-4">
-    <h4 class="text-white font-medium mb-4">Product Image</h4>
-    
-    <!-- Image Upload -->
-    <div class="form-control">
-      <label class="label">
-        <span class="label-text text-white">Image URL</span>
-      </label>
-      <input 
-        type="url" 
-        bind:value={productForm.image_url}
-        placeholder="https://example.com/image.jpg" 
-        class="input input-bordered bg-white/10 text-white placeholder-white/50"
-      />
-    </div>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  <!-- Left Column - Image Upload -->
+  <div class="space-y-6">
+    <!-- Image URL Input -->
+    <FormField
+      label="Image URL"
+      labelArabic="رابط الصورة"
+      type="url"
+      bind:value={productForm.image_url}
+      placeholder="https://example.com/image.jpg"
+      on:input={handleImageUrlChange}
+    />
 
     <!-- File Upload -->
-    <div class="form-control">
-      <label class="label">
-        <span class="label-text text-white">Upload Image</span>
+    <div class="space-y-3">
+      <label class="label-standard">
+        Upload Image
+        <span class="text-white/50 text-sm mr-2">رفع صورة</span>
       </label>
-      <input 
-        type="file" 
-        accept="image/*"
-        class="file-input file-input-bordered bg-white/10 text-white"
-        on:change={handleImageUpload}
-      />
+      <div class="flex gap-3">
+        <input
+          bind:this={fileInput}
+          type="file"
+          accept="image/*"
+          on:change={handleImageUpload}
+          class="file-input file-input-bordered file-input-primary w-full bg-white/10 border-white/20 text-white"
+        />
+        {#if imagePreview}
+          <button
+            type="button"
+            on:click={() => { imagePreview = ''; productForm.image_url = '' }}
+            class="btn btn-outline btn-error btn-sm"
+          >
+            Remove
+          </button>
+        {/if}
+      </div>
     </div>
 
     <!-- Image Preview -->
-    <div class="bg-white/5 p-4 rounded-lg border border-white/10">
-      <h5 class="text-white/70 text-sm mb-3">Image Preview</h5>
-      {#if productForm.image_url || imagePreview}
-        <div class="relative">
-          <img 
-            src={imagePreview || productForm.image_url} 
+    {#if imagePreview}
+      <div class="space-y-3">
+        <label class="label-standard">
+          Preview
+          <span class="text-white/50 text-sm mr-2">معاينة</span>
+        </label>
+        <div class="relative w-full h-48 bg-white/5 rounded-lg border border-white/20 overflow-hidden">
+          <img
+            src={imagePreview}
             alt="Product preview"
-            class="w-full h-48 object-cover rounded-lg border border-white/20"
+            class="w-full h-full object-cover"
           />
-          <button 
-            type="button"
-            class="absolute top-2 right-2 btn btn-sm btn-circle btn-error"
-            on:click={removeImage}
-          >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-            </svg>
-          </button>
         </div>
-      {:else}
-        <div class="w-full h-48 bg-white/5 border-2 border-dashed border-white/20 rounded-lg flex items-center justify-center">
-          <div class="text-center text-white/50">
-            <svg class="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-            </svg>
-            <p>No image selected</p>
-          </div>
-        </div>
-      {/if}
-    </div>
+      </div>
+    {/if}
   </div>
 
-  <!-- Right Column - Color & Visual -->
-  <div class="space-y-4">
-    <h4 class="text-white font-medium mb-4">Visual Properties</h4>
-    
+  <!-- Right Column - Color Selection -->
+  <div class="space-y-6">
     <!-- Color Picker -->
-    <div class="form-control">
-      <label class="label">
-        <span class="label-text text-white">Product Color</span>
-      </label>
-      <div class="flex gap-3 items-center">
-        <input 
-          type="color" 
-          bind:value={productForm.color}
-          class="w-16 h-12 rounded border border-white/20 bg-transparent cursor-pointer"
-        />
-        <input 
-          type="text" 
-          bind:value={productForm.color}
-          placeholder="#000000" 
-          class="input input-bordered flex-1 bg-white/10 text-white placeholder-white/50"
-        />
-      </div>
-    </div>
+    <FormField
+      label="Product Color"
+      labelArabic="لون المنتج"
+      type="color"
+      bind:value={productForm.color}
+      placeholder="#000000"
+    />
 
-    <!-- Color Preview -->
-    <div class="bg-white/5 p-4 rounded-lg border border-white/10">
-      <h5 class="text-white/70 text-sm mb-3">Color Preview</h5>
-      <div class="flex items-center gap-4">
-        <div 
-          class="w-16 h-16 rounded-lg border border-white/20"
-          style="background-color: {productForm.color}"
-        ></div>
-        <div class="text-white/80">
-          <div class="text-sm">Selected Color</div>
-          <div class="text-xs text-white/60">{productForm.color}</div>
-        </div>
-      </div>
-    </div>
+    <!-- Color Text Input -->
+    <FormField
+      label="Color Name/Code"
+      labelArabic="اسم/رمز اللون"
+      type="text"
+      bind:value={productForm.color}
+      placeholder="e.g., Red, #FF0000, rgb(255,0,0)"
+    />
 
-    <!-- Quick Color Palette -->
-    <div class="form-control">
-      <label class="label">
-        <span class="label-text text-white">Quick Colors</span>
+    <!-- Quick Color Selection -->
+    <div class="space-y-3">
+      <label class="label-standard">
+        Quick Colors
+        <span class="text-white/50 text-sm mr-2">الألوان السريعة</span>
       </label>
-      <div class="grid grid-cols-6 gap-2">
-        {#each ['#000000', '#FFFFFF', '#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF', '#FFA500', '#800080', '#FFC0CB', '#A52A2A'] as color}
-          <button 
+      <div class="grid grid-cols-5 gap-2">
+        {#each quickColors as color}
+          <button
             type="button"
-            class="w-8 h-8 rounded border border-white/20 cursor-pointer hover:scale-110 transition-transform"
+            class="w-10 h-10 rounded-lg border-2 transition-all duration-200 hover:scale-110 {productForm.color === color ? 'border-white shadow-lg' : 'border-white/30'}"
             style="background-color: {color}"
-            on:click={() => productForm.color = color}
+            on:click={() => selectColor(color)}
+            title={color}
           ></button>
         {/each}
       </div>
-    </div>
-
-    <!-- Image Guidelines -->
-    <div class="bg-blue-500/10 p-4 rounded-lg border border-blue-500/20">
-      <h5 class="text-blue-300 text-sm font-medium mb-2">Image Guidelines</h5>
-      <ul class="text-blue-200/80 text-xs space-y-1">
-        <li>• Recommended size: 800x800 pixels</li>
-        <li>• Supported formats: JPG, PNG, WebP</li>
-        <li>• Maximum file size: 5MB</li>
-        <li>• Use high-quality images for better presentation</li>
-      </ul>
     </div>
   </div>
 </div>
