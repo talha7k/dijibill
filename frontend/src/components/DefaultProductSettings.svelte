@@ -148,7 +148,7 @@
         type="select"
         value={unitValue}
         on:input={handleUnitChange}
-        options={units.map(unit => ({ value: unit.id.toString(), label: `${unit.name} (${unit.symbol})` }))}
+        options={units.map(unit => ({ value: unit.id.toString(), label: `${unit.label} (${unit.value})` }))}
       />
 
       <!-- Default Product Type -->

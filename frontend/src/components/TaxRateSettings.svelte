@@ -1,34 +1,105 @@
 <script>
   import { GetTaxRates, CreateTaxRate, UpdateTaxRate, DeleteTaxRate } from '../../wailsjs/go/main/App.js'
-   import { database } from '../../wailsjs/go/models'
+  import { database } from '../../wailsjs/go/models'
   import { createEventDispatcher } from 'svelte'
   import DataTable from './DataTable.svelte'
-  import FormField from './FormField.svelte'
+  import TaxRateModal from './TaxRateModal.svelte'
   import ConfirmationModal from './ConfirmationModal.svelte'
 
   const dispatch = createEventDispatcher()
 
-  /** @type {Array<any>} */
   export let taxRates = []
-  /** @type {boolean} */
   export let isLoading = false
 
-  /** @type {{name: string, name_arabic: string, rate: number, is_default: boolean, is_active: boolean, description?: string, created_at?: any, updated_at?: any}} */
-  let newTaxRate = { name: '', name_arabic: '', rate: 0, is_default: false, is_active: true }
-  /** @type {boolean} */
-  let showTaxRateForm = false
-  /** @type {any} */
+  let showTaxRateModal = false
   let editingTaxRate = null
-  /** @type {string} */
-  let searchTerm = ''
-  
-  // Confirmation modal state
   let showDeleteConfirm = false
   let taxRateToDelete = null
   let loading = false
+  let searchTerm = ''
+
+  function editTaxRate(taxRate) {
+    editingTaxRate = taxRate
+    showTaxRateModal = true
+  }
+
+  function closeTaxRateModal() {
+    showTaxRateModal = false
+    editingTaxRate = null
+  }
+
+  async function handleTaxRateSave(event) {
+    const taxRateData = event.detail
+    loading = true
+    
+    try {
+      if (editingTaxRate) {
+        // Update existing tax rate
+        const updatedTaxRate = new database.TaxRate({
+          ...editingTaxRate,
+          ...taxRateData
+        })
+        await UpdateTaxRate(updatedTaxRate)
+      } else {
+        // Create new tax rate
+        const newTaxRate = new database.TaxRate({
+          id: 0,
+          ...taxRateData,
+          created_at: null,
+          updated_at: null
+        })
+        await CreateTaxRate(newTaxRate)
+      }
+      
+      dispatch('reload')
+      closeTaxRateModal()
+    } catch (error) {
+      console.error('Error saving tax rate:', error)
+      dispatch('error', { message: 'Error saving tax rate: ' + error.message })
+    } finally {
+      loading = false
+    }
+  }
+
+  function showDeleteConfirmation(taxRate) {
+    taxRateToDelete = taxRate
+    showDeleteConfirm = true
+  }
+
+  function cancelDelete() {
+    showDeleteConfirm = false
+    taxRateToDelete = null
+  }
+
+  async function confirmDelete() {
+    if (!taxRateToDelete) return
+    
+    try {
+      loading = true
+      await DeleteTaxRate(taxRateToDelete.id)
+      dispatch('reload')
+      showDeleteConfirm = false
+      taxRateToDelete = null
+    } catch (error) {
+      console.error('Error deleting tax rate:', error)
+      dispatch('error', { message: 'Error deleting tax rate: ' + error.message })
+    } finally {
+      loading = false
+    }
+  }
+
+  // Filter tax rates based on search term
+  $: filteredTaxRates = taxRates.filter(taxRate => {
+    if (!searchTerm) return true
+    const searchLower = searchTerm.toLowerCase()
+    return (
+      taxRate.name.toLowerCase().includes(searchLower) ||
+      (taxRate.name_arabic && taxRate.name_arabic.includes(searchTerm)) ||
+      taxRate.rate.toString().includes(searchTerm)
+    )
+  })
 
   // DataTable configuration
-  /** @type {Array<{label: string, key?: string, class?: string, render?: Function, actions?: Array<{key: string, text: string, icon?: string, class?: string, title?: string}>}>} */
   const columns = [
     {
       key: 'name',
@@ -62,13 +133,6 @@
       label: 'Actions',
       actions: [
         {
-          key: 'setDefault',
-          text: 'Set Default',
-          icon: 'fa-star',
-          class: 'btn-secondary',
-          title: 'Set as default tax rate'
-        },
-        {
           key: 'edit',
           text: 'Edit',
           icon: 'fa-edit',
@@ -86,141 +150,14 @@
     }
   ]
 
-  /** @type {{text: string, icon: string}} */
   const primaryAction = {
-    text: 'Add Tax Rate',
+    label: 'Add Tax Rate',
     icon: 'fa-plus'
   }
 
-  // Filter tax rates based on search term
-  $: filteredTaxRates = taxRates.filter(taxRate => {
-    if (!searchTerm) return true
-    const searchLower = searchTerm.toLowerCase()
-    return (
-      taxRate.name.toLowerCase().includes(searchLower) ||
-      (taxRate.name_arabic && taxRate.name_arabic.includes(searchTerm)) ||
-      taxRate.rate.toString().includes(searchTerm)
-    )
-  })
-
-  async function addTaxRate() {
-    if (newTaxRate.name && newTaxRate.rate >= 0) {
-      try {
-        const taxRateData = new database.TaxRate({
-          id: 0,
-          name: newTaxRate.name,
-          name_arabic: newTaxRate.name_arabic || '',
-          rate: newTaxRate.rate,
-          is_default: newTaxRate.is_default || false,
-          is_active: true,
-          description: '',
-          created_at: null,
-          updated_at: null
-        });
-        await CreateTaxRate(taxRateData)
-        dispatch('reload')
-        resetTaxRateForm()
-      } catch (error) {
-        console.error('Error adding tax rate:', error)
-        dispatch('error', { message: 'Error adding tax rate: ' + error.message })
-      }
-    }
-  }
-
-  function editTaxRate(taxRate) {
-    editingTaxRate = taxRate.id
-    newTaxRate = { ...taxRate }
-    showTaxRateForm = true
-  }
-
-  async function updateTaxRate() {
-    try {
-      const taxRateData = new database.TaxRate({
-        id: editingTaxRate,
-        name: newTaxRate.name,
-        name_arabic: newTaxRate.name_arabic || '',
-        rate: newTaxRate.rate,
-        is_default: newTaxRate.is_default || false,
-        is_active: newTaxRate.is_active !== undefined ? newTaxRate.is_active : true,
-        description: newTaxRate.description || '',
-        created_at: newTaxRate.created_at || null,
-        updated_at: newTaxRate.updated_at || null
-      });
-      await UpdateTaxRate(taxRateData)
-      dispatch('reload')
-      resetTaxRateForm()
-    } catch (error) {
-      console.error('Error updating tax rate:', error)
-      dispatch('error', { message: 'Error updating tax rate: ' + error.message })
-    }
-  }
-
-  function showDeleteConfirmation(taxRate) {
-    taxRateToDelete = taxRate;
-    showDeleteConfirm = true;
-  }
-
-  function cancelDelete() {
-    showDeleteConfirm = false;
-    taxRateToDelete = null;
-  }
-
-  async function confirmDelete() {
-    if (!taxRateToDelete) return;
-    
-    try {
-      loading = true;
-      await DeleteTaxRate(taxRateToDelete.id);
-      dispatch('reload');
-      showDeleteConfirm = false;
-      taxRateToDelete = null;
-    } catch (error) {
-      console.error('Error deleting tax rate:', error);
-      dispatch('error', { message: 'Error deleting tax rate: ' + error.message });
-    } finally {
-      loading = false;
-    }
-  }
-
-  function resetTaxRateForm() {
-    newTaxRate = { name: '', name_arabic: '', rate: 0, is_default: false, is_active: true }
-    showTaxRateForm = false
-    editingTaxRate = null
-  }
-
-  async function setDefaultTaxRate(id) {
-    try {
-      // First, update all tax rates to not be default
-      for (const taxRate of taxRates) {
-        if (taxRate.is_default) {
-          const updatedTaxRate = new database.TaxRate({ ...taxRate, is_default: false });
-          await UpdateTaxRate(updatedTaxRate);
-        }
-      }
-      // Then set the selected one as default
-      const selectedTaxRate = taxRates.find(tr => tr.id === id);
-      if (selectedTaxRate) {
-        const updatedTaxRate = new database.TaxRate({ ...selectedTaxRate, is_default: true });
-        await UpdateTaxRate(updatedTaxRate);
-        dispatch('reload')
-      }
-    } catch (error) {
-      console.error('Error setting default tax rate:', error)
-      dispatch('error', { message: 'Error setting default tax rate: ' + error.message })
-    }
-  }
-
-  // Computed properties for FormField string conversion
-  $: rateValue = newTaxRate.rate?.toString() || ''
-  
-  function handleRateChange(event) {
-    const value = parseFloat(event.target.value)
-    newTaxRate.rate = isNaN(value) ? 0 : value
-  }
-
-  // DataTable event handlers
+  // Event handlers for DataTable
   function handlePrimaryAction() {
-    showTaxRateForm = true
+    showTaxRateModal = true
   }
 
   function handleSearch(event) {
@@ -237,85 +174,10 @@
       case 'delete':
         showDeleteConfirmation(item)
         break
-      case 'setDefault':
-        if (!item.is_default) {
-          setDefaultTaxRate(item.id)
-        }
-        break
     }
   }
 </script>
-
 <div class="space-y-6">
-  <!-- Tax Rate Form -->
-  {#if showTaxRateForm}
-    <div class=" p-6 rounded-lg border">
-      <h4 class="text-lg font-medium text-gray-100 mb-6">
-        {editingTaxRate ? 'Edit Tax Rate' : 'Add New Tax Rate'}
-      </h4>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <FormField
-          label="Name"
-          labelArabic="الاسم"
-          type="text"
-          bind:value={newTaxRate.name}
-          placeholder="Enter tax rate name"
-          required
-        />
-
-        <FormField
-          label="Name (Arabic)"
-          labelArabic="الاسم بالعربية"
-          type="text"
-          bind:value={newTaxRate.name_arabic}
-          placeholder="اسم معدل الضريبة"
-          dir="rtl"
-        />
-
-        <FormField
-           label="Rate (%)"
-           labelArabic="المعدل (%)"
-           type="number"
-           value={rateValue}
-           placeholder="Enter tax rate percentage"
-           min="0"
-           max="100"
-           step="0.01"
-           required
-           on:input={handleRateChange}
-         />
-
-        <div class="flex items-center space-x-6">
-          <FormField
-            type="checkbox"
-            bind:checked={newTaxRate.is_default}
-            placeholder="Set as default"
-          />
-          <FormField
-            type="checkbox"
-            bind:checked={newTaxRate.is_active}
-            placeholder="Active"
-          />
-        </div>
-      </div>
-      
-      <div class="flex justify-end space-x-3 mt-6">
-        <button
-          on:click={resetTaxRateForm}
-          class="px-4 py-2 border border-gray-300 text-gray-300 rounded-md hover: focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          Cancel
-        </button>
-        <button
-          on:click={editingTaxRate ? updateTaxRate : addTaxRate}
-          class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          {editingTaxRate ? 'Update' : 'Add'} Tax Rate
-        </button>
-      </div>
-    </div>
-  {/if}
-
   <!-- Tax Rates DataTable -->
   <DataTable
     data={filteredTaxRates}
@@ -332,6 +194,15 @@
     on:row-action={handleRowAction}
   />
 </div>
+
+<!-- Tax Rate Modal -->
+<TaxRateModal
+  show={showTaxRateModal}
+  taxRate={editingTaxRate}
+  {loading}
+  on:save={handleTaxRateSave}
+  on:close={closeTaxRateModal}
+/>
 
 <!-- Confirmation Modal -->
 <ConfirmationModal

@@ -87,28 +87,6 @@
     }
   }
 
-  async function setDefaultSalesCategory(id) {
-    try {
-      // First, update all sales categories to not be default
-      for (const salesCategory of salesCategories) {
-        if (salesCategory.is_default) {
-          const updatedSalesCategory = new database.SalesCategory({ ...salesCategory, is_default: false });
-          await UpdateSalesCategory(updatedSalesCategory);
-        }
-      }
-      // Then set the selected one as default
-      const selectedSalesCategory = salesCategories.find(sc => sc.id === id);
-      if (selectedSalesCategory) {
-        const updatedSalesCategory = new database.SalesCategory({ ...selectedSalesCategory, is_default: true });
-        await UpdateSalesCategory(updatedSalesCategory);
-        dispatch('reload')
-      }
-    } catch (error) {
-      console.error('Error setting default sales category:', error)
-      dispatch('error', { message: 'Error setting default sales category: ' + error.message })
-    }
-  }
-
   // DataTable configuration
   let searchTerm = ''
   
@@ -164,14 +142,6 @@
       label: 'Actions',
       actions: [
         {
-          key: 'setDefault',
-          text: 'Set Default',
-          icon: 'fa-star',
-          class: 'btn-secondary',
-          title: 'Set as default sales category',
-          condition: (item) => !item.is_default
-        },
-        {
           key: 'edit',
           text: 'Edit',
           icon: 'fa-edit',
@@ -212,9 +182,6 @@
         break
       case 'delete':
         showDeleteConfirmation(item.id)
-        break
-      case 'setDefault':
-        setDefaultSalesCategory(item.id)
         break
     }
   }

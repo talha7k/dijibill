@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
   import { createEventDispatcher } from 'svelte'
   import Modal from './Modal.svelte'
   import FormField from './FormField.svelte'
@@ -6,19 +6,8 @@
   const dispatch = createEventDispatcher()
 
   export let show = false
-  export let unit: Unit | null = null
+  export let unit = null
   export let loading = false
-
-  interface Unit {
-    id?: number
-    value: string
-    label: string
-    arabic?: string
-    is_default: boolean
-    is_active: boolean
-    created_at?: string | null
-    updated_at?: string | null
-  }
 
   let formData = {
     value: '',

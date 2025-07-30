@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
   import { createEventDispatcher } from 'svelte'
   import Modal from './Modal.svelte'
   import FormField from './FormField.svelte'
@@ -6,20 +6,8 @@
   const dispatch = createEventDispatcher()
 
   export let show = false
-  export let paymentType: PaymentType | null = null
+  export let paymentType = null
   export let loading = false
-
-  interface PaymentType {
-    id?: number
-    name: string
-    name_arabic?: string
-    code: string
-    description?: string
-    is_default: boolean
-    is_active: boolean
-    created_at?: string | null
-    updated_at?: string | null
-  }
 
   let formData = {
     name: '',

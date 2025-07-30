@@ -92,28 +92,6 @@
     closePaymentTypeModal()
   }
 
-  async function setDefaultPaymentType(id) {
-    try {
-      // First, update all payment types to not be default
-      for (const paymentType of paymentTypes) {
-        if (paymentType.is_default) {
-          const updatedPaymentType = new database.PaymentType({ ...paymentType, is_default: false });
-          await UpdatePaymentType(updatedPaymentType);
-        }
-      }
-      // Then set the selected one as default
-      const selectedPaymentType = paymentTypes.find(pt => pt.id === id);
-      if (selectedPaymentType) {
-        const updatedPaymentType = new database.PaymentType({ ...selectedPaymentType, is_default: true });
-        await UpdatePaymentType(updatedPaymentType);
-        dispatch('reload')
-      }
-    } catch (error) {
-      console.error('Error setting default payment type:', error)
-      dispatch('error', { message: 'Error setting default payment type: ' + error.message })
-    }
-  }
-
   // DataTable configuration
   let searchTerm = ''
   
@@ -163,14 +141,6 @@
       label: 'Actions',
       actions: [
         {
-          key: 'setDefault',
-          text: 'Set Default',
-          icon: 'fa-star',
-          class: 'btn-secondary',
-          title: 'Set as default payment type',
-          condition: (item) => !item.is_default
-        },
-        {
           key: 'edit',
           text: 'Edit',
           icon: 'fa-edit',
@@ -211,9 +181,6 @@
         break
       case 'delete':
         showDeleteConfirmation(item.id)
-        break
-      case 'setDefault':
-        setDefaultPaymentType(item.id)
         break
     }
   }
