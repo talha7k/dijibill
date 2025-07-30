@@ -67,7 +67,7 @@ func (d *Database) createTables() error {
 			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 		)`,
-		`CREATE TABLE IF NOT EXISTS item_categories (
+		`CREATE TABLE IF NOT EXISTS product_categories (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			name TEXT NOT NULL,
 			name_arabic TEXT,
@@ -76,7 +76,7 @@ func (d *Database) createTables() error {
 			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 		)`,
-		`CREATE TABLE IF NOT EXISTS sale_items (
+		`CREATE TABLE IF NOT EXISTS products (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			name TEXT NOT NULL,
 			name_arabic TEXT,
@@ -87,9 +87,14 @@ func (d *Database) createTables() error {
 			vat_rate REAL DEFAULT 15.0,
 			unit TEXT DEFAULT 'pcs',
 			unit_arabic TEXT DEFAULT 'قطعة',
+			sku TEXT,
+			barcode TEXT,
+			stock INTEGER DEFAULT 0,
+			min_stock INTEGER DEFAULT 0,
+			is_active BOOLEAN DEFAULT 1,
 			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-			FOREIGN KEY (category_id) REFERENCES item_categories(id)
+			FOREIGN KEY (category_id) REFERENCES product_categories(id)
 		)`,
 		`CREATE TABLE IF NOT EXISTS invoices (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -111,7 +116,7 @@ func (d *Database) createTables() error {
 		`CREATE TABLE IF NOT EXISTS invoice_items (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			invoice_id INTEGER NOT NULL,
-			sale_item_id INTEGER NOT NULL,
+			product_id INTEGER NOT NULL,
 			quantity REAL NOT NULL,
 			unit_price REAL NOT NULL,
 			vat_rate REAL NOT NULL,
@@ -119,7 +124,51 @@ func (d *Database) createTables() error {
 			total_amount REAL NOT NULL,
 			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 			FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON DELETE CASCADE,
-			FOREIGN KEY (sale_item_id) REFERENCES sale_items(id)
+			FOREIGN KEY (product_id) REFERENCES products(id)
+		)`,
+		`CREATE TABLE IF NOT EXISTS payment_types (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			name TEXT NOT NULL,
+			name_arabic TEXT,
+			code TEXT UNIQUE,
+			description TEXT,
+			is_default BOOLEAN DEFAULT 0,
+			is_active BOOLEAN DEFAULT 1,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+		)`,
+		`CREATE TABLE IF NOT EXISTS sales_categories (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			name TEXT NOT NULL,
+			name_arabic TEXT,
+			code TEXT UNIQUE,
+			description TEXT,
+			description_arabic TEXT,
+			is_default BOOLEAN DEFAULT 0,
+			is_active BOOLEAN DEFAULT 1,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+		)`,
+		`CREATE TABLE IF NOT EXISTS tax_rates (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			name TEXT NOT NULL,
+			name_arabic TEXT,
+			rate REAL NOT NULL,
+			description TEXT,
+			is_default BOOLEAN DEFAULT 0,
+			is_active BOOLEAN DEFAULT 1,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+		)`,
+		`CREATE TABLE IF NOT EXISTS units_of_measurement (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			value TEXT NOT NULL,
+			label TEXT NOT NULL,
+			arabic TEXT,
+			is_default BOOLEAN DEFAULT 0,
+			is_active BOOLEAN DEFAULT 1,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 		)`,
 	}
 
@@ -234,9 +283,9 @@ func (d *Database) DeleteCustomer(id int) error {
 	return err
 }
 
-// ItemCategory operations
-func (d *Database) CreateItemCategory(category *ItemCategory) error {
-	query := `INSERT INTO item_categories (name, name_arabic, description, description_arabic) VALUES (?, ?, ?, ?)`
+// ProductCategory operations
+func (d *Database) CreateProductCategory(category *ProductCategory) error {
+	query := `INSERT INTO product_categories (name, name_arabic, description, description_arabic) VALUES (?, ?, ?, ?)`
 
 	result, err := d.db.Exec(query, category.Name, category.NameArabic, category.Description, category.DescriptionArabic)
 	if err != nil {
@@ -251,8 +300,8 @@ func (d *Database) CreateItemCategory(category *ItemCategory) error {
 	return nil
 }
 
-func (d *Database) GetItemCategories() ([]ItemCategory, error) {
-	query := `SELECT id, name, name_arabic, description, description_arabic, created_at, updated_at FROM item_categories ORDER BY name`
+func (d *Database) GetProductCategories() ([]ProductCategory, error) {
+	query := `SELECT id, name, name_arabic, description, description_arabic, created_at, updated_at FROM product_categories ORDER BY name`
 
 	rows, err := d.db.Query(query)
 	if err != nil {
@@ -260,9 +309,9 @@ func (d *Database) GetItemCategories() ([]ItemCategory, error) {
 	}
 	defer rows.Close()
 
-	var categories []ItemCategory
+	var categories []ProductCategory
 	for rows.Next() {
-		var c ItemCategory
+		var c ProductCategory
 		err := rows.Scan(&c.ID, &c.Name, &c.NameArabic, &c.Description, &c.DescriptionArabic, &c.CreatedAt, &c.UpdatedAt)
 		if err != nil {
 			return nil, err
@@ -272,14 +321,15 @@ func (d *Database) GetItemCategories() ([]ItemCategory, error) {
 	return categories, nil
 }
 
-// SaleItem operations
-func (d *Database) CreateSaleItem(item *SaleItem) error {
+// Product operations
+func (d *Database) CreateProduct(product *Product) error {
 	query := `
-		INSERT INTO sale_items (name, name_arabic, description, description_arabic, category_id, unit_price, vat_rate, unit, unit_arabic)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+		INSERT INTO products (name, name_arabic, description, description_arabic, category_id, unit_price, vat_rate, unit, unit_arabic, sku, barcode, stock, min_stock, is_active)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
-	result, err := d.db.Exec(query, item.Name, item.NameArabic, item.Description, item.DescriptionArabic,
-		item.CategoryID, item.UnitPrice, item.VATRate, item.Unit, item.UnitArabic)
+	result, err := d.db.Exec(query, product.Name, product.NameArabic, product.Description, product.DescriptionArabic,
+		product.CategoryID, product.UnitPrice, product.VATRate, product.Unit, product.UnitArabic, 
+		product.SKU, product.Barcode, product.Stock, product.MinStock, product.IsActive)
 	if err != nil {
 		return err
 	}
@@ -288,12 +338,12 @@ func (d *Database) CreateSaleItem(item *SaleItem) error {
 	if err != nil {
 		return err
 	}
-	item.ID = int(id)
+	product.ID = int(id)
 	return nil
 }
 
-func (d *Database) GetSaleItems() ([]SaleItem, error) {
-	query := `SELECT id, name, name_arabic, description, description_arabic, category_id, unit_price, vat_rate, unit, unit_arabic, created_at, updated_at FROM sale_items ORDER BY name`
+func (d *Database) GetProducts() ([]Product, error) {
+	query := `SELECT id, name, name_arabic, description, description_arabic, category_id, unit_price, vat_rate, unit, unit_arabic, sku, barcode, stock, min_stock, is_active, created_at, updated_at FROM products ORDER BY name`
 
 	rows, err := d.db.Query(query)
 	if err != nil {
@@ -301,17 +351,18 @@ func (d *Database) GetSaleItems() ([]SaleItem, error) {
 	}
 	defer rows.Close()
 
-	var items []SaleItem
+	var products []Product
 	for rows.Next() {
-		var item SaleItem
-		err := rows.Scan(&item.ID, &item.Name, &item.NameArabic, &item.Description, &item.DescriptionArabic,
-			&item.CategoryID, &item.UnitPrice, &item.VATRate, &item.Unit, &item.UnitArabic, &item.CreatedAt, &item.UpdatedAt)
+		var product Product
+		err := rows.Scan(&product.ID, &product.Name, &product.NameArabic, &product.Description, &product.DescriptionArabic,
+			&product.CategoryID, &product.UnitPrice, &product.VATRate, &product.Unit, &product.UnitArabic,
+			&product.SKU, &product.Barcode, &product.Stock, &product.MinStock, &product.IsActive, &product.CreatedAt, &product.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
-		items = append(items, item)
+		products = append(products, product)
 	}
-	return items, nil
+	return products, nil
 }
 
 // Invoice operations
@@ -347,10 +398,10 @@ func (d *Database) CreateInvoice(invoice *Invoice) error {
 	// Insert invoice items
 	for _, item := range invoice.Items {
 		itemQuery := `
-			INSERT INTO invoice_items (invoice_id, sale_item_id, quantity, unit_price, vat_rate, vat_amount, total_amount)
+			INSERT INTO invoice_items (invoice_id, product_id, quantity, unit_price, vat_rate, vat_amount, total_amount)
 			VALUES (?, ?, ?, ?, ?, ?, ?)`
 
-		_, err = tx.Exec(itemQuery, invoiceID, item.SaleItemID, item.Quantity, item.UnitPrice, item.VATRate, item.VATAmount, item.TotalAmount)
+		_, err = tx.Exec(itemQuery, invoiceID, item.ProductID, item.Quantity, item.UnitPrice, item.VATRate, item.VATAmount, item.TotalAmount)
 		if err != nil {
 			return err
 		}
@@ -409,7 +460,7 @@ func (d *Database) GetInvoiceByID(id int) (*Invoice, error) {
 }
 
 func (d *Database) GetInvoiceItems(invoiceID int) ([]InvoiceItem, error) {
-	query := `SELECT id, invoice_id, sale_item_id, quantity, unit_price, vat_rate, vat_amount, total_amount, created_at FROM invoice_items WHERE invoice_id = ?`
+	query := `SELECT id, invoice_id, product_id, quantity, unit_price, vat_rate, vat_amount, total_amount, created_at FROM invoice_items WHERE invoice_id = ?`
 
 	rows, err := d.db.Query(query, invoiceID)
 	if err != nil {
@@ -420,7 +471,7 @@ func (d *Database) GetInvoiceItems(invoiceID int) ([]InvoiceItem, error) {
 	var items []InvoiceItem
 	for rows.Next() {
 		var item InvoiceItem
-		err := rows.Scan(&item.ID, &item.InvoiceID, &item.SaleItemID, &item.Quantity, &item.UnitPrice,
+		err := rows.Scan(&item.ID, &item.InvoiceID, &item.ProductID, &item.Quantity, &item.UnitPrice,
 			&item.VATRate, &item.VATAmount, &item.TotalAmount, &item.CreatedAt)
 		if err != nil {
 			return nil, err
@@ -464,4 +515,208 @@ func (d *Database) generateInvoiceNumber() string {
 	var count int
 	d.db.QueryRow("SELECT COUNT(*) FROM invoices").Scan(&count)
 	return fmt.Sprintf("INV-%06d", count+1)
+}
+
+// PaymentType operations
+func (d *Database) CreatePaymentType(paymentType *PaymentType) error {
+	query := `INSERT INTO payment_types (name, name_arabic, code, description, is_default, is_active) VALUES (?, ?, ?, ?, ?, ?)`
+
+	result, err := d.db.Exec(query, paymentType.Name, paymentType.NameArabic, paymentType.Code, paymentType.Description, paymentType.IsDefault, paymentType.IsActive)
+	if err != nil {
+		return err
+	}
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		return err
+	}
+	paymentType.ID = int(id)
+	return nil
+}
+
+func (d *Database) GetPaymentTypes() ([]PaymentType, error) {
+	query := `SELECT id, name, name_arabic, code, description, is_default, is_active, created_at, updated_at FROM payment_types ORDER BY name`
+
+	rows, err := d.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var paymentTypes []PaymentType
+	for rows.Next() {
+		var pt PaymentType
+		err := rows.Scan(&pt.ID, &pt.Name, &pt.NameArabic, &pt.Code, &pt.Description, &pt.IsDefault, &pt.IsActive, &pt.CreatedAt, &pt.UpdatedAt)
+		if err != nil {
+			return nil, err
+		}
+		paymentTypes = append(paymentTypes, pt)
+	}
+	return paymentTypes, nil
+}
+
+func (d *Database) UpdatePaymentType(paymentType *PaymentType) error {
+	query := `UPDATE payment_types SET name = ?, name_arabic = ?, code = ?, description = ?, is_default = ?, is_active = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`
+
+	_, err := d.db.Exec(query, paymentType.Name, paymentType.NameArabic, paymentType.Code, paymentType.Description, paymentType.IsDefault, paymentType.IsActive, paymentType.ID)
+	return err
+}
+
+func (d *Database) DeletePaymentType(id int) error {
+	_, err := d.db.Exec("DELETE FROM payment_types WHERE id = ?", id)
+	return err
+}
+
+// SalesCategory operations
+func (d *Database) CreateSalesCategory(salesCategory *SalesCategory) error {
+	query := `INSERT INTO sales_categories (name, name_arabic, code, description, description_arabic, is_default, is_active) VALUES (?, ?, ?, ?, ?, ?, ?)`
+
+	result, err := d.db.Exec(query, salesCategory.Name, salesCategory.NameArabic, salesCategory.Code, salesCategory.Description, salesCategory.DescriptionArabic, salesCategory.IsDefault, salesCategory.IsActive)
+	if err != nil {
+		return err
+	}
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		return err
+	}
+	salesCategory.ID = int(id)
+	return nil
+}
+
+func (d *Database) GetSalesCategories() ([]SalesCategory, error) {
+	query := `SELECT id, name, name_arabic, code, description, description_arabic, is_default, is_active, created_at, updated_at FROM sales_categories ORDER BY name`
+
+	rows, err := d.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var salesCategories []SalesCategory
+	for rows.Next() {
+		var sc SalesCategory
+		err := rows.Scan(&sc.ID, &sc.Name, &sc.NameArabic, &sc.Code, &sc.Description, &sc.DescriptionArabic, &sc.IsDefault, &sc.IsActive, &sc.CreatedAt, &sc.UpdatedAt)
+		if err != nil {
+			return nil, err
+		}
+		salesCategories = append(salesCategories, sc)
+	}
+	return salesCategories, nil
+}
+
+func (d *Database) UpdateSalesCategory(salesCategory *SalesCategory) error {
+	query := `UPDATE sales_categories SET name = ?, name_arabic = ?, code = ?, description = ?, description_arabic = ?, is_default = ?, is_active = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`
+
+	_, err := d.db.Exec(query, salesCategory.Name, salesCategory.NameArabic, salesCategory.Code, salesCategory.Description, salesCategory.DescriptionArabic, salesCategory.IsDefault, salesCategory.IsActive, salesCategory.ID)
+	return err
+}
+
+func (d *Database) DeleteSalesCategory(id int) error {
+	_, err := d.db.Exec("DELETE FROM sales_categories WHERE id = ?", id)
+	return err
+}
+
+// TaxRate operations
+func (d *Database) CreateTaxRate(taxRate *TaxRate) error {
+	query := `INSERT INTO tax_rates (name, name_arabic, rate, description, is_active) VALUES (?, ?, ?, ?, ?)`
+
+	result, err := d.db.Exec(query, taxRate.Name, taxRate.NameArabic, taxRate.Rate, taxRate.Description, taxRate.IsActive)
+	if err != nil {
+		return err
+	}
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		return err
+	}
+	taxRate.ID = int(id)
+	return nil
+}
+
+func (d *Database) GetTaxRates() ([]TaxRate, error) {
+	query := `SELECT id, name, name_arabic, rate, description, is_active, created_at, updated_at FROM tax_rates ORDER BY name`
+
+	rows, err := d.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var taxRates []TaxRate
+	for rows.Next() {
+		var tr TaxRate
+		err := rows.Scan(&tr.ID, &tr.Name, &tr.NameArabic, &tr.Rate, &tr.Description, &tr.IsActive, &tr.CreatedAt, &tr.UpdatedAt)
+		if err != nil {
+			return nil, err
+		}
+		taxRates = append(taxRates, tr)
+	}
+	return taxRates, nil
+}
+
+func (d *Database) UpdateTaxRate(taxRate *TaxRate) error {
+	query := `UPDATE tax_rates SET name = ?, name_arabic = ?, rate = ?, description = ?, is_active = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`
+
+	_, err := d.db.Exec(query, taxRate.Name, taxRate.NameArabic, taxRate.Rate, taxRate.Description, taxRate.IsActive, taxRate.ID)
+	return err
+}
+
+func (d *Database) DeleteTaxRate(id int) error {
+	_, err := d.db.Exec("DELETE FROM tax_rates WHERE id = ?", id)
+	return err
+}
+
+// UnitOfMeasurement operations
+func (d *Database) CreateUnitOfMeasurement(unit *UnitOfMeasurement) error {
+	query := `INSERT INTO units_of_measurement (name, name_arabic, abbreviation, abbreviation_arabic, description, description_arabic, is_active) VALUES (?, ?, ?, ?, ?, ?, ?)`
+
+	result, err := d.db.Exec(query, unit.Value, unit.Arabic, unit.Label, unit.Arabic, "", "", unit.IsActive)
+	if err != nil {
+		return err
+	}
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		return err
+	}
+	unit.ID = int(id)
+	return nil
+}
+
+func (d *Database) GetUnitsOfMeasurement() ([]UnitOfMeasurement, error) {
+	query := `SELECT id, name, name_arabic, abbreviation, abbreviation_arabic, description, description_arabic, is_active, created_at, updated_at FROM units_of_measurement ORDER BY name`
+
+	rows, err := d.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var units []UnitOfMeasurement
+	for rows.Next() {
+		var u UnitOfMeasurement
+		var name, nameArabic, abbrev, abbreviArabic, desc, descArabic string
+		err := rows.Scan(&u.ID, &name, &nameArabic, &abbrev, &abbreviArabic, &desc, &descArabic, &u.IsActive, &u.CreatedAt, &u.UpdatedAt)
+		if err != nil {
+			return nil, err
+		}
+		u.Value = name
+		u.Label = abbrev
+		u.Arabic = nameArabic
+		units = append(units, u)
+	}
+	return units, nil
+}
+
+func (d *Database) UpdateUnitOfMeasurement(unit *UnitOfMeasurement) error {
+	query := `UPDATE units_of_measurement SET name = ?, name_arabic = ?, abbreviation = ?, abbreviation_arabic = ?, description = ?, description_arabic = ?, is_active = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`
+
+	_, err := d.db.Exec(query, unit.Value, unit.Arabic, unit.Label, unit.Arabic, "", "", unit.IsActive, unit.ID)
+	return err
+}
+
+func (d *Database) DeleteUnitOfMeasurement(id int) error {
+	_, err := d.db.Exec("DELETE FROM units_of_measurement WHERE id = ?", id)
+	return err
 }

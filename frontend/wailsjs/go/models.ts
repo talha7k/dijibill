@@ -96,24 +96,74 @@ export namespace main {
 		    return a;
 		}
 	}
-	export class SaleItem {
+	export class ProductCategory {
 	    id: number;
 	    name: string;
 	    name_arabic: string;
 	    description: string;
 	    description_arabic: string;
-	    category_id: number;
-	    unit_price: number;
-	    vat_rate: number;
-	    unit: string;
-	    unit_arabic: string;
 	    // Go type: time
 	    created_at: any;
 	    // Go type: time
 	    updated_at: any;
 	
 	    static createFrom(source: any = {}) {
-	        return new SaleItem(source);
+	        return new ProductCategory(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.name_arabic = source["name_arabic"];
+	        this.description = source["description"];
+	        this.description_arabic = source["description_arabic"];
+	        this.created_at = this.convertValues(source["created_at"], null);
+	        this.updated_at = this.convertValues(source["updated_at"], null);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class Product {
+	    id: number;
+	    name: string;
+	    name_arabic: string;
+	    description: string;
+	    description_arabic: string;
+	    category_id: number;
+	    category?: ProductCategory;
+	    unit_price: number;
+	    vat_rate: number;
+	    unit: string;
+	    unit_arabic: string;
+	    sku: string;
+	    barcode: string;
+	    stock: number;
+	    min_stock: number;
+	    is_active: boolean;
+	    // Go type: time
+	    created_at: any;
+	    // Go type: time
+	    updated_at: any;
+	
+	    static createFrom(source: any = {}) {
+	        return new Product(source);
 	    }
 	
 	    constructor(source: any = {}) {
@@ -124,10 +174,16 @@ export namespace main {
 	        this.description = source["description"];
 	        this.description_arabic = source["description_arabic"];
 	        this.category_id = source["category_id"];
+	        this.category = this.convertValues(source["category"], ProductCategory);
 	        this.unit_price = source["unit_price"];
 	        this.vat_rate = source["vat_rate"];
 	        this.unit = source["unit"];
 	        this.unit_arabic = source["unit_arabic"];
+	        this.sku = source["sku"];
+	        this.barcode = source["barcode"];
+	        this.stock = source["stock"];
+	        this.min_stock = source["min_stock"];
+	        this.is_active = source["is_active"];
 	        this.created_at = this.convertValues(source["created_at"], null);
 	        this.updated_at = this.convertValues(source["updated_at"], null);
 	    }
@@ -153,8 +209,8 @@ export namespace main {
 	export class InvoiceItem {
 	    id: number;
 	    invoice_id: number;
-	    sale_item_id: number;
-	    sale_item?: SaleItem;
+	    product_id: number;
+	    product?: Product;
 	    quantity: number;
 	    unit_price: number;
 	    vat_rate: number;
@@ -171,8 +227,8 @@ export namespace main {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.id = source["id"];
 	        this.invoice_id = source["invoice_id"];
-	        this.sale_item_id = source["sale_item_id"];
-	        this.sale_item = this.convertValues(source["sale_item"], SaleItem);
+	        this.product_id = source["product_id"];
+	        this.product = this.convertValues(source["product"], Product);
 	        this.quantity = source["quantity"];
 	        this.unit_price = source["unit_price"];
 	        this.vat_rate = source["vat_rate"];
@@ -264,19 +320,21 @@ export namespace main {
 		}
 	}
 	
-	export class ItemCategory {
+	export class PaymentType {
 	    id: number;
 	    name: string;
 	    name_arabic: string;
+	    code: string;
+	    is_default: boolean;
+	    is_active: boolean;
 	    description: string;
-	    description_arabic: string;
 	    // Go type: time
 	    created_at: any;
 	    // Go type: time
 	    updated_at: any;
 	
 	    static createFrom(source: any = {}) {
-	        return new ItemCategory(source);
+	        return new PaymentType(source);
 	    }
 	
 	    constructor(source: any = {}) {
@@ -284,8 +342,157 @@ export namespace main {
 	        this.id = source["id"];
 	        this.name = source["name"];
 	        this.name_arabic = source["name_arabic"];
+	        this.code = source["code"];
+	        this.is_default = source["is_default"];
+	        this.is_active = source["is_active"];
+	        this.description = source["description"];
+	        this.created_at = this.convertValues(source["created_at"], null);
+	        this.updated_at = this.convertValues(source["updated_at"], null);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
+	export class SalesCategory {
+	    id: number;
+	    name: string;
+	    name_arabic: string;
+	    code: string;
+	    description: string;
+	    description_arabic: string;
+	    is_default: boolean;
+	    is_active: boolean;
+	    // Go type: time
+	    created_at: any;
+	    // Go type: time
+	    updated_at: any;
+	
+	    static createFrom(source: any = {}) {
+	        return new SalesCategory(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.name_arabic = source["name_arabic"];
+	        this.code = source["code"];
 	        this.description = source["description"];
 	        this.description_arabic = source["description_arabic"];
+	        this.is_default = source["is_default"];
+	        this.is_active = source["is_active"];
+	        this.created_at = this.convertValues(source["created_at"], null);
+	        this.updated_at = this.convertValues(source["updated_at"], null);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
+	export class TaxRate {
+	    id: number;
+	    name: string;
+	    name_arabic: string;
+	    rate: number;
+	    is_default: boolean;
+	    is_active: boolean;
+	    description: string;
+	    // Go type: time
+	    created_at: any;
+	    // Go type: time
+	    updated_at: any;
+	
+	    static createFrom(source: any = {}) {
+	        return new TaxRate(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.name_arabic = source["name_arabic"];
+	        this.rate = source["rate"];
+	        this.is_default = source["is_default"];
+	        this.is_active = source["is_active"];
+	        this.description = source["description"];
+	        this.created_at = this.convertValues(source["created_at"], null);
+	        this.updated_at = this.convertValues(source["updated_at"], null);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
+	export class UnitOfMeasurement {
+	    id: number;
+	    value: string;
+	    label: string;
+	    arabic: string;
+	    is_default: boolean;
+	    is_active: boolean;
+	    // Go type: time
+	    created_at: any;
+	    // Go type: time
+	    updated_at: any;
+	
+	    static createFrom(source: any = {}) {
+	        return new UnitOfMeasurement(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.value = source["value"];
+	        this.label = source["label"];
+	        this.arabic = source["arabic"];
+	        this.is_default = source["is_default"];
+	        this.is_active = source["is_active"];
 	        this.created_at = this.convertValues(source["created_at"], null);
 	        this.updated_at = this.convertValues(source["updated_at"], null);
 	    }

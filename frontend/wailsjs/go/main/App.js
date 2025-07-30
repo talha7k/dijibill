@@ -10,12 +10,12 @@ export function CreateInvoice(arg1) {
   return window['go']['main']['App']['CreateInvoice'](arg1);
 }
 
-export function CreateItemCategory(arg1) {
-  return window['go']['main']['App']['CreateItemCategory'](arg1);
+export function CreateProduct(arg1) {
+  return window['go']['main']['App']['CreateProduct'](arg1);
 }
 
-export function CreateSaleItem(arg1) {
-  return window['go']['main']['App']['CreateSaleItem'](arg1);
+export function CreateProductCategory(arg1) {
+  return window['go']['main']['App']['CreateProductCategory'](arg1);
 }
 
 export function DeleteCustomer(arg1) {
@@ -50,16 +50,16 @@ export function GetInvoices() {
   return window['go']['main']['App']['GetInvoices']();
 }
 
-export function GetItemCategories() {
-  return window['go']['main']['App']['GetItemCategories']();
+export function GetProductCategories() {
+  return window['go']['main']['App']['GetProductCategories']();
+}
+
+export function GetProducts() {
+  return window['go']['main']['App']['GetProducts']();
 }
 
 export function GetQRCodeInfo(arg1) {
   return window['go']['main']['App']['GetQRCodeInfo'](arg1);
-}
-
-export function GetSaleItems() {
-  return window['go']['main']['App']['GetSaleItems']();
 }
 
 export function Greet(arg1) {

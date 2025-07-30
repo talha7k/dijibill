@@ -217,20 +217,20 @@ func (p *PDFService) addInvoiceItemsTable(pdf *gofpdf.Fpdf, invoice *Invoice) {
 	pdf.SetFont("Arial", "", 8)
 	pdf.SetFillColor(255, 255, 255)
 
-	// Get sale items for the invoice items
+	// Get products for the invoice items
 	for _, item := range invoice.Items {
-		saleItem, err := p.getSaleItemByID(item.SaleItemID)
+		product, err := p.getProductByID(item.ProductID)
 		if err != nil {
 			continue
 		}
 
-		pdf.CellFormat(30, 6, p.truncateText(saleItem.Name, 25), "1", 0, "L", false, 0, "")
+		pdf.CellFormat(30, 6, p.truncateText(product.Name, 25), "1", 0, "L", false, 0, "")
 		pdf.CellFormat(20, 6, fmt.Sprintf("%.2f", item.Quantity), "1", 0, "C", false, 0, "")
 		pdf.CellFormat(25, 6, fmt.Sprintf("%.2f", item.UnitPrice), "1", 0, "R", false, 0, "")
 		pdf.CellFormat(20, 6, fmt.Sprintf("%.1f%%", item.VATRate), "1", 0, "C", false, 0, "")
 		pdf.CellFormat(25, 6, fmt.Sprintf("%.2f", item.VATAmount), "1", 0, "R", false, 0, "")
 		pdf.CellFormat(25, 6, fmt.Sprintf("%.2f", item.TotalAmount), "1", 0, "R", false, 0, "")
-		pdf.CellFormat(45, 6, p.truncateText(saleItem.NameArabic, 35), "1", 1, "R", false, 0, "")
+		pdf.CellFormat(45, 6, p.truncateText(product.NameArabic, 35), "1", 1, "R", false, 0, "")
 	}
 }
 
@@ -288,20 +288,20 @@ func (p *PDFService) generateQRCodeData(invoice *Invoice, company *Company) (str
 	return qrCodeBase64, nil
 }
 
-func (p *PDFService) getSaleItemByID(id int) (*SaleItem, error) {
+func (p *PDFService) getProductByID(id int) (*Product, error) {
 	// This is a simplified version - in a real app you'd have a proper method in the database
-	items, err := p.db.GetSaleItems()
+	products, err := p.db.GetProducts()
 	if err != nil {
 		return nil, err
 	}
 
-	for _, item := range items {
-		if item.ID == id {
-			return &item, nil
+	for _, product := range products {
+		if product.ID == id {
+			return &product, nil
 		}
 	}
 
-	return nil, fmt.Errorf("sale item not found")
+	return nil, fmt.Errorf("product not found")
 }
 
 func (p *PDFService) truncateText(text string, maxLen int) string {

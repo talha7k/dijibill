@@ -6,9 +6,9 @@ export function CreateCustomer(arg1:main.Customer):Promise<void>;
 
 export function CreateInvoice(arg1:main.Invoice):Promise<void>;
 
-export function CreateItemCategory(arg1:main.ItemCategory):Promise<void>;
+export function CreateProduct(arg1:main.Product):Promise<void>;
 
-export function CreateSaleItem(arg1:main.SaleItem):Promise<void>;
+export function CreateProductCategory(arg1:main.ProductCategory):Promise<void>;
 
 export function DeleteCustomer(arg1:number):Promise<void>;
 
@@ -26,11 +26,11 @@ export function GetInvoiceByID(arg1:number):Promise<main.Invoice>;
 
 export function GetInvoices():Promise<Array<main.Invoice>>;
 
-export function GetItemCategories():Promise<Array<main.ItemCategory>>;
+export function GetProductCategories():Promise<Array<main.ProductCategory>>;
+
+export function GetProducts():Promise<Array<main.Product>>;
 
 export function GetQRCodeInfo(arg1:string):Promise<Record<string, any>>;
-
-export function GetSaleItems():Promise<Array<main.SaleItem>>;
 
 export function Greet(arg1:string):Promise<string>;
 

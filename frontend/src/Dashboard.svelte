@@ -1,6 +1,6 @@
 <script>
   import { onMount } from 'svelte'
-  import { GetCustomers, GetInvoices, GetSaleItems } from '../wailsjs/go/main/App.js'
+  import { GetCustomers, GetInvoices, GetProducts } from '../wailsjs/go/main/App.js'
 
   let stats = {
     items: 0,
@@ -32,19 +32,19 @@
   onMount(async () => {
     try {
       // Load data from backend
-      const [customersData, invoicesData, itemsData] = await Promise.all([
-        GetCustomers(),
-        GetInvoices(),
-        GetSaleItems()
-      ])
+      const [customersData, invoicesData, productsData] = await Promise.all([
+      GetCustomers(),
+      GetInvoices(),
+      GetProducts()
+    ])
 
       customers = customersData || []
       invoices = invoicesData || []
       
       // Calculate stats
       stats.customers = customers.length
-      stats.items = itemsData?.length || 0
-      stats.products = itemsData?.length || 0
+      stats.items = productsData?.length || 0
+        stats.products = productsData?.length || 0
       stats.payments = invoices.filter(inv => inv.status === 'paid').length
 
     } catch (error) {

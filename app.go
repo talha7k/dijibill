@@ -71,28 +71,28 @@ func (a *App) DeleteCustomer(id int) error {
 	return a.db.DeleteCustomer(id)
 }
 
-// Item Category Management Methods
+// Product Category Management Methods
 
-func (a *App) CreateItemCategory(category ItemCategory) error {
+func (a *App) CreateProductCategory(category ProductCategory) error {
 	category.CreatedAt = time.Now()
 	category.UpdatedAt = time.Now()
-	return a.db.CreateItemCategory(&category)
+	return a.db.CreateProductCategory(&category)
 }
 
-func (a *App) GetItemCategories() ([]ItemCategory, error) {
-	return a.db.GetItemCategories()
+func (a *App) GetProductCategories() ([]ProductCategory, error) {
+	return a.db.GetProductCategories()
 }
 
-// Sale Item Management Methods
+// Product Management Methods
 
-func (a *App) CreateSaleItem(item SaleItem) error {
-	item.CreatedAt = time.Now()
-	item.UpdatedAt = time.Now()
-	return a.db.CreateSaleItem(&item)
+func (a *App) CreateProduct(product Product) error {
+	product.CreatedAt = time.Now()
+	product.UpdatedAt = time.Now()
+	return a.db.CreateProduct(&product)
 }
 
-func (a *App) GetSaleItems() ([]SaleItem, error) {
-	return a.db.GetSaleItems()
+func (a *App) GetProducts() ([]Product, error) {
+	return a.db.GetProducts()
 }
 
 // Invoice Management Methods
@@ -140,6 +140,90 @@ func (a *App) GetCompany() (*Company, error) {
 
 func (a *App) UpdateCompany(company Company) error {
 	return a.db.UpdateCompany(&company)
+}
+
+// Payment Type Management Methods
+
+func (a *App) CreatePaymentType(paymentType PaymentType) error {
+	paymentType.CreatedAt = time.Now()
+	paymentType.UpdatedAt = time.Now()
+	return a.db.CreatePaymentType(&paymentType)
+}
+
+func (a *App) GetPaymentTypes() ([]PaymentType, error) {
+	return a.db.GetPaymentTypes()
+}
+
+func (a *App) UpdatePaymentType(paymentType PaymentType) error {
+	paymentType.UpdatedAt = time.Now()
+	return a.db.UpdatePaymentType(&paymentType)
+}
+
+func (a *App) DeletePaymentType(id int) error {
+	return a.db.DeletePaymentType(id)
+}
+
+// Sales Category Management Methods
+
+func (a *App) CreateSalesCategory(salesCategory SalesCategory) error {
+	salesCategory.CreatedAt = time.Now()
+	salesCategory.UpdatedAt = time.Now()
+	return a.db.CreateSalesCategory(&salesCategory)
+}
+
+func (a *App) GetSalesCategories() ([]SalesCategory, error) {
+	return a.db.GetSalesCategories()
+}
+
+func (a *App) UpdateSalesCategory(salesCategory SalesCategory) error {
+	salesCategory.UpdatedAt = time.Now()
+	return a.db.UpdateSalesCategory(&salesCategory)
+}
+
+func (a *App) DeleteSalesCategory(id int) error {
+	return a.db.DeleteSalesCategory(id)
+}
+
+// Tax Rate Management Methods
+
+func (a *App) CreateTaxRate(taxRate TaxRate) error {
+	taxRate.CreatedAt = time.Now()
+	taxRate.UpdatedAt = time.Now()
+	return a.db.CreateTaxRate(&taxRate)
+}
+
+func (a *App) GetTaxRates() ([]TaxRate, error) {
+	return a.db.GetTaxRates()
+}
+
+func (a *App) UpdateTaxRate(taxRate TaxRate) error {
+	taxRate.UpdatedAt = time.Now()
+	return a.db.UpdateTaxRate(&taxRate)
+}
+
+func (a *App) DeleteTaxRate(id int) error {
+	return a.db.DeleteTaxRate(id)
+}
+
+// Unit of Measurement Management Methods
+
+func (a *App) CreateUnitOfMeasurement(unit UnitOfMeasurement) error {
+	unit.CreatedAt = time.Now()
+	unit.UpdatedAt = time.Now()
+	return a.db.CreateUnitOfMeasurement(&unit)
+}
+
+func (a *App) GetUnitsOfMeasurement() ([]UnitOfMeasurement, error) {
+	return a.db.GetUnitsOfMeasurement()
+}
+
+func (a *App) UpdateUnitOfMeasurement(unit UnitOfMeasurement) error {
+	unit.UpdatedAt = time.Now()
+	return a.db.UpdateUnitOfMeasurement(&unit)
+}
+
+func (a *App) DeleteUnitOfMeasurement(id int) error {
+	return a.db.DeleteUnitOfMeasurement(id)
 }
 
 // PDF Generation Methods
