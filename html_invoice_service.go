@@ -5,9 +5,9 @@ import (
 	"context"
 	"fmt"
 	"html/template"
+	"log"
 	"os"
 	"path/filepath"
-	"time"
 
 	"dijibill/database"
 
@@ -41,7 +41,7 @@ type InvoiceItemData struct {
 	Product *database.Product
 }
 
-// GenerateInvoiceHTML generates HTML content for an invoice
+// GenerateInvoiceHTML generates HTML content for an invoice with on-demand QR code generation
 func (h *HTMLInvoiceService) GenerateInvoiceHTML(invoiceID int) (string, error) {
 	// Get invoice data
 	invoice, err := h.db.GetInvoiceByID(invoiceID)
@@ -92,6 +92,19 @@ func (h *HTMLInvoiceService) GenerateInvoiceHTML(invoiceID int) (string, error) 
 	}
 	invoice.Customer = customer
 
+	// Generate QR code on-demand
+	qrService := NewZATCAQRService()
+	qrCodeBase64, err := qrService.GenerateZATCAQRCodeOnDemand(invoice, company)
+	if err != nil {
+		// Log the error but continue without QR code
+		log.Printf("Warning: Could not generate QR code for invoice %d: %v", invoice.ID, err)
+		qrCodeBase64 = ""
+	}
+
+	// Create a copy of the invoice with the generated QR code for template rendering
+	invoiceWithQR := *invoice
+	invoiceWithQR.QRCode = qrCodeBase64
+
 	// Get invoice items with product details
 	items := make([]InvoiceItemData, len(invoice.Items))
 	for i, item := range invoice.Items {
@@ -110,9 +123,9 @@ func (h *HTMLInvoiceService) GenerateInvoiceHTML(invoiceID int) (string, error) 
 		}
 	}
 
-	// Prepare template data
+	// Prepare template data with the QR code included
 	data := InvoiceData{
-		Invoice: invoice,
+		Invoice: &invoiceWithQR, // Use the copy with QR code
 		Company: company,
 		Items:   items,
 	}
@@ -205,53 +218,65 @@ func (h *HTMLInvoiceService) PrintInvoiceHTML(invoiceID int) error {
 	return nil
 }
 
-// SaveInvoiceHTML saves the invoice as an HTML file
+// SaveInvoiceHTML opens the native print dialog for saving/printing the invoice
 func (h *HTMLInvoiceService) SaveInvoiceHTML(invoiceID int) error {
-	// Get invoice details for default filename
-	invoice, err := h.db.GetInvoiceByID(invoiceID)
-	if err != nil {
-		return err
-	}
-
-	defaultFilename := fmt.Sprintf("Invoice_%s_%s.html", invoice.InvoiceNumber, time.Now().Format("20060102_150405"))
-
-	// Show save dialog
-	savePath, err := runtime.SaveFileDialog(h.ctx, runtime.SaveDialogOptions{
-		DefaultFilename: defaultFilename,
-		Title:           "Save Invoice HTML",
-		Filters: []runtime.FileFilter{
-			{
-				DisplayName: "HTML Files (*.html)",
-				Pattern:     "*.html",
-			},
-		},
-	})
-	if err != nil {
-		return err
-	}
-
-	// If user cancelled the dialog, savePath will be empty
-	if savePath == "" {
-		return nil // User cancelled, not an error
-	}
-
-	// Generate HTML
 	htmlContent, err := h.GenerateInvoiceHTML(invoiceID)
 	if err != nil {
 		return err
 	}
 
-	// Save to chosen location
-	if err := os.WriteFile(savePath, []byte(htmlContent), 0644); err != nil {
+	// Create temporary HTML file for printing
+	tempDir := os.TempDir()
+	invoice, err := h.db.GetInvoiceByID(invoiceID)
+	if err != nil {
 		return err
 	}
 
-	// Show success message
-	runtime.MessageDialog(h.ctx, runtime.MessageDialogOptions{
-		Type:    runtime.InfoDialog,
-		Title:   "Success",
-		Message: fmt.Sprintf("Invoice HTML saved successfully to:\n%s", savePath),
-	})
+	filename := fmt.Sprintf("Invoice_%s_save.html", invoice.InvoiceNumber)
+	tempFilePath := filepath.Join(tempDir, filename)
+
+	// Create HTML with print-optimized styling
+	printHTML := fmt.Sprintf(`
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Invoice %s</title>
+    <style>
+        @media print {
+            body { margin: 0; }
+            .no-print { display: none; }
+        }
+        @page {
+            margin: 0.5in;
+            size: A4;
+        }
+    </style>
+</head>
+<body>
+    <div class="no-print" style="padding: 20px; background: #f0f0f0; text-align: center; margin-bottom: 20px;">
+        <h3>Invoice %s - Ready to Save/Print</h3>
+        <p>Use Ctrl+P (Cmd+P on Mac) or the button below to open print dialog.</p>
+        <p>In the print dialog, you can choose "Save as PDF" or select a printer.</p>
+        <button onclick="window.print()" style="padding: 10px 20px; font-size: 16px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; margin-right: 10px;">Print / Save as PDF</button>
+        <button onclick="window.close()" style="padding: 10px 20px; font-size: 16px; background: #6c757d; color: white; border: none; border-radius: 5px; cursor: pointer;">Close</button>
+    </div>
+    %s
+    <script>
+        // Auto-open print dialog after a short delay
+        setTimeout(function() {
+            window.print();
+        }, 1000);
+    </script>
+</body>
+</html>`, invoice.InvoiceNumber, invoice.InvoiceNumber, htmlContent)
+
+	if err := os.WriteFile(tempFilePath, []byte(printHTML), 0644); err != nil {
+		return err
+	}
+
+	// Open in browser which will automatically show print dialog
+	runtime.BrowserOpenURL(h.ctx, "file://"+tempFilePath)
 	return nil
 }
 

@@ -158,6 +158,10 @@ export function PrintInvoiceHTML(arg1) {
   return window['go']['main']['App']['PrintInvoiceHTML'](arg1);
 }
 
+export function RegenerateAllMissingQRCodes() {
+  return window['go']['main']['App']['RegenerateAllMissingQRCodes']();
+}
+
 export function RegenerateInvoiceQRCode(arg1) {
   return window['go']['main']['App']['RegenerateInvoiceQRCode'](arg1);
 }

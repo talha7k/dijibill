@@ -68,15 +68,15 @@
     }
   }
 
-  async function downloadInvoiceHTML(invoiceId) {
-    console.log('downloadInvoiceHTML called with ID:', invoiceId)
+  async function saveOrPrintInvoice(invoiceId) {
+    console.log('saveOrPrintInvoice called with ID:', invoiceId)
     try {
-      console.log('Saving HTML for invoice:', invoiceId)
+      console.log('Opening print dialog for invoice:', invoiceId)
       await SaveInvoiceHTML(invoiceId)
-      console.log('HTML save completed')
+      console.log('Print dialog opened')
     } catch (error) {
-      console.error('Error saving HTML:', error)
-      alert('Failed to save HTML. Please try again.')
+      console.error('Error opening print dialog:', error)
+      alert('Failed to open print dialog. Please try again.')
     }
   }
 
@@ -233,8 +233,8 @@
                       </button>
                       <button 
                         class="btn-icon btn-sm text-success hover:bg-success/20" 
-                        title="Save HTML"
-                        on:click={() => downloadInvoiceHTML(invoice.id)}
+                        title="Save/Print"
+                        on:click={() => saveOrPrintInvoice(invoice.id)}
                       >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
