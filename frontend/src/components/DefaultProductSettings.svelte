@@ -1,7 +1,7 @@
 <script>
   import { createEventDispatcher, onMount } from 'svelte'
   import { GetDefaultProductSettings, UpdateDefaultProductSettings, GetTaxRates, GetUnitsOfMeasurement } from '../../wailsjs/go/main/App.js'
-  import * as main from '../../wailsjs/go/models'
+   import { database } from '../../wailsjs/go/models'
 
   const dispatch = createEventDispatcher()
 
@@ -60,7 +60,7 @@
     isLoading = true
     try {
       // Create a new DefaultProductSettings object
-      const settings = new main.main.DefaultProductSettings()
+      const settings = new database.DefaultProductSettings()
       settings.id = defaultProductSettings.id
       settings.default_stock = defaultProductSettings.default_stock
       settings.default_tax_rate_id = defaultProductSettings.default_tax_rate_id

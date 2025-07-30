@@ -1,6 +1,6 @@
 <script>
   import { GetPaymentTypes, CreatePaymentType, UpdatePaymentType, DeletePaymentType } from '../../wailsjs/go/main/App.js'
-  import * as main from '../../wailsjs/go/models'
+   import { database } from '../../wailsjs/go/models'
   import { createEventDispatcher } from 'svelte'
 
   const dispatch = createEventDispatcher()
@@ -15,7 +15,7 @@
   async function addPaymentType() {
     if (newPaymentType.name && newPaymentType.code) {
       try {
-        const paymentTypeData = new main.main.PaymentType({
+        const paymentTypeData = new database.PaymentType({
           id: 0,
           name: newPaymentType.name,
           name_arabic: newPaymentType.name_arabic || '',
@@ -44,7 +44,7 @@
 
   async function updatePaymentType() {
     try {
-      const paymentTypeData = new main.main.PaymentType({
+      const paymentTypeData = new database.PaymentType({
         id: editingPaymentType,
         name: newPaymentType.name,
         name_arabic: newPaymentType.name_arabic || '',
@@ -87,14 +87,14 @@
       // First, update all payment types to not be default
       for (const paymentType of paymentTypes) {
         if (paymentType.is_default) {
-          const updatedPaymentType = new main.main.PaymentType({ ...paymentType, is_default: false });
+          const updatedPaymentType = new database.PaymentType({ ...paymentType, is_default: false });
           await UpdatePaymentType(updatedPaymentType);
         }
       }
       // Then set the selected one as default
       const selectedPaymentType = paymentTypes.find(pt => pt.id === id);
       if (selectedPaymentType) {
-        const updatedPaymentType = new main.main.PaymentType({ ...selectedPaymentType, is_default: true });
+        const updatedPaymentType = new database.PaymentType({ ...selectedPaymentType, is_default: true });
         await UpdatePaymentType(updatedPaymentType);
         dispatch('reload')
       }

@@ -1,7 +1,7 @@
 <script>
   import { createEventDispatcher } from 'svelte'
   import { CreateProductCategory } from '../../wailsjs/go/main/App.js'
-  import * as main from '../../wailsjs/go/models'
+   import { database } from '../../wailsjs/go/models'
 
   export let categories = []
   export let isLoading = false
@@ -37,7 +37,7 @@
   async function handleSaveCategory() {
     try {
       isLoading = true
-      const category = main.main.ProductCategory.createFrom(categoryForm)
+      const category = database.ProductCategory.createFrom(categoryForm)
       await CreateProductCategory(category)
       
       dispatch('categoriesUpdated')

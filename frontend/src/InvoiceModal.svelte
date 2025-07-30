@@ -1,7 +1,7 @@
 <script>
   import { createEventDispatcher, onMount } from 'svelte'
   import { GetCustomers, GetProducts, GetPaymentTypes, GetSalesCategories, CreateInvoice } from '../wailsjs/go/main/App.js'
-  import * as main from '../wailsjs/go/models'
+  import {database} from '../wailsjs/go/models'
   
   const dispatch = createEventDispatcher()
   
@@ -172,7 +172,7 @@
         }))
       }
       
-      const invoice = main.main.Invoice.createFrom(invoiceObj)
+      const invoice = database.Invoice.createFrom(invoiceObj)
       await CreateInvoice(invoice)
       dispatch('saved')
       closeModal()

@@ -1,7 +1,7 @@
 <script>
   import { onMount } from 'svelte'
   import { GetProducts, CreateProduct, GetProductCategories, CreateProductCategory, GetDefaultProductSettings } from '../wailsjs/go/main/App.js'
-  import * as main from '../wailsjs/go/models'
+  import {database} from '../wailsjs/go/models'
   
   // Import components
   import ProductList from './components/ProductList.svelte'
@@ -149,7 +149,7 @@
   async function handleSaveProduct() {
     try {
       isLoading = true
-      const product = main.main.Product.createFrom(productForm)
+      const product = database.Product.createFrom(productForm)
       await CreateProduct(product)
       await loadProducts()
       showProductModal = false

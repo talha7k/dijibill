@@ -1,6 +1,6 @@
 # Dijibill: Cross-Platform Invoicing & Business Management for SMEs
 
-Dijibill is a desktop application designed to streamline invoicing and business operations for Small and Medium-sized Enterprises (SMEs) in Saudi Arabia. Built with a focus on local compliance and user experience, it offers bilingual support (English/Arabic) and adheres to Saudi Arabian invoice standards, including VAT calculation and ZATCA-compliant QR codes.
+Dijibill is a desktop application designed to streamline invoicing and business operations for Small and Medium-sized Enterprises (SMEs). Built with a focus on local compliance and user experience, it offers bilingual support (English/Arabic) and adheres to Saudi Arabian invoice standards, including VAT calculation and ZATCA-compliant QR codes.
 
 ---
 
