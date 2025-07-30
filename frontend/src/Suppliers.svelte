@@ -26,23 +26,34 @@
   async function loadSuppliers() {
     try {
       loading = true
-      suppliers = await GetSuppliers()
+      console.log('Loading suppliers...')
+      const result = await GetSuppliers()
+      console.log('Suppliers loaded:', result)
+      suppliers = result || []
     } catch (error) {
       console.error('Error loading suppliers:', error)
       suppliers = []
+      // Show user-friendly error message
+      alert('Failed to load suppliers. Please check your connection and try again.')
     } finally {
       loading = false
+      console.log('Loading finished. Suppliers count:', suppliers.length)
     }
   }
 
   // Filter suppliers based on search term
-  $: filteredSuppliers = suppliers.filter(supplier => 
-    supplier.company_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (supplier.company_name_arabic && supplier.company_name_arabic.includes(searchTerm)) ||
-    supplier.contact_person.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    supplier.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    supplier.phone.includes(searchTerm)
-  )
+  $: filteredSuppliers = suppliers.filter(supplier => {
+    if (!searchTerm) return true
+    
+    const term = searchTerm.toLowerCase()
+    return (
+      (supplier.company_name || '').toLowerCase().includes(term) ||
+      (supplier.company_name_arabic || '').includes(searchTerm) ||
+      (supplier.contact_person || '').toLowerCase().includes(term) ||
+      (supplier.email || '').toLowerCase().includes(term) ||
+      (supplier.phone || '').includes(searchTerm)
+    )
+  })
 
   function handleAddSupplier() {
     editingSupplier = null
