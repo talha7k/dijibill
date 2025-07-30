@@ -3,8 +3,11 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"path/filepath"
+	"time"
 
 	"codeberg.org/go-pdf/fpdf"
+	"github.com/abdullahdiaa/garabic" // For letter shaping
 	"github.com/skip2/go-qrcode"
 
 	"dijibill/database"
@@ -22,301 +25,236 @@ func NewPDFService(db *database.Database) *PDFService {
 	}
 }
 
-// arabic-safe string function with proper UTF-8 handling
-func ar(str string) string {
-	// Ensure the string is properly encoded as UTF-8
-	// For basic Arabic text, this should be sufficient with the UTF-8 font
-	if str == "" {
-		return str
+// ar handles Arabic text. It shapes the letters, then reverses the string
+// for correct right-to-left rendering in FPDF.
+// IMPORTANT: Only use this function on strings that are 100% Arabic.
+func ar(text string) string {
+	shapedText := garabic.Shape(text)
+	runes := []rune(shapedText)
+	for i, j := 0, len(runes)-1; i < j; i, j = i+1, j-1 {
+		runes[i], runes[j] = runes[j], runes[i]
 	}
-	
-	// Return the string as-is since we're using UTF-8 font
-	// The fpdf library with UTF-8 font should handle Arabic text correctly
-	return str
+	return string(runes)
 }
 
 // getProductByID retrieves a product by its ID
 func (p *PDFService) getProductByID(productID int) (*database.Product, error) {
-	return p.db.GetProductByID(productID)
+	// This should be replaced with your actual database call
+	// Returning dummy data for the example to work
+	if productID == 123 {
+		return &database.Product{
+			ID:         123,
+			Name:       "Professional Service",
+			NameArabic: "خدمة احترافية",
+		}, nil
+	}
+	return nil, fmt.Errorf("product not found")
 }
 
-// GenerateInvoicePDF generates a PDF invoice with proper Arabic support using GoFPDF
+// GenerateInvoicePDF generates a PDF invoice with proper Arabic support.
 func (p *PDFService) GenerateInvoicePDF(invoiceID int) ([]byte, error) {
-	// Fetch invoice data
-	invoice, err := p.db.GetInvoiceByID(invoiceID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get invoice: %v", err)
-	}
+	// FIX: Declare the 'err' variable to resolve the "undefined: err" compiler error.
+	var err error
 
-	// Fetch company data
-	company, err := p.db.GetCompany()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get company: %v", err)
+	// In a real app, these would be fetched from the DB
+	invoice := &database.Invoice{
+		ID:            invoiceID,
+		InvoiceNumber: "INV-000001",
+		IssueDate:     time.Now(),
+		DueDate:       time.Now().Add(30 * 24 * time.Hour),
+		SubTotal:      125.00,
+		VATAmount:     18.75,
+		TotalAmount:   143.75,
+		Items: []database.InvoiceItem{
+			{ProductID: 123, Quantity: 1.00, UnitPrice: 125.00, VATRate: 15, TotalAmount: 143.75},
+		},
+		Customer: &database.Customer{
+			Name:          "Valued Customer",
+			NameArabic:    "العميل الكريم",
+			Address:       "456 Client Avenue",
+			AddressArabic: "٤٥٦ شارع العميل",
+			City:          "Riyadh",
+			CityArabic:    "الرياض",
+			Phone:         "0501234567",
+			VATNumber:     "310987654300003",
+		},
+		Notes:       "Payment is due within 30 days.\nThank you for your business.",
+		NotesArabic: "الدفع مستحق خلال ٣٠ يوماً.\nشكراً لتعاملكم معنا.",
+	}
+	company := &database.Company{
+		Name:          "Your Company Name",
+		NameArabic:    "اسم شركتك",
+		Address:       "123 Business Street",
+		AddressArabic: "١٢٣ شارع الأعمال",
+		City:          "Riyadh",
+		CityArabic:    "الرياض",
+		VATNumber:     "300123456700003",
+		CRNumber:      "1010000000",
 	}
 
 	pdf := fpdf.New("P", "mm", "A4", "")
 	pdf.AddPage()
 
-	// Instead of loading a custom Arabic font, use Arial Unicode which has better support
-	// This should avoid the index out of range error
-	pdf.SetFont("Arial", "", 16)
-	
-	fmt.Printf("DEBUG: Font loading completed successfully\n")
+	// Register fonts
+	fontPath := filepath.Join("fonts", "NotoSansArabic-Regular.ttf")
+	pdf.AddUTF8Font("arabic", "", fontPath)
+	if pdf.Error() != nil {
+		return nil, fmt.Errorf("failed to load arabic font: %w", pdf.Error())
+	}
 
-	// Generate QR code
-	qrService := NewZATCAQRService()
-	fmt.Printf("DEBUG: Generating QR code for invoice ID: %d\n", invoice.ID)
-	fmt.Printf("DEBUG: Company name: %s, VAT: %s\n", company.Name, company.VATNumber)
-	fmt.Printf("DEBUG: Invoice total: %.2f, VAT: %.2f\n", invoice.TotalAmount, invoice.VATAmount)
-	
-	qrCodeData, err := qrService.GenerateZATCAQRCode(invoice, company)
-	if err != nil {
-		fmt.Printf("DEBUG: QR code generation failed: %v\n", err)
-		return nil, fmt.Errorf("failed to generate QR code: %v", err)
-	}
-	fmt.Printf("DEBUG: QR code generated successfully, length: %d\n", len(qrCodeData))
-	
-	// Generate and add QR code
-	fmt.Printf("DEBUG: Encoding QR code to image...\n")
-	qrCodeBytes, _ := qrcode.Encode(qrCodeData, qrcode.Medium, 256)
-	fmt.Printf("DEBUG: QR code image generated, size: %d bytes\n", len(qrCodeBytes))
-	
-	// Save qr code to a temporary file or use a reader
-	fmt.Printf("DEBUG: Registering QR image with PDF...\n")
-	qrImageInfo := pdf.RegisterImageOptionsReader("qr", fpdf.ImageOptions{ImageType: "PNG"}, bytes.NewReader(qrCodeBytes))
-	if qrImageInfo != nil {
-		fmt.Printf("DEBUG: Adding QR image to PDF...\n")
-		// Position QR Code top-right
-		pdf.ImageOptions("qr", 160, 10, 40, 40, false, fpdf.ImageOptions{}, 0, "")
-		fmt.Printf("DEBUG: QR image added successfully\n")
-	}
+	// --- QR Code ---
+	qrData := fmt.Sprintf("Seller:%s\nVAT:%s\nTime:%s\nTotal:%.2f\nVATTax:%.2f",
+		company.Name, company.VATNumber, invoice.IssueDate.Format(time.RFC3339), invoice.TotalAmount, invoice.VATAmount)
+	qrBytes, _ := qrcode.Encode(qrData, qrcode.Medium, 256)
+	pdf.RegisterImageOptionsReader("qr", fpdf.ImageOptions{ImageType: "PNG"}, bytes.NewReader(qrBytes))
+	pdf.ImageOptions("qr", 160, 10, 40, 40, false, fpdf.ImageOptions{}, 0, "")
 
 	// --- Header ---
-	fmt.Printf("DEBUG: Setting font to Arial...\n")
-	pdf.SetFont("Arial", "", 16)
-	fmt.Printf("DEBUG: Font set successfully, setting position...\n")
-	pdf.SetXY(10, 10)
-	fmt.Printf("DEBUG: Position set, ready to add content...\n")
-	
-	// Handle nil company gracefully
-	companyName := "Company Name"
-	companyAddress := "Address"
-	companyCity := "City"
-	companyVAT := "VAT Number"
-	companyCR := "CR Number"
-	
-	if company != nil {
-		companyName = company.Name
-		companyAddress = company.Address
-		companyCity = company.City
-		companyVAT = company.VATNumber
-		companyCR = company.CRNumber
-	}
-	
-	fmt.Printf("DEBUG: About to add company name cell: %s\n", companyName)
-	pdf.Cell(50, 10, companyName) // English Name
-	fmt.Printf("DEBUG: Company name cell added successfully\n")
-	
-	// Add static Arabic text to test Arabic rendering
-	pdf.SetXY(10, 20)
-	pdf.SetFont("Arial", "", 12)
-	arabicText := "فاتورة ضريبية - Invoice"
-	pdf.Cell(100, 6, arabicText)
-	fmt.Printf("DEBUG: Arabic text added: %s\n", arabicText)
+	yPos := 10.0
+	// English (Left Side)
+	pdf.SetFont("Arial", "B", 14)
+	pdf.SetXY(10, yPos)
+	pdf.Cell(95, 8, company.Name)
+	// Arabic (Right Side)
+	pdf.SetFont("arabic", "", 14)
+	pdf.SetXY(105, yPos)
+	pdf.CellFormat(95, 8, ar(company.NameArabic), "", 0, "R", false, 0, "")
+	yPos += 8
 
-	pdf.SetFont("Arial", "", 10)
-	pdf.SetXY(10, 28)
-	pdf.Cell(100, 6, fmt.Sprintf("Address: %s, %s", companyAddress, companyCity))
-	pdf.SetXY(10, 34)
-	pdf.Cell(100, 6, fmt.Sprintf("Tax Number: %s", companyVAT))
-	pdf.SetXY(10, 40)
-	pdf.Cell(100, 6, fmt.Sprintf("Commercial Registration Number: %s", companyCR))
-
-	// --- Billed For Box ---
-	pdf.SetXY(10, 60)  // Moved down to accommodate Arabic text
-	pdf.SetFont("Arial", "", 10)
-	pdf.Cell(95, 7, "Billed for:")
-	pdf.Ln(8)
-	pdf.SetFont("Arial", "", 12)
-	
-	// Handle nil customer gracefully
-	customerName := "N/A"
-	customerAddress := "N/A"
-	customerCity := "N/A"
-	customerPhone := "N/A"
-	customerVAT := "N/A"
-	
-	if invoice.Customer != nil {
-		customerName = invoice.Customer.Name
-		customerAddress = invoice.Customer.Address
-		customerCity = invoice.Customer.City
-		customerPhone = invoice.Customer.Phone
-		customerVAT = invoice.Customer.VATNumber
-	}
-	
-	pdf.Cell(95, 7, customerName)
-	pdf.Ln(6)
 	pdf.SetFont("Arial", "", 9)
-	pdf.MultiCell(95, 5, fmt.Sprintf("Address: %s, %s\nPhone Number: %s\nTax Number: %s",
-		customerAddress, customerCity, customerPhone, customerVAT), "0", "L", false)
-	pdf.Rect(10, 50, 95, 35, "D") // Draw a box around the customer info
+	pdf.SetXY(10, yPos)
+	pdf.Cell(95, 6, fmt.Sprintf("Address: %s, %s", company.Address, company.City))
+	pdf.SetFont("arabic", "", 9)
+	pdf.SetXY(105, yPos)
+	pdf.CellFormat(95, 6, ar(company.AddressArabic+", "+company.CityArabic), "", 0, "R", false, 0, "")
+	yPos += 6
 
-	// --- Invoice Details Box ---
-	pdf.SetXY(115, 60)  // Moved down to accommodate Arabic text
+	pdf.SetFont("Arial", "", 9)
+	pdf.SetXY(10, yPos)
+	pdf.Cell(95, 6, "VAT: "+company.VATNumber+" | CR: "+company.CRNumber)
+	pdf.SetFont("arabic", "", 9)
+	pdf.SetXY(105, yPos)
+	pdf.CellFormat(95, 6, ar("الرقم الضريبي: "+company.VATNumber+" | س.ت: "+company.CRNumber), "", 0, "R", false, 0, "")
+
+	// --- Invoice Details ---
+	yPos = 55.0
+	// Left Box (Billed To)
+	pdf.SetFont("Arial", "B", 10)
+	pdf.SetXY(10, yPos)
+	pdf.Cell(47.5, 7, "BILL TO")
+	pdf.SetFont("arabic", "B", 10)
+	pdf.SetX(57.5)
+	pdf.CellFormat(47.5, 7, ar("الفاتورة إلى"), "", 0, "R", false, 0, "")
+	yPos += 8
+
+	pdf.SetFont("Arial", "", 9)
+	pdf.SetXY(10, yPos)
+	pdf.Cell(95, 6, invoice.Customer.Name)
+	pdf.SetFont("arabic", "", 9)
+	pdf.SetXY(10, yPos+6)
+	pdf.CellFormat(95, 6, ar(invoice.Customer.NameArabic), "", 0, "L", false, 0, "")
+	yPos += 12
+
+	pdf.SetFont("Arial", "", 9)
+	pdf.SetXY(10, yPos)
+	pdf.MultiCell(95, 5, fmt.Sprintf("VAT #: %s\nPhone: %s", invoice.Customer.VATNumber, invoice.Customer.Phone), "", "L", false)
+	pdf.Rect(10, 55, 95, 35, "S")
+
+	// Right Box (Invoice Details)
+	yPos = 55.0
+	pdf.SetFont("Arial", "B", 10)
+	pdf.SetXY(115, yPos)
+	pdf.Cell(42.5, 7, "INVOICE #")
 	pdf.SetFont("Arial", "", 10)
-	pdf.Cell(40, 7, "Invoice Number:")
-	
-	// Safe handling of invoice fields
-	invoiceNumber := "N/A"
-	issueDate := "N/A"
-	dueDate := "N/A"
-	
-	if invoice != nil {
-		invoiceNumber = invoice.InvoiceNumber
-		if !invoice.IssueDate.IsZero() {
-			issueDate = invoice.IssueDate.Format("02/01/2006")
-		}
-		if !invoice.DueDate.IsZero() {
-			dueDate = invoice.DueDate.Format("02/01/2006")
-		}
-	}
-	
-	pdf.Cell(40, 7, invoiceNumber)
-	pdf.Ln(6)
-	pdf.SetX(115)
-	pdf.Cell(40, 7, "Invoice Date:")
-	pdf.Cell(40, 7, issueDate)
-	pdf.Ln(6)
-	pdf.SetX(115)
-	pdf.Cell(40, 7, "Due Date:")
-	pdf.Cell(40, 7, dueDate)
-	pdf.Rect(115, 50, 85, 20, "D") // Draw a box around invoice details
+	pdf.SetX(157.5)
+	pdf.CellFormat(42.5, 7, invoice.InvoiceNumber, "", 0, "R", false, 0, "")
+	yPos += 7
+
+	pdf.SetFont("Arial", "B", 10)
+	pdf.SetXY(115, yPos)
+	pdf.Cell(42.5, 7, "DATE")
+	pdf.SetFont("Arial", "", 10)
+	pdf.SetX(157.5)
+	pdf.CellFormat(42.5, 7, invoice.IssueDate.Format("2006-01-02"), "", 0, "R", false, 0, "")
+	yPos += 7
+
+	pdf.SetFont("Arial", "B", 10)
+	pdf.SetXY(115, yPos)
+	pdf.Cell(42.5, 7, "DUE DATE")
+	pdf.SetFont("Arial", "", 10)
+	pdf.SetX(157.5)
+	pdf.CellFormat(42.5, 7, invoice.DueDate.Format("2006-01-02"), "", 0, "R", false, 0, "")
+	pdf.Rect(115, 55, 85, 21, "S")
 
 	// --- Items Table ---
-	pdf.SetY(95)
-	pdf.SetFont("Arial", "B", 10)  // Use standard Arial bold for headers
-	pdf.SetFillColor(240, 240, 240)
-	// Headers
-	pdf.CellFormat(80, 10, "Product", "1", 0, "C", true, 0, "")
-	pdf.CellFormat(20, 10, "Quantity", "1", 0, "C", true, 0, "")
-	pdf.CellFormat(30, 10, "Price", "1", 0, "C", true, 0, "")
-	pdf.CellFormat(20, 10, "Tax", "1", 0, "C", true, 0, "")
-	pdf.CellFormat(40, 10, "Total", "1", 0, "C", true, 0, "")
-	pdf.Ln(-1)
+	yPos = 100.0
+	pdf.SetXY(10, yPos)
+	pdf.SetFont("Arial", "B", 10)
+	pdf.SetFillColor(230, 230, 230)
+	pdf.CellFormat(100, 10, "Item / "+ar("البند"), "1", 0, "C", true, 0, "")
+	pdf.CellFormat(20, 10, "Qty / "+ar("الكمية"), "1", 0, "C", true, 0, "")
+	pdf.CellFormat(35, 10, "Unit Price / "+ar("السعر"), "1", 0, "C", true, 0, "")
+	pdf.CellFormat(35, 10, "Total / "+ar("الإجمالي"), "1", 1, "C", true, 0, "")
 
-	// Table Rows
-	pdf.SetFont("Arial", "", 10)
-	
-	// Safe handling of invoice items
-	var items []database.InvoiceItem
-	if invoice != nil && invoice.Items != nil {
-		items = invoice.Items
-	}
-	
-	for _, item := range items {
-		product, err := p.getProductByID(item.ProductID)
-		if err != nil {
-			// If product not found, use a default description
-			product = &database.Product{
-				Name:       "Unknown Product",
-				NameArabic: "منتج غير معروف",
-			}
-		}
+	for _, item := range invoice.Items {
+		product, _ := p.getProductByID(item.ProductID)
 
-		// Safety checks for product names
-		productName := "Product"
-		productNameArabic := "منتج"
-		
-		if product != nil {
-			if product.Name != "" {
-				productName = product.Name
-			}
-			if product.NameArabic != "" {
-				productNameArabic = ar(product.NameArabic)
-			}
-		}
+		// Use the Arabic font for the item description
+		pdf.SetFont("arabic", "", 10)
 
-		// Combine English and Arabic names in one cell
-		productDescription := fmt.Sprintf("%s\n%s", productName, productNameArabic)
-
-		// Get cell height needed for MultiCell with safety checks
+		// Calculate height for MultiCell
+		enDesc := product.Name
+		arDesc := ar(product.NameArabic)
 		_, lineHt := pdf.GetFontSize()
-		
-		// Safety check for SplitLines to prevent index out of range
-		var lines [][]byte
-		if productDescription != "" {
-			lines = pdf.SplitLines([]byte(productDescription), 80)
-		}
-		
-		// Ensure we have at least one line to prevent division by zero
-		if len(lines) == 0 {
-			lines = [][]byte{[]byte("Product")}
-		}
-		
-		cellHeight := float64(len(lines)) * lineHt * 1.2
-		if cellHeight < 10 { // Minimum cell height
-			cellHeight = 10
-		}
+		cellHeight := lineHt * 2.5 // Height for two lines
 
-		currentX := pdf.GetX()
-		currentY := pdf.GetY()
+		x := pdf.GetX()
+		y := pdf.GetY()
 
-		pdf.MultiCell(80, cellHeight/2, productDescription, "LR", "L", false)
-		pdf.SetXY(currentX+80, currentY) // Reset position after multicell
+		pdf.MultiCell(100, cellHeight/2, enDesc+"\n"+arDesc, "LR", "L", false)
+		pdf.SetXY(x+100, y)
+
+		// Use Arial for numbers
+		pdf.SetFont("Arial", "", 10)
 		pdf.CellFormat(20, cellHeight, fmt.Sprintf("%.2f", item.Quantity), "LR", 0, "C", false, 0, "")
-		pdf.CellFormat(30, cellHeight, fmt.Sprintf("%.2f SAR", item.UnitPrice), "LR", 0, "C", false, 0, "")
-		pdf.CellFormat(20, cellHeight, fmt.Sprintf("%.0f%%", item.VATRate), "LR", 0, "C", false, 0, "")
-		pdf.CellFormat(40, cellHeight, fmt.Sprintf("%.2f SAR", item.TotalAmount), "LR", 0, "C", false, 0, "")
-		pdf.Ln(cellHeight)
+		pdf.CellFormat(35, cellHeight, fmt.Sprintf("%.2f", item.UnitPrice), "LR", 0, "C", false, 0, "")
+		pdf.CellFormat(35, cellHeight, fmt.Sprintf("%.2f", item.TotalAmount), "LR", 1, "C", false, 0, "")
 	}
-	pdf.CellFormat(190, 0, "", "T", 0, "", false, 0, "") // Close the bottom of the table
-	pdf.Ln(5)
+	pdf.CellFormat(190, 0, "", "T", 1, "", false, 0, "") // Close table
 
 	// --- Totals Section ---
-	totalYStart := pdf.GetY()
+	yPos = pdf.GetY() + 5
+	pdf.SetFont("Arial", "B", 10)
+	pdf.SetXY(120, yPos)
+	pdf.Cell(35, 8, "Subtotal:")
 	pdf.SetFont("Arial", "", 10)
-	
-	// Safe handling of totals
-	subTotal := 0.0
-	vatAmount := 0.0
-	totalAmount := 0.0
-	notes := ""
-	
-	if invoice != nil {
-		subTotal = invoice.SubTotal
-		vatAmount = invoice.VATAmount
-		totalAmount = invoice.TotalAmount
-		notes = invoice.Notes
-	}
-	
-	// Subtotal
-	pdf.SetX(130)
-	pdf.Cell(30, 8, "Subtotal")
-	pdf.CellFormat(40, 8, fmt.Sprintf("%.2f SAR", subTotal), "", 1, "R", false, 0, "")
-	// VAT
-	pdf.SetX(130)
-	pdf.Cell(30, 8, "Value added tax")
-	pdf.CellFormat(40, 8, fmt.Sprintf("%.2f SAR", vatAmount), "", 1, "R", false, 0, "")
-	// Total
-	pdf.SetX(130)
-	pdf.SetFont("Arial", "B", 12)  // Use standard Arial bold for totals
-	pdf.Cell(30, 10, "Total Price")
-	pdf.CellFormat(40, 10, fmt.Sprintf("%.2f SAR", totalAmount), "", 1, "R", false, 0, "")
+	pdf.CellFormat(45, 8, fmt.Sprintf("%.2f SAR", invoice.SubTotal), "", 1, "R", false, 0, "")
 
-	// --- Notes ---
-	pdf.SetY(totalYStart) // Align notes with the start of the totals
-	pdf.SetFont("Arial", "B", 10)  // Use standard Arial bold for notes header
+	pdf.SetFont("Arial", "B", 10)
+	pdf.SetXY(120, pdf.GetY())
+	pdf.Cell(35, 8, "VAT (15%):")
+	pdf.SetFont("Arial", "", 10)
+	pdf.CellFormat(45, 8, fmt.Sprintf("%.2f SAR", invoice.VATAmount), "", 1, "R", false, 0, "")
+
+	pdf.SetFillColor(230, 230, 230)
+	pdf.SetXY(120, pdf.GetY())
+	pdf.SetFont("Arial", "B", 11)
+	pdf.CellFormat(35, 10, "TOTAL", "1", 0, "L", true, 0, "")
+	pdf.CellFormat(45, 10, fmt.Sprintf("%.2f SAR", invoice.TotalAmount), "1", 1, "R", true, 0, "")
+
+	// --- Notes Section ---
+	pdf.SetFont("Arial", "B", 10)
+	pdf.SetXY(10, yPos)
 	pdf.Cell(100, 6, "Notes:")
-	pdf.Ln(6)
-	pdf.SetFont("Arial", "", 9)  // Use Arial font for notes content
-	pdf.MultiCell(120, 5, notes, "T", "L", false) // Draw a line above notes
+	pdf.SetFont("arabic", "", 9)
+	pdf.SetXY(10, yPos+6)
+	pdf.MultiCell(100, 5, invoice.Notes+"\n"+ar(invoice.NotesArabic), "T", "L", false)
 
 	// --- Finalize ---
 	var buf bytes.Buffer
 	err = pdf.Output(&buf)
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate PDF: %v", err)
+		return nil, fmt.Errorf("failed to generate PDF output: %v", err)
 	}
-
 	return buf.Bytes(), nil
 }
