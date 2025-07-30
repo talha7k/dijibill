@@ -4,54 +4,23 @@
   import PurchaseInvoiceModal from './components/PurchaseInvoiceModal.svelte'
   import StatusBadge from './components/StatusBadge.svelte'
 
-  let purchaseInvoices = [
-    {
-      id: 1,
-      invoice_number: 'PI-2024-001',
-      supplier_id: 1,
-      supplier_name: 'Tech Solutions Ltd',
-      invoice_date: '2024-01-15',
-      due_date: '2024-02-14',
-      amount: 5000.00,
-      tax_amount: 750.00,
-      total_amount: 5750.00,
-      currency: 'SAR',
-      status: 'pending',
-      description: 'Office equipment and supplies',
-      description_arabic: 'معدات ولوازم مكتبية',
-      payment_terms: 'net_30',
-      reference_number: 'REF-001',
-      notes: 'Urgent delivery required'
-    },
-    {
-      id: 2,
-      invoice_number: 'PI-2024-002',
-      supplier_id: 2,
-      supplier_name: 'Global Supplies Co',
-      invoice_date: '2024-02-01',
-      due_date: '2024-02-16',
-      amount: 3200.00,
-      tax_amount: 480.00,
-      total_amount: 3680.00,
-      currency: 'SAR',
-      status: 'approved',
-      description: 'Monthly maintenance supplies',
-      description_arabic: 'لوازم الصيانة الشهرية',
-      payment_terms: 'net_15',
-      reference_number: 'REF-002',
-      notes: ''
-    }
-  ]
+  /** @type {Array<{id: number, invoice_number: string, supplier_id: number, supplier_name: string, invoice_date: string, due_date: string, amount: number, tax_amount: number, total_amount: number, currency: string, status: string, description: string, description_arabic: string, payment_terms: string, reference_number: string, notes: string}>} */
+  let purchaseInvoices = []
 
+  /** @type {Array<{id: number, company_name: string}>} */
   let suppliers = [
     { id: 1, company_name: 'Tech Solutions Ltd' },
     { id: 2, company_name: 'Global Supplies Co' },
     { id: 3, company_name: 'Office Depot' }
   ]
 
+  /** @type {string} */
   let searchTerm = ''
+  /** @type {boolean} */
   let showInvoiceModal = false
+  /** @type {any} */
   let editingInvoice = null
+  /** @type {boolean} */
   let loading = false
 
   // Filter invoices based on search term
@@ -125,7 +94,7 @@
   }
 
   function handleSearch(event) {
-    searchTerm = event.detail
+    searchTerm = event.detail.searchTerm
   }
 
   function formatDate(dateString) {
@@ -164,6 +133,7 @@
     return `<span class="status-badge status-badge-${badgeType}">${label}</span>`
   }
 
+  /** @type {Array<{label: string, key?: string, labelArabic?: string, sortable?: boolean, class?: string, render?: Function, actions?: Array<{key: string, text: string, icon?: string, class?: string, title?: string}>}>} */
   const columns = [
     {
       key: 'invoice_number',
@@ -218,9 +188,10 @@
       render: (invoice) => getStatusBadge(invoice.status)
     },
     {
+      label: 'Actions',
       actions: [
         { key: 'edit', text: 'Edit', icon: 'fa-edit', class: 'btn-primary' },
-        { key: 'delete', text: 'Delete', icon: 'fa-trash', class: 'btn-danger' }
+        { key: 'delete', text: 'Delete', icon: 'fa-trash', class: 'btn-error' }
       ]
     }
   ]

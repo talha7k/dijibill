@@ -2,8 +2,11 @@
   import { createEventDispatcher } from 'svelte'
   import DataTable from './DataTable.svelte'
   
+  /** @type {Array<any>} */
   export let products = []
+  /** @type {boolean} */
   export let loading = false
+  /** @type {string} */
   export let searchTerm = ''
 
   const dispatch = createEventDispatcher()
@@ -32,6 +35,7 @@
   )
 
   // Table configuration
+  /** @type {Array<{label: string, key?: string, class?: string, render?: Function, actions?: Array<{key: string, text: string, icon?: string, class?: string, title?: string}>}>} */
   const columns = [
     { 
       key: 'image', 
@@ -77,22 +81,24 @@
         return html
       }
     },
-    { 
-      key: 'is_active', 
-      label: 'Status',
+    { key: 'is_active', label: 'Status' },
+    {
+      label: 'Actions',
       actions: [
-        { key: 'edit', icon: 'fa-edit', class: 'btn-warning', title: 'Edit Product' },
-        { key: 'delete', icon: 'fa-trash', class: 'btn-error', title: 'Delete Product' }
+        { key: 'edit', text: 'Edit', icon: 'fa-edit', class: 'btn-warning', title: 'Edit Product' },
+        { key: 'delete', text: 'Delete', icon: 'fa-trash', class: 'btn-error', title: 'Delete Product' }
       ]
     }
   ]
 
   // Primary and secondary actions
+  /** @type {{text: string, icon: string}} */
   const primaryAction = {
     text: 'Add Product',
     icon: 'fa-plus'
   }
 
+  /** @type {Array<{text: string, icon: string}>} */
   const secondaryActions = [
     {
       text: 'Reports',

@@ -7,12 +7,19 @@
 	import StatusBadge from './components/StatusBadge.svelte';
 	import PaymentModal from './components/PaymentModal.svelte';
 
+	/** @type {Array<any>} */
 	let payments = [];
+	/** @type {Array<any>} */
 	let paymentTypes = [];
+	/** @type {Array<any>} */
 	let invoices = [];
+	/** @type {string} */
 	let searchTerm = '';
+	/** @type {boolean} */
 	let showModal = false;
+	/** @type {any} */
 	let editingPayment = null;
+	/** @type {boolean} */
 	let loading = false;
 
 	onMount(async () => {
@@ -176,6 +183,7 @@
 	})();
 
 	// Table configuration
+	/** @type {Array<{label: string, key?: string, class?: string, render?: Function, actions?: Array<{key: string, text: string, icon?: string, class?: string, title?: string}>}>} */
 	const columns = [
 		{ key: 'id', label: 'Payment ID', render: (item) => `#${item.id}` },
 		{ key: 'invoice_id', label: 'Invoice', render: (item) => getInvoiceNumber(item.invoice_id) },
@@ -183,21 +191,23 @@
 		{ key: 'payment_type_id', label: 'Method', render: (item) => getPaymentTypeName(item.payment_type_id) },
 		{ key: 'payment_date', label: 'Date', render: (item) => formatDate(item.payment_date) },
 		{ key: 'reference', label: 'Reference', render: (item) => item.reference || '-' },
-		{ 
-			key: 'status', 
-			label: 'Status',
+		{ key: 'status', label: 'Status' },
+		{
+			label: 'Actions',
 			actions: [
-				{ key: 'edit', icon: 'fa-edit', class: 'btn-secondary', title: 'Edit Payment' },
-				{ key: 'delete', icon: 'fa-trash', class: 'btn-error', title: 'Delete Payment' }
+				{ key: 'edit', text: 'Edit', icon: 'fa-edit', class: 'btn-secondary', title: 'Edit Payment' },
+				{ key: 'delete', text: 'Delete', icon: 'fa-trash', class: 'btn-error', title: 'Delete Payment' }
 			]
 		}
 	];
 
+	/** @type {{text: string, icon: string}} */
 	const primaryAction = {
 		text: 'Record Payment',
 		icon: 'fa-plus'
 	};
 
+	/** @type {Array<{text: string, icon: string}>} */
 	const secondaryActions = [
 		{
 			text: 'Reports',

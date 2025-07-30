@@ -3,12 +3,16 @@
   import Modal from './Modal.svelte'
   import FormField from './FormField.svelte'
   
+  /** @type {boolean} */
   export let show = false
+  /** @type {any} */
   export let editingSupplier = null
+  /** @type {boolean} */
   export let loading = false
 
   const dispatch = createEventDispatcher()
 
+  /** @type {{company_name: string, company_name_arabic: string, contact_person: string, contact_person_arabic: string, vat_number: string, email: string, phone: string, address: string, address_arabic: string, city: string, city_arabic: string, country: string, country_arabic: string, payment_terms: string, active: boolean}} */
   let supplierForm = {
     company_name: '',
     company_name_arabic: '',
@@ -27,27 +31,28 @@
     active: true
   }
 
+  /** @type {Record<string, string>} */
   let errors = {}
 
   // Reset form when modal opens/closes or when editing supplier changes
-  $: if (show && editingSupplier) {
+  $: if (show && editingSupplier && typeof editingSupplier === 'object') {
     const supplier = editingSupplier
     supplierForm = {
-      company_name: supplier.company_name || '',
-      company_name_arabic: supplier.company_name_arabic || '',
-      contact_person: supplier.contact_person || '',
-      contact_person_arabic: supplier.contact_person_arabic || '',
-      vat_number: supplier.vat_number || '',
-      email: supplier.email || '',
-      phone: supplier.phone || '',
-      address: supplier.address || '',
-      address_arabic: supplier.address_arabic || '',
-      city: supplier.city || '',
-      city_arabic: supplier.city_arabic || '',
-      country: supplier.country || 'SA',
-      country_arabic: supplier.country_arabic || 'المملكة العربية السعودية',
-      payment_terms: supplier.payment_terms || 'net_30',
-      active: supplier.active !== undefined ? supplier.active : true
+      company_name: supplier?.company_name || '',
+      company_name_arabic: supplier?.company_name_arabic || '',
+      contact_person: supplier?.contact_person || '',
+      contact_person_arabic: supplier?.contact_person_arabic || '',
+      vat_number: supplier?.vat_number || '',
+      email: supplier?.email || '',
+      phone: supplier?.phone || '',
+      address: supplier?.address || '',
+      address_arabic: supplier?.address_arabic || '',
+      city: supplier?.city || '',
+      city_arabic: supplier?.city_arabic || '',
+      country: supplier?.country || 'SA',
+      country_arabic: supplier?.country_arabic || 'المملكة العربية السعودية',
+      payment_terms: supplier?.payment_terms || 'net_30',
+      active: supplier?.active !== undefined ? supplier.active : true
     }
     errors = {}
   } else if (show && !editingSupplier) {

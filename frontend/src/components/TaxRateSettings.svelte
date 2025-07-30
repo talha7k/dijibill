@@ -7,15 +7,22 @@
 
   const dispatch = createEventDispatcher()
 
+  /** @type {Array<any>} */
   export let taxRates = []
+  /** @type {boolean} */
   export let isLoading = false
 
+  /** @type {{name: string, name_arabic: string, rate: number, is_default: boolean, is_active: boolean, description?: string, created_at?: any, updated_at?: any}} */
   let newTaxRate = { name: '', name_arabic: '', rate: 0, is_default: false, is_active: true }
+  /** @type {boolean} */
   let showTaxRateForm = false
+  /** @type {any} */
   let editingTaxRate = null
+  /** @type {string} */
   let searchTerm = ''
 
   // DataTable configuration
+  /** @type {Array<{label: string, key?: string, class?: string, render?: Function, actions?: Array<{key: string, text: string, icon?: string, class?: string, title?: string}>}>} */
   const columns = [
     {
       key: 'name',
@@ -46,6 +53,7 @@
       }
     },
     {
+      label: 'Actions',
       actions: [
         {
           key: 'setDefault',
@@ -65,13 +73,14 @@
           key: 'delete',
           text: 'Delete',
           icon: 'fa-trash',
-          class: 'btn-danger',
+          class: 'btn-error',
           title: 'Delete tax rate'
         }
       ]
     }
   ]
 
+  /** @type {{text: string, icon: string}} */
   const primaryAction = {
     text: 'Add Tax Rate',
     icon: 'fa-plus'

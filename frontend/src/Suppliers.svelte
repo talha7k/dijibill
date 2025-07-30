@@ -4,50 +4,17 @@
   import SupplierModal from './components/SupplierModal.svelte'
   import StatusBadge from './components/StatusBadge.svelte'
 
+  /** @type {Array<{id: number, company_name: string, company_name_arabic: string, contact_person: string, contact_person_arabic: string, email: string, phone: string, vat_number: string, address: string, address_arabic: string, city: string, city_arabic: string, country: string, country_arabic: string, payment_terms: string, active: boolean, created_at: string}>} */
   let suppliers = [
-    {
-      id: 1,
-      company_name: 'Tech Solutions Ltd',
-      company_name_arabic: 'شركة الحلول التقنية المحدودة',
-      contact_person: 'Ahmed Al-Rashid',
-      contact_person_arabic: 'أحمد الراشد',
-      email: 'ahmed@techsolutions.com',
-      phone: '+966 11 234 5678',
-      vat_number: '300123456789003',
-      address: '123 King Fahd Road, Riyadh',
-      address_arabic: '123 طريق الملك فهد، الرياض',
-      city: 'Riyadh',
-      city_arabic: 'الرياض',
-      country: 'SA',
-      country_arabic: 'المملكة العربية السعودية',
-      payment_terms: 'net_30',
-      active: true,
-      created_at: '2024-01-15'
-    },
-    {
-      id: 2,
-      company_name: 'Global Supplies Co',
-      company_name_arabic: 'شركة الإمدادات العالمية',
-      contact_person: 'Sarah Johnson',
-      contact_person_arabic: 'سارة جونسون',
-      email: 'sarah@globalsupplies.com',
-      phone: '+966 12 345 6789',
-      vat_number: '300987654321003',
-      address: '456 Business District, Jeddah',
-      address_arabic: '456 الحي التجاري، جدة',
-      city: 'Jeddah',
-      city_arabic: 'جدة',
-      country: 'SA',
-      country_arabic: 'المملكة العربية السعودية',
-      payment_terms: 'net_15',
-      active: true,
-      created_at: '2024-02-01'
-    }
   ]
 
+  /** @type {string} */
   let searchTerm = ''
+  /** @type {boolean} */
   let showSupplierModal = false
+  /** @type {any} */
   let editingSupplier = null
+  /** @type {boolean} */
   let loading = false
 
   // Filter suppliers based on search term
@@ -115,7 +82,7 @@
   }
 
   function handleSearch(event) {
-    searchTerm = event.detail
+    searchTerm = event.detail.searchTerm
   }
 
   function formatPaymentTerms(terms) {
@@ -130,6 +97,7 @@
     return termMap[terms] || terms
   }
 
+  /** @type {Array<{label: string, key?: string, labelArabic?: string, sortable?: boolean, class?: string, render?: Function, actions?: Array<{key: string, text: string, icon?: string, class?: string, title?: string}>}>} */
   const columns = [
     {
       key: 'company_name',
@@ -190,9 +158,10 @@
         : '<span class="status-badge status-badge-error">Inactive</span>'
     },
     {
+      label: 'Actions',
       actions: [
         { key: 'edit', text: 'Edit', icon: 'fa-edit', class: 'btn-primary' },
-        { key: 'delete', text: 'Delete', icon: 'fa-trash', class: 'btn-danger' }
+        { key: 'delete', text: 'Delete', icon: 'fa-trash', class: 'btn-error' }
       ]
     }
   ]

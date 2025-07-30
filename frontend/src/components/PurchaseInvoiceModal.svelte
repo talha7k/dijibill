@@ -3,13 +3,18 @@
   import Modal from './Modal.svelte'
   import FormField from './FormField.svelte'
   
+  /** @type {boolean} */
   export let show = false
+  /** @type {any} */
   export let editingInvoice = null
+  /** @type {boolean} */
   export let loading = false
+  /** @type {Array<{id: number, company_name: string}>} */
   export let suppliers = []
 
   const dispatch = createEventDispatcher()
 
+  /** @type {{invoice_number: string, supplier_id: string, invoice_date: string, due_date: string, amount: string, tax_amount: string, total_amount: string, currency: string, status: string, description: string, description_arabic: string, payment_terms: string, reference_number: string, notes: string}} */
   let invoiceForm = {
     invoice_number: '',
     supplier_id: '',
@@ -27,44 +32,46 @@
     notes: ''
   }
 
+  /** @type {Record<string, string>} */
   let errors = {}
 
   // Reset form when modal opens/closes or when editing invoice changes
-  $: if (show && editingInvoice) {
-    const invoice = editingInvoice
-    invoiceForm = {
-      invoice_number: invoice.invoice_number || '',
-      supplier_id: invoice.supplier_id || '',
-      invoice_date: invoice.invoice_date || '',
-      due_date: invoice.due_date || '',
-      amount: invoice.amount || '',
-      tax_amount: invoice.tax_amount || '',
-      total_amount: invoice.total_amount || '',
-      currency: invoice.currency || 'SAR',
-      status: invoice.status || 'pending',
-      description: invoice.description || '',
-      description_arabic: invoice.description_arabic || '',
-      payment_terms: invoice.payment_terms || 'net_30',
-      reference_number: invoice.reference_number || '',
-      notes: invoice.notes || ''
-    }
-    errors = {}
-  } else if (show && !editingInvoice) {
-    invoiceForm = {
-      invoice_number: '',
-      supplier_id: '',
-      invoice_date: new Date().toISOString().split('T')[0],
-      due_date: '',
-      amount: '',
-      tax_amount: '',
-      total_amount: '',
-      currency: 'SAR',
-      status: 'pending',
-      description: '',
-      description_arabic: '',
-      payment_terms: 'net_30',
-      reference_number: '',
-      notes: ''
+  $: if (show) {
+    if (editingInvoice && typeof editingInvoice === 'object') {
+      const invoice = editingInvoice
+      invoiceForm = {
+        invoice_number: invoice?.invoice_number || '',
+        supplier_id: invoice?.supplier_id || '',
+        invoice_date: invoice?.invoice_date || '',
+        due_date: invoice?.due_date || '',
+        amount: invoice?.amount || '',
+        tax_amount: invoice?.tax_amount || '',
+        total_amount: invoice?.total_amount || '',
+        currency: invoice?.currency || 'SAR',
+        status: invoice?.status || 'pending',
+        description: invoice?.description || '',
+        description_arabic: invoice?.description_arabic || '',
+        payment_terms: invoice?.payment_terms || 'net_30',
+        reference_number: invoice?.reference_number || '',
+        notes: invoice?.notes || ''
+      }
+    } else {
+      invoiceForm = {
+        invoice_number: '',
+        supplier_id: '',
+        invoice_date: new Date().toISOString().split('T')[0],
+        due_date: '',
+        amount: '',
+        tax_amount: '',
+        total_amount: '',
+        currency: 'SAR',
+        status: 'pending',
+        description: '',
+        description_arabic: '',
+        payment_terms: 'net_30',
+        reference_number: '',
+        notes: ''
+      }
     }
     errors = {}
   }

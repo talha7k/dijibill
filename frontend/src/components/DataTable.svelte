@@ -1,17 +1,29 @@
 <script>
   import { createEventDispatcher } from 'svelte'
   
+  /** @type {Array<any>} */
   export let data = []
+  /** @type {Array<{label: string, key?: string, class?: string, render?: Function, actions?: Array<{key: string, text: string, icon?: string, class?: string, title?: string}>}>} */
   export let columns = []
+  /** @type {boolean} */
   export let loading = false
+  /** @type {string} */
   export let searchTerm = ''
+  /** @type {string} */
   export let searchPlaceholder = 'Search...'
+  /** @type {string} */
   export let emptyStateTitle = 'No data found'
+  /** @type {string} */
   export let emptyStateMessage = 'No items to display'
+  /** @type {string} */
   export let emptyStateIcon = 'fa-table'
+  /** @type {boolean} */
   export let showSearch = true
+  /** @type {boolean} */
   export let showActions = true
+  /** @type {{icon?: string, text?: string} | null} */
   export let primaryAction = null
+  /** @type {Array<{icon?: string, text?: string}>} */
   export let secondaryActions = []
 
   const dispatch = createEventDispatcher()
