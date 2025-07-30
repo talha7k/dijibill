@@ -306,6 +306,68 @@ func (a *App) SaveInvoiceHTML(invoiceID int) error {
 	return a.htmlInvoiceService.SaveInvoiceHTML(invoiceID)
 }
 
+// Language-specific HTML Invoice Generation Methods
+
+func (a *App) GenerateInvoiceHTMLEnglish(invoiceID int) (string, error) {
+	return a.htmlInvoiceService.GenerateInvoiceHTMLWithLanguage(invoiceID, "english")
+}
+
+func (a *App) GenerateInvoiceHTMLArabic(invoiceID int) (string, error) {
+	return a.htmlInvoiceService.GenerateInvoiceHTMLWithLanguage(invoiceID, "arabic")
+}
+
+func (a *App) GenerateInvoiceHTMLBilingual(invoiceID int) (string, error) {
+	return a.htmlInvoiceService.GenerateInvoiceHTMLWithLanguage(invoiceID, "bilingual")
+}
+
+func (a *App) ViewInvoiceHTMLEnglish(invoiceID int) error {
+	htmlContent, err := a.htmlInvoiceService.GenerateInvoiceHTMLWithLanguage(invoiceID, "english")
+	if err != nil {
+		return err
+	}
+	return a.htmlInvoiceService.openHTMLInBrowser(htmlContent)
+}
+
+func (a *App) ViewInvoiceHTMLArabic(invoiceID int) error {
+	htmlContent, err := a.htmlInvoiceService.GenerateInvoiceHTMLWithLanguage(invoiceID, "arabic")
+	if err != nil {
+		return err
+	}
+	return a.htmlInvoiceService.openHTMLInBrowser(htmlContent)
+}
+
+func (a *App) ViewInvoiceHTMLBilingual(invoiceID int) error {
+	htmlContent, err := a.htmlInvoiceService.GenerateInvoiceHTMLWithLanguage(invoiceID, "bilingual")
+	if err != nil {
+		return err
+	}
+	return a.htmlInvoiceService.openHTMLInBrowser(htmlContent)
+}
+
+func (a *App) SaveInvoiceHTMLEnglish(invoiceID int) error {
+	htmlContent, err := a.htmlInvoiceService.GenerateInvoiceHTMLWithLanguage(invoiceID, "english")
+	if err != nil {
+		return err
+	}
+	return a.htmlInvoiceService.saveHTMLFile(htmlContent, invoiceID, "english")
+}
+
+func (a *App) SaveInvoiceHTMLArabic(invoiceID int) error {
+	htmlContent, err := a.htmlInvoiceService.GenerateInvoiceHTMLWithLanguage(invoiceID, "arabic")
+	if err != nil {
+		return err
+	}
+	return a.htmlInvoiceService.saveHTMLFile(htmlContent, invoiceID, "arabic")
+}
+
+func (a *App) SaveInvoiceHTMLBilingual(invoiceID int) error {
+	htmlContent, err := a.htmlInvoiceService.GenerateInvoiceHTMLWithLanguage(invoiceID, "bilingual")
+	if err != nil {
+		return err
+	}
+	return a.htmlInvoiceService.saveHTMLFile(htmlContent, invoiceID, "bilingual")
+}
+
 // Legacy PDF methods - kept for backward compatibility but now generate HTML
 func (a *App) GenerateInvoicePDF(invoiceID int) (string, error) {
 	// Generate HTML and save as .html file instead

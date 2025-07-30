@@ -1,5 +1,5 @@
 <script>
-  import { createEventDispatcher } from 'svelte'
+  import { createEventDispatcher, onMount } from 'svelte'
 
   const dispatch = createEventDispatcher()
 
@@ -8,6 +8,7 @@
     language: 'en',
     timezone: 'Asia/Riyadh',
     date_format: 'DD/MM/YYYY',
+    invoice_language: 'english', // Default language for invoices/printouts
     zatca_enabled: true,
     auto_backup: true,
     backup_frequency: 'daily'
@@ -15,7 +16,23 @@
 
   export let isLoading = false
 
+  onMount(() => {
+    // Load existing settings from localStorage
+    const savedSettings = localStorage.getItem('systemSettings')
+    if (savedSettings) {
+      try {
+        const parsed = JSON.parse(savedSettings)
+        systemSettings = { ...systemSettings, ...parsed }
+      } catch (error) {
+        console.error('Error loading system settings from localStorage:', error)
+      }
+    }
+  })
+
   function saveSystemSettings() {
+    // Save to localStorage for immediate access by other components
+    localStorage.setItem('systemSettings', JSON.stringify(systemSettings))
+    
     dispatch('save', { systemSettings })
   }
 </script>
@@ -100,6 +117,27 @@
             <option value="YYYY-MM-DD">YYYY-MM-DD</option>
           </select>
         </div>
+      </div>
+
+      <!-- Invoice Language -->
+      <div>
+        <label for="invoice-language" class="block text-sm font-medium text-gray-700">
+          Invoice Language
+        </label>
+        <div class="mt-1">
+          <select
+            id="invoice-language"
+            bind:value={systemSettings.invoice_language}
+            class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+          >
+            <option value="english">English</option>
+            <option value="arabic">Arabic</option>
+            <option value="bilingual">Bilingual (Arabic + English)</option>
+          </select>
+        </div>
+        <p class="mt-1 text-xs text-gray-500">
+          Default language for all invoice printouts and PDFs
+        </p>
       </div>
     </div>
 

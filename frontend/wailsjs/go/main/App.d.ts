@@ -38,6 +38,12 @@ export function DownloadInvoicePDF(arg1:number):Promise<void>;
 
 export function GenerateInvoiceHTML(arg1:number):Promise<string>;
 
+export function GenerateInvoiceHTMLArabic(arg1:number):Promise<string>;
+
+export function GenerateInvoiceHTMLBilingual(arg1:number):Promise<string>;
+
+export function GenerateInvoiceHTMLEnglish(arg1:number):Promise<string>;
+
 export function GenerateInvoicePDF(arg1:number):Promise<string>;
 
 export function GenerateSampleQRCode():Promise<string>;
@@ -86,6 +92,12 @@ export function RegenerateInvoiceQRCode(arg1:number):Promise<string>;
 
 export function SaveInvoiceHTML(arg1:number):Promise<void>;
 
+export function SaveInvoiceHTMLArabic(arg1:number):Promise<void>;
+
+export function SaveInvoiceHTMLBilingual(arg1:number):Promise<void>;
+
+export function SaveInvoiceHTMLEnglish(arg1:number):Promise<void>;
+
 export function ShowError(arg1:string,arg2:string):Promise<void>;
 
 export function ShowMessage(arg1:string,arg2:string):Promise<void>;
@@ -113,5 +125,11 @@ export function UpdateUnitOfMeasurement(arg1:database.UnitOfMeasurement):Promise
 export function ValidateZATCAQRCode(arg1:string):Promise<void>;
 
 export function ViewInvoiceHTML(arg1:number):Promise<void>;
+
+export function ViewInvoiceHTMLArabic(arg1:number):Promise<void>;
+
+export function ViewInvoiceHTMLBilingual(arg1:number):Promise<void>;
+
+export function ViewInvoiceHTMLEnglish(arg1:number):Promise<void>;
 
 export function ViewInvoicePDF(arg1:number):Promise<void>;

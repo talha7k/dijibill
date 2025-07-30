@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice {{.Invoice.InvoiceNumber}}</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; direction: ltr; text-align: left; background-color: #f9f9f9; color: #1a1a1a; line-height: 1.6; }
+        .invoice-container { max-width: 850px; margin: 25px auto; background: white; padding: 35px; border-radius: 8px; box-shadow: 0 4px_20px rgba(0,0,0,0.08); }
+        .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #007bff; }
+        .company-info { flex: 1; }
+        .name-en { font-size: 26px; font-weight: bold; color: #007bff; }
+        .details-en { font-size: 14px; color: #555; margin-top: 8px; }
+        .qr-code { width: 120px; height: 120px; flex-shrink: 0; margin-left: 30px; }
+        .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 35px; }
+        .section-title { font-size: 16px; font-weight: bold; color: #007bff; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid #eee; }
+        .info-box { background-color: #fdfdfd; padding: 15px; border-radius: 6px; border: 1px solid #eee; }
+        .info-pair { margin-bottom: 8px; font-size: 14px; }
+        .meta-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; }
+        .meta-row:last-child { border-bottom: none; }
+        .meta-row .label { font-weight: bold; }
+        .items-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+        .items-table th { background-color: #007bff; color: white; padding: 12px 10px; font-size: 14px; text-align: left; }
+        .items-table th.number { text-align: right; }
+        .items-table td { padding: 12px 10px; border-bottom: 1px solid #eee; }
+        .items-table td.number { text-align: right; }
+        .totals { float: right; width: 320px; margin-top: 20px; }
+        .total-row { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee; background-color: #fdfdfd; }
+        .total-row.final { font-weight: bold; font-size: 18px; color: #007bff; background-color: #e6f2ff; border-top: 2px solid #007bff; }
+        .notes { clear: both; margin-top: 40px; padding: 20px; background-color: #fdfdfd; border-radius: 8px; border: 1px solid #eee; }
+        .footer { text-align: center; font-size: 12px; color: #999; border-top: 1px solid #eee; padding-top: 20px; margin-top: 40px; }
+    </style>
+</head>
+<body>
+    <div class="invoice-container">
+        <div class="header">
+            <div class="company-info">
+                <div class="name-en">{{.Company.Name}}</div>
+                <div class="details-en">
+                    <div>{{.Company.Address}}</div>
+                    <div>VAT: {{.Company.VATNumber}} {{if .Company.CRNumber}}| CR: {{.Company.CRNumber}}{{end}}</div>
+                </div>
+            </div>
+            <div class="qr-code">{{if .Invoice.QRCode}}<img src="data:image/png;base64,{{.Invoice.QRCode}}" alt="QR Code" style="width: 120px; height: 120px;">{{end}}</div>
+        </div>
+        <div class="grid-container">
+            <div class="info-box">
+                <div class="section-title">Bill To</div>
+                <div class="info-pair"><div>{{.Invoice.Customer.Name}}</div></div>
+                <div class="info-pair"><div>{{.Invoice.Customer.Address}}</div></div>
+                <div class="info-pair" style="margin-top: 10px;"><div>VAT: {{.Invoice.Customer.VATNumber}}</div></div>
+            </div>
+            <div class="info-box">
+                <div class="section-title">Invoice Details</div>
+                <div class="meta-row"><span class="label">Invoice #</span><span>{{.Invoice.InvoiceNumber}}</span></div>
+                <div class="meta-row"><span class="label">Issue Date</span><span>{{.Invoice.IssueDate.Format "Jan 2, 2006"}}</span></div>
+                <div class="meta-row"><span class="label">Due Date</span><span>{{.Invoice.DueDate.Format "Jan 2, 2006"}}</span></div>
+            </div>
+        </div>
+        <table class="items-table">
+            <thead><tr><th>Item</th><th class="number">Qty</th><th class="number">Price</th><th class="number">Total</th></tr></thead>
+            <tbody>
+                {{range .Items}}
+                <tr>
+                    <td><div>{{.Product.Name}}</div></td>
+                    <td class="number">{{printf "%.2f" .Quantity}}</td>
+                    <td class="number">{{printf "%.2f" .UnitPrice}}</td>
+                    <td class="number">{{printf "%.2f" .TotalAmount}}</td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+        <div style="clear: both;"><div class="totals">
+            <div class="total-row"><span>Subtotal</span><span>{{printf "%.2f" .Invoice.SubTotal}}</span></div>
+            <div class="total-row"><span>VAT</span><span>{{printf "%.2f" .Invoice.VATAmount}}</span></div>
+            <div class="total-row final"><span>TOTAL</span><span>{{printf "%.2f" .Invoice.TotalAmount}}</span></div>
+        </div></div>
+        <div class="notes">
+            <div style="font-weight: bold; margin-bottom: 10px;">Notes</div>
+            <div>{{.Invoice.Notes}}</div>
+        </div>
+        <div class="footer"><p>Thank you for your business!</p></div>
+    </div>
+</body>
+</html>

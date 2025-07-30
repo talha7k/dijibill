@@ -74,6 +74,18 @@ export function GenerateInvoiceHTML(arg1) {
   return window['go']['main']['App']['GenerateInvoiceHTML'](arg1);
 }
 
+export function GenerateInvoiceHTMLArabic(arg1) {
+  return window['go']['main']['App']['GenerateInvoiceHTMLArabic'](arg1);
+}
+
+export function GenerateInvoiceHTMLBilingual(arg1) {
+  return window['go']['main']['App']['GenerateInvoiceHTMLBilingual'](arg1);
+}
+
+export function GenerateInvoiceHTMLEnglish(arg1) {
+  return window['go']['main']['App']['GenerateInvoiceHTMLEnglish'](arg1);
+}
+
 export function GenerateInvoicePDF(arg1) {
   return window['go']['main']['App']['GenerateInvoicePDF'](arg1);
 }
@@ -170,6 +182,18 @@ export function SaveInvoiceHTML(arg1) {
   return window['go']['main']['App']['SaveInvoiceHTML'](arg1);
 }
 
+export function SaveInvoiceHTMLArabic(arg1) {
+  return window['go']['main']['App']['SaveInvoiceHTMLArabic'](arg1);
+}
+
+export function SaveInvoiceHTMLBilingual(arg1) {
+  return window['go']['main']['App']['SaveInvoiceHTMLBilingual'](arg1);
+}
+
+export function SaveInvoiceHTMLEnglish(arg1) {
+  return window['go']['main']['App']['SaveInvoiceHTMLEnglish'](arg1);
+}
+
 export function ShowError(arg1, arg2) {
   return window['go']['main']['App']['ShowError'](arg1, arg2);
 }
@@ -224,6 +248,18 @@ export function ValidateZATCAQRCode(arg1) {
 
 export function ViewInvoiceHTML(arg1) {
   return window['go']['main']['App']['ViewInvoiceHTML'](arg1);
+}
+
+export function ViewInvoiceHTMLArabic(arg1) {
+  return window['go']['main']['App']['ViewInvoiceHTMLArabic'](arg1);
+}
+
+export function ViewInvoiceHTMLBilingual(arg1) {
+  return window['go']['main']['App']['ViewInvoiceHTMLBilingual'](arg1);
+}
+
+export function ViewInvoiceHTMLEnglish(arg1) {
+  return window['go']['main']['App']['ViewInvoiceHTMLEnglish'](arg1);
 }
 
 export function ViewInvoicePDF(arg1) {

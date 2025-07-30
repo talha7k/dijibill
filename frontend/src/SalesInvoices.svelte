@@ -1,12 +1,37 @@
 <script>
   import { onMount } from 'svelte'
-  import { GetInvoices, GenerateInvoiceHTML, ViewInvoiceHTML, SaveInvoiceHTML } from '../wailsjs/go/main/App.js'
+  import { 
+    GetInvoices, 
+    GenerateInvoiceHTML, 
+    ViewInvoiceHTML, 
+    SaveInvoiceHTML,
+    ViewInvoiceHTMLEnglish,
+    ViewInvoiceHTMLArabic,
+    ViewInvoiceHTMLBilingual,
+    SaveInvoiceHTMLEnglish,
+    SaveInvoiceHTMLArabic,
+    SaveInvoiceHTMLBilingual
+  } from '../wailsjs/go/main/App.js'
   import InvoiceModal from './InvoiceModal.svelte'
   
   let invoices = []
   let isLoading = false
   let showInvoiceModal = false
   let searchTerm = ''
+  
+  // Get invoice language preference from localStorage (set by system settings)
+  function getInvoiceLanguagePreference() {
+    const systemSettings = localStorage.getItem('systemSettings')
+    if (systemSettings) {
+      try {
+        const settings = JSON.parse(systemSettings)
+        return settings.invoice_language || 'english'
+      } catch (error) {
+        console.error('Error parsing system settings:', error)
+      }
+    }
+    return 'english' // default to English
+  }
   
   onMount(async () => {
     await loadInvoices()
@@ -70,25 +95,39 @@
 
   async function saveOrPrintInvoice(invoiceId) {
     console.log('saveOrPrintInvoice called with ID:', invoiceId)
+    const language = getInvoiceLanguagePreference()
+    
     try {
-      console.log('Opening print dialog for invoice:', invoiceId)
-      await SaveInvoiceHTML(invoiceId)
-      console.log('Print dialog opened')
+      if (language === 'arabic') {
+        await SaveInvoiceHTMLArabic(invoiceId)
+      } else if (language === 'bilingual') {
+        await SaveInvoiceHTMLBilingual(invoiceId)
+      } else {
+        await SaveInvoiceHTMLEnglish(invoiceId)
+      }
+      console.log(`Invoice ${invoiceId} saved in ${language}`)
     } catch (error) {
-      console.error('Error opening print dialog:', error)
-      alert('Failed to open print dialog. Please try again.')
+      console.error('Error saving invoice:', error)
+      alert('Error saving invoice: ' + error.message)
     }
   }
 
   async function viewInvoiceHTML(invoiceId) {
     console.log('viewInvoiceHTML called with ID:', invoiceId)
+    const language = getInvoiceLanguagePreference()
+    
     try {
-      console.log('Opening HTML preview for invoice:', invoiceId)
-      await ViewInvoiceHTML(invoiceId)
-      console.log('HTML preview opened')
+      if (language === 'arabic') {
+        await ViewInvoiceHTMLArabic(invoiceId)
+      } else if (language === 'bilingual') {
+        await ViewInvoiceHTMLBilingual(invoiceId)
+      } else {
+        await ViewInvoiceHTMLEnglish(invoiceId)
+      }
+      console.log(`Invoice ${invoiceId} viewed in ${language}`)
     } catch (error) {
-      console.error('Error viewing HTML:', error)
-      alert('Failed to open HTML preview. Please try again.')
+      console.error('Error viewing invoice:', error)
+      alert('Error viewing invoice: ' + error.message)
     }
   }
 
