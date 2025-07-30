@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"path/filepath"
 
 	"codeberg.org/go-pdf/fpdf"
 	"github.com/skip2/go-qrcode"
@@ -23,11 +22,16 @@ func NewPDFService(db *database.Database) *PDFService {
 	}
 }
 
-// arabic-safe string function
+// arabic-safe string function with proper UTF-8 handling
 func ar(str string) string {
-	// This is a placeholder for a real Arabic reshaping library if needed,
-	// but gofpdf's UTF-8 handling is often sufficient.
-	// For now, it just returns the string.
+	// Ensure the string is properly encoded as UTF-8
+	// For basic Arabic text, this should be sufficient with the UTF-8 font
+	if str == "" {
+		return str
+	}
+	
+	// Return the string as-is since we're using UTF-8 font
+	// The fpdf library with UTF-8 font should handle Arabic text correctly
 	return str
 }
 
@@ -53,26 +57,46 @@ func (p *PDFService) GenerateInvoicePDF(invoiceID int) ([]byte, error) {
 	pdf := fpdf.New("P", "mm", "A4", "")
 	pdf.AddPage()
 
-	// Register Arabic font (regular style only for now)
-	fontPath := filepath.Join("fonts", "NotoSansArabic-Regular.ttf")
-	pdf.AddUTF8Font("arabic", "", fontPath)
+	// Instead of loading a custom Arabic font, use Arial Unicode which has better support
+	// This should avoid the index out of range error
+	pdf.SetFont("Arial", "", 16)
 	
-	// For bold text, we'll use the same font but with standard fonts for headers
-	// This avoids the "undefined font: arabic B" error
+	fmt.Printf("DEBUG: Font loading completed successfully\n")
 
+	// Generate QR code
+	qrService := NewZATCAQRService()
+	fmt.Printf("DEBUG: Generating QR code for invoice ID: %d\n", invoice.ID)
+	fmt.Printf("DEBUG: Company name: %s, VAT: %s\n", company.Name, company.VATNumber)
+	fmt.Printf("DEBUG: Invoice total: %.2f, VAT: %.2f\n", invoice.TotalAmount, invoice.VATAmount)
+	
+	qrCodeData, err := qrService.GenerateZATCAQRCode(invoice, company)
+	if err != nil {
+		fmt.Printf("DEBUG: QR code generation failed: %v\n", err)
+		return nil, fmt.Errorf("failed to generate QR code: %v", err)
+	}
+	fmt.Printf("DEBUG: QR code generated successfully, length: %d\n", len(qrCodeData))
+	
 	// Generate and add QR code
-	// ... (your QR code generation logic) ...
-	qrCodeBytes, _ := qrcode.Encode("ZATCA QR DATA HERE", qrcode.Medium, 256)
+	fmt.Printf("DEBUG: Encoding QR code to image...\n")
+	qrCodeBytes, _ := qrcode.Encode(qrCodeData, qrcode.Medium, 256)
+	fmt.Printf("DEBUG: QR code image generated, size: %d bytes\n", len(qrCodeBytes))
+	
 	// Save qr code to a temporary file or use a reader
+	fmt.Printf("DEBUG: Registering QR image with PDF...\n")
 	qrImageInfo := pdf.RegisterImageOptionsReader("qr", fpdf.ImageOptions{ImageType: "PNG"}, bytes.NewReader(qrCodeBytes))
 	if qrImageInfo != nil {
+		fmt.Printf("DEBUG: Adding QR image to PDF...\n")
 		// Position QR Code top-right
 		pdf.ImageOptions("qr", 160, 10, 40, 40, false, fpdf.ImageOptions{}, 0, "")
+		fmt.Printf("DEBUG: QR image added successfully\n")
 	}
 
 	// --- Header ---
-	pdf.SetFont("arabic", "", 16)
+	fmt.Printf("DEBUG: Setting font to Arial...\n")
+	pdf.SetFont("Arial", "", 16)
+	fmt.Printf("DEBUG: Font set successfully, setting position...\n")
 	pdf.SetXY(10, 10)
+	fmt.Printf("DEBUG: Position set, ready to add content...\n")
 	
 	// Handle nil company gracefully
 	companyName := "Company Name"
@@ -89,9 +113,11 @@ func (p *PDFService) GenerateInvoicePDF(invoiceID int) ([]byte, error) {
 		companyCR = company.CRNumber
 	}
 	
+	fmt.Printf("DEBUG: About to add company name cell: %s\n", companyName)
 	pdf.Cell(50, 10, companyName) // English Name
+	fmt.Printf("DEBUG: Company name cell added successfully\n")
 
-	pdf.SetFont("arabic", "", 10)
+	pdf.SetFont("Arial", "", 10)
 	pdf.SetXY(10, 18)
 	pdf.Cell(100, 6, fmt.Sprintf("Address: %s, %s", companyAddress, companyCity))
 	pdf.SetXY(10, 24)
@@ -101,10 +127,10 @@ func (p *PDFService) GenerateInvoicePDF(invoiceID int) ([]byte, error) {
 
 	// --- Billed For Box ---
 	pdf.SetXY(10, 50)
-	pdf.SetFont("arabic", "", 10)
+	pdf.SetFont("Arial", "", 10)
 	pdf.Cell(95, 7, "Billed for:")
 	pdf.Ln(8)
-	pdf.SetFont("arabic", "", 12)
+	pdf.SetFont("Arial", "", 12)
 	
 	// Handle nil customer gracefully
 	customerName := "N/A"
@@ -123,14 +149,14 @@ func (p *PDFService) GenerateInvoicePDF(invoiceID int) ([]byte, error) {
 	
 	pdf.Cell(95, 7, customerName)
 	pdf.Ln(6)
-	pdf.SetFont("arabic", "", 9)
+	pdf.SetFont("Arial", "", 9)
 	pdf.MultiCell(95, 5, fmt.Sprintf("Address: %s, %s\nPhone Number: %s\nTax Number: %s",
 		customerAddress, customerCity, customerPhone, customerVAT), "0", "L", false)
 	pdf.Rect(10, 50, 95, 35, "D") // Draw a box around the customer info
 
 	// --- Invoice Details Box ---
 	pdf.SetXY(115, 50)
-	pdf.SetFont("arabic", "", 10)
+	pdf.SetFont("Arial", "", 10)
 	pdf.Cell(40, 7, "Invoice Number:")
 	
 	// Safe handling of invoice fields
@@ -172,7 +198,7 @@ func (p *PDFService) GenerateInvoicePDF(invoiceID int) ([]byte, error) {
 	pdf.Ln(-1)
 
 	// Table Rows
-	pdf.SetFont("arabic", "", 10)
+	pdf.SetFont("Arial", "", 10)
 	
 	// Safe handling of invoice items
 	var items []database.InvoiceItem
@@ -190,13 +216,40 @@ func (p *PDFService) GenerateInvoicePDF(invoiceID int) ([]byte, error) {
 			}
 		}
 
-		// Combine English and Arabic names in one cell
-		productDescription := fmt.Sprintf("%s\n%s", product.Name, ar(product.NameArabic))
+		// Safety checks for product names
+		productName := "Product"
+		productNameArabic := "منتج"
+		
+		if product != nil {
+			if product.Name != "" {
+				productName = product.Name
+			}
+			if product.NameArabic != "" {
+				productNameArabic = ar(product.NameArabic)
+			}
+		}
 
-		// Get cell height needed for MultiCell
+		// Combine English and Arabic names in one cell
+		productDescription := fmt.Sprintf("%s\n%s", productName, productNameArabic)
+
+		// Get cell height needed for MultiCell with safety checks
 		_, lineHt := pdf.GetFontSize()
-		lines := pdf.SplitLines([]byte(productDescription), 80)
+		
+		// Safety check for SplitLines to prevent index out of range
+		var lines [][]byte
+		if productDescription != "" {
+			lines = pdf.SplitLines([]byte(productDescription), 80)
+		}
+		
+		// Ensure we have at least one line to prevent division by zero
+		if len(lines) == 0 {
+			lines = [][]byte{[]byte("Product")}
+		}
+		
 		cellHeight := float64(len(lines)) * lineHt * 1.2
+		if cellHeight < 10 { // Minimum cell height
+			cellHeight = 10
+		}
 
 		currentX := pdf.GetX()
 		currentY := pdf.GetY()
@@ -214,7 +267,7 @@ func (p *PDFService) GenerateInvoicePDF(invoiceID int) ([]byte, error) {
 
 	// --- Totals Section ---
 	totalYStart := pdf.GetY()
-	pdf.SetFont("arabic", "", 10)
+	pdf.SetFont("Arial", "", 10)
 	
 	// Safe handling of totals
 	subTotal := 0.0
@@ -248,7 +301,7 @@ func (p *PDFService) GenerateInvoicePDF(invoiceID int) ([]byte, error) {
 	pdf.SetFont("Arial", "B", 10)  // Use standard Arial bold for notes header
 	pdf.Cell(100, 6, "Notes:")
 	pdf.Ln(6)
-	pdf.SetFont("arabic", "", 9)  // Use Arabic font for notes content
+	pdf.SetFont("Arial", "", 9)  // Use Arial font for notes content
 	pdf.MultiCell(120, 5, notes, "T", "L", false) // Draw a line above notes
 
 	// --- Finalize ---

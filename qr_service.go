@@ -30,6 +30,8 @@ type ZATCAQRData struct {
 
 // GenerateZATCAQRCode generates a ZATCA-compliant QR code in Base64 format
 func (q *ZATCAQRService) GenerateZATCAQRCode(invoice *database.Invoice, company *database.Company) (string, error) {
+	fmt.Printf("DEBUG: Starting QR generation for invoice %d\n", invoice.ID)
+	
 	// Prepare QR data
 	qrData := ZATCAQRData{
 		SellerName:  company.Name,
@@ -38,18 +40,24 @@ func (q *ZATCAQRService) GenerateZATCAQRCode(invoice *database.Invoice, company 
 		TotalAmount: invoice.TotalAmount,
 		VATAmount:   invoice.VATAmount,
 	}
+	
+	fmt.Printf("DEBUG: QR data prepared - Seller: %s, VAT: %s\n", qrData.SellerName, qrData.VATNumber)
 
 	// Generate cryptographic stamp (simplified - in production, use proper digital signature)
 	qrData.Hash = q.generateCryptographicStamp(qrData)
+	fmt.Printf("DEBUG: Hash generated, length: %d\n", len(qrData.Hash))
 
 	// Encode to TLV format
 	tlvBytes, err := q.encodeTLV(qrData)
 	if err != nil {
+		fmt.Printf("DEBUG: TLV encoding failed: %v\n", err)
 		return "", fmt.Errorf("failed to encode TLV: %v", err)
 	}
+	fmt.Printf("DEBUG: TLV encoded, length: %d\n", len(tlvBytes))
 
 	// Encode to Base64
 	base64String := base64.StdEncoding.EncodeToString(tlvBytes)
+	fmt.Printf("DEBUG: Base64 encoded, length: %d\n", len(base64String))
 
 	// Validate length (max 700 characters as per ZATCA specs)
 	if len(base64String) > 700 {
