@@ -25,9 +25,10 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Tax Rate -->
         <div class="form-control">
-          <label class="label-glass">Tax Rate</label>
+          <label for="tax-rate-select" class="label-glass">Tax Rate</label>
           <div class="flex space-x-2">
             <select 
+              id="tax-rate-select"
               bind:value={productForm.vat_rate}
               class="select-glass flex-1"
             >

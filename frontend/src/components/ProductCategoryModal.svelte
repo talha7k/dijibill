@@ -1,5 +1,6 @@
 <script>
   import { createEventDispatcher } from 'svelte'
+  import FormField from './FormField.svelte'
 
   export let show = false
   export let editingCategory = null
@@ -33,57 +34,41 @@
       
       <div class="space-y-4">
         <!-- Category Name -->
-        <div class="form-control">
-          <label class="label">
-            <span class="label-text text-white">Category Name</span>
-          </label>
-          <input 
-            type="text" 
-            bind:value={categoryForm.name}
-            placeholder="Enter category name" 
-            class="input input-bordered bg-white/10 text-white placeholder-white/50"
-            required
-          />
-        </div>
+        <FormField
+          label="Category Name"
+          type="text"
+          bind:value={categoryForm.name}
+          placeholder="Enter category name"
+          required={true}
+        />
 
         <!-- Category Name Arabic -->
-        <div class="form-control">
-          <label class="label">
-            <span class="label-text text-white">Category Name (Arabic)</span>
-          </label>
-          <input 
-            type="text" 
-            bind:value={categoryForm.name_arabic}
-            placeholder="أدخل اسم الفئة" 
-            class="input input-bordered bg-white/10 text-white placeholder-white/50"
-            dir="rtl"
-          />
-        </div>
+        <FormField
+          label="Category Name (Arabic)"
+          labelArabic="اسم الفئة"
+          type="text"
+          bind:value={categoryForm.name_arabic}
+          placeholder="أدخل اسم الفئة"
+          dir="rtl"
+        />
 
         <!-- Description -->
-        <div class="form-control">
-          <label class="label">
-            <span class="label-text text-white">Description</span>
-          </label>
-          <textarea 
-            bind:value={categoryForm.description}
-            placeholder="Enter category description" 
-            class="textarea textarea-bordered bg-white/10 text-white placeholder-white/50"
-          ></textarea>
-        </div>
+        <FormField
+          label="Description"
+          type="textarea"
+          bind:value={categoryForm.description}
+          placeholder="Enter category description"
+        />
 
         <!-- Description Arabic -->
-        <div class="form-control">
-          <label class="label">
-            <span class="label-text text-white">Description (Arabic)</span>
-          </label>
-          <textarea 
-            bind:value={categoryForm.description_arabic}
-            placeholder="أدخل وصف الفئة" 
-            class="textarea textarea-bordered bg-white/10 text-white placeholder-white/50"
-            dir="rtl"
-          ></textarea>
-        </div>
+        <FormField
+          label="Description (Arabic)"
+          labelArabic="الوصف"
+          type="textarea"
+          bind:value={categoryForm.description_arabic}
+          placeholder="أدخل وصف الفئة"
+          dir="rtl"
+        />
       </div>
 
       <div class="modal-action">

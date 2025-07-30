@@ -43,9 +43,10 @@
 
         <!-- SKU -->
         <div class="form-control">
-          <label class="label-glass">SKU</label>
+          <label for="product-sku" class="label-glass">SKU</label>
           <div class="flex space-x-2">
             <input 
+              id="product-sku"
               type="text" 
               class="input-glass flex-1"
               bind:value={productForm.sku}
@@ -66,9 +67,10 @@
 
         <!-- Barcode -->
         <div class="form-control">
-          <label class="label-glass">Barcode</label>
+          <label for="product-barcode" class="label-glass">Barcode</label>
           <div class="flex space-x-2">
             <input 
+              id="product-barcode"
               type="text" 
               class="input-glass flex-1"
               bind:value={productForm.barcode}
@@ -89,9 +91,9 @@
 
         <!-- Category -->
         <div class="form-control">
-          <label class="label-glass">Category</label>
+          <label for="product-category" class="label-glass">Category</label>
           <div class="flex space-x-2">
-            <select class="select-glass flex-1" bind:value={productForm.category_id}>
+            <select id="product-category" class="select-glass flex-1" bind:value={productForm.category_id}>
               <option value={0}>Select Category</option>
               {#each (categories || []) as category}
                 <option value={category.id}>{category.name}</option>
@@ -153,15 +155,17 @@
        <!-- Status Checkboxes -->
        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
          <div class="form-control">
-           <label class="label-glass">Product Status</label>
-           <div class="space-y-3">
+           <label id="product-status-label" class="label-glass">Product Status</label>
+           <div class="space-y-3" role="group" aria-labelledby="product-status-label">
              <FormField
+               label="Active Product"
                type="checkbox"
                bind:checked={productForm.is_active}
                placeholder="Active Product"
              />
              
              <FormField
+               label="Service (not using stock)"
                type="checkbox"
                bind:checked={productForm.service_not_using_stock}
                placeholder="Service (not using stock)"
