@@ -4,6 +4,7 @@
   import { createEventDispatcher } from 'svelte'
   import DataTable from './DataTable.svelte'
   import FormField from './FormField.svelte'
+  import ConfirmationModal from './ConfirmationModal.svelte'
 
   const dispatch = createEventDispatcher()
 
@@ -13,6 +14,9 @@
   let newSalesCategory = { name: '', name_arabic: '', code: '', description: '', description_arabic: '', is_default: false, is_active: true }
   let showSalesCategoryForm = false
   let editingSalesCategory = null
+  let showDeleteConfirm = false
+  let categoryToDelete = null
+  let loading = false
 
   async function addSalesCategory() {
     if (newSalesCategory.name && newSalesCategory.code) {
@@ -68,14 +72,29 @@
     }
   }
 
-  async function deleteSalesCategory(id) {
-    if (confirm('Are you sure you want to delete this sales category?')) {
+  function showDeleteConfirmation(id) {
+    categoryToDelete = id
+    showDeleteConfirm = true
+  }
+
+  function cancelDelete() {
+    showDeleteConfirm = false
+    categoryToDelete = null
+  }
+
+  async function confirmDelete() {
+    if (categoryToDelete) {
+      loading = true
       try {
-        await DeleteSalesCategory(id)
+        await DeleteSalesCategory(categoryToDelete)
         dispatch('reload')
+        showDeleteConfirm = false
+        categoryToDelete = null
       } catch (error) {
         console.error('Error deleting sales category:', error)
         dispatch('error', { message: 'Error deleting sales category: ' + error.message })
+      } finally {
+        loading = false
       }
     }
   }
@@ -195,7 +214,7 @@
         editSalesCategory(salesCategory)
         break
       case 'delete':
-        deleteSalesCategory(parseInt(id))
+        showDeleteConfirmation(parseInt(id))
         break
       case 'setDefault':
         setDefaultSalesCategory(parseInt(id))
@@ -305,3 +324,17 @@
     on:row-action={handleRowAction}
   />
 </div>
+
+{#if showDeleteConfirm}
+  <ConfirmationModal
+    show={showDeleteConfirm}
+    title="Delete Sales Category"
+    message="Are you sure you want to delete this sales category? This action cannot be undone."
+    confirmText="Delete"
+    cancelText="Cancel"
+    confirmClass="btn-error"
+    {loading}
+    on:confirm={confirmDelete}
+    on:cancel={cancelDelete}
+  />
+{/if}

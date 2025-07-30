@@ -4,6 +4,7 @@
   import { createEventDispatcher } from 'svelte'
   import DataTable from './DataTable.svelte'
   import FormField from './FormField.svelte'
+  import ConfirmationModal from './ConfirmationModal.svelte'
 
   const dispatch = createEventDispatcher()
 
@@ -13,6 +14,9 @@
   let newPaymentType = { name: '', name_arabic: '', code: '', description: '', is_default: false, is_active: true }
   let showPaymentTypeForm = false
   let editingPaymentType = null
+  let showDeleteConfirm = false
+  let paymentTypeToDelete = null
+  let loading = false
 
   async function addPaymentType() {
     if (newPaymentType.name && newPaymentType.code) {
@@ -66,14 +70,29 @@
     }
   }
 
-  async function deletePaymentType(id) {
-    if (confirm('Are you sure you want to delete this payment type?')) {
+  function showDeleteConfirmation(id) {
+    paymentTypeToDelete = id
+    showDeleteConfirm = true
+  }
+
+  function cancelDelete() {
+    showDeleteConfirm = false
+    paymentTypeToDelete = null
+  }
+
+  async function confirmDelete() {
+    if (paymentTypeToDelete) {
+      loading = true
       try {
-        await DeletePaymentType(id)
+        await DeletePaymentType(paymentTypeToDelete)
         dispatch('reload')
+        showDeleteConfirm = false
+        paymentTypeToDelete = null
       } catch (error) {
         console.error('Error deleting payment type:', error)
         dispatch('error', { message: 'Error deleting payment type: ' + error.message })
+      } finally {
+        loading = false
       }
     }
   }
@@ -187,7 +206,7 @@
         editPaymentType(paymentType)
         break
       case 'delete':
-        deletePaymentType(parseInt(id))
+        showDeleteConfirmation(parseInt(id))
         break
       case 'setDefault':
         setDefaultPaymentType(parseInt(id))
@@ -286,3 +305,17 @@
     on:row-action={handleRowAction}
   />
 </div>
+
+{#if showDeleteConfirm}
+  <ConfirmationModal
+    show={showDeleteConfirm}
+    title="Delete Payment Type"
+    message="Are you sure you want to delete this payment type? This action cannot be undone."
+    confirmText="Delete"
+    cancelText="Cancel"
+    confirmClass="btn-error"
+    {loading}
+    on:confirm={confirmDelete}
+    on:cancel={cancelDelete}
+  />
+{/if}

@@ -6,6 +6,7 @@
 	import DataTable from './components/DataTable.svelte';
 	import StatusBadge from './components/StatusBadge.svelte';
 	import PaymentModal from './components/PaymentModal.svelte';
+	import ConfirmationModal from './components/ConfirmationModal.svelte';
 
 	/** @type {Array<any>} */
 	let payments = [];
@@ -21,6 +22,9 @@
 	let editingPayment = null;
 	/** @type {boolean} */
 	let loading = false;
+	let showDeleteConfirm = false;
+	let paymentToDelete = null;
+	let confirmLoading = false;
 
 	onMount(async () => {
 		loading = true;
@@ -112,17 +116,29 @@
 		}
 	}
 
-	async function deletePayment(id) {
-		if (confirm('Are you sure you want to delete this payment?')) {
+	function showDeleteConfirmation(id) {
+		paymentToDelete = id;
+		showDeleteConfirm = true;
+	}
+
+	function cancelDelete() {
+		showDeleteConfirm = false;
+		paymentToDelete = null;
+	}
+
+	async function confirmDelete() {
+		if (paymentToDelete) {
+			confirmLoading = true;
 			try {
-				loading = true;
-				await DeletePayment(id);
+				await DeletePayment(paymentToDelete);
 				await loadPayments();
+				showDeleteConfirm = false;
+				paymentToDelete = null;
 			} catch (error) {
 				console.error('Error deleting payment:', error);
 				alert('Error deleting payment: ' + error.message);
 			} finally {
-				loading = false;
+				confirmLoading = false;
 			}
 		}
 	}
@@ -230,7 +246,7 @@
 		if (action === 'edit') {
 			openModal(item);
 		} else if (action === 'delete') {
-			deletePayment(item.id);
+			showDeleteConfirmation(item.id);
 		}
 	}
 
@@ -285,3 +301,17 @@
 	on:save={handleSavePayment}
 	on:close={closeModal}
 />
+
+{#if showDeleteConfirm}
+	<ConfirmationModal
+		show={showDeleteConfirm}
+		title="Delete Payment"
+		message="Are you sure you want to delete this payment? This action cannot be undone."
+		confirmText="Delete"
+		cancelText="Cancel"
+		confirmClass="btn-error"
+		loading={confirmLoading}
+		on:confirm={confirmDelete}
+		on:cancel={cancelDelete}
+	/>
+{/if}

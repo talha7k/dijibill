@@ -9,6 +9,7 @@
   import ProductModal from './components/ProductModal.svelte'
   import HorizontalTabs from './components/HorizontalTabs.svelte'
   import PageLayout from './components/PageLayout.svelte'
+  import ConfirmationModal from './components/ConfirmationModal.svelte'
 
   // State variables
   let products = []
@@ -19,6 +20,11 @@
   let showProductModal = false
   let editingProduct = null
   let activeTab = 'products'
+  
+  // Confirmation modal state
+  let showDeleteConfirm = false
+  let productToDelete = null
+  let confirmLoading = false
 
   // Tab configuration
   const tabs = [
@@ -150,8 +156,33 @@
 
   function handleDeleteProduct(event) {
     const product = event.detail;
-    if (confirm(`Are you sure you want to delete "${product.name}"?`)) {
-      deleteProduct(product.id);
+    showDeleteConfirmation(product);
+  }
+
+  function showDeleteConfirmation(product) {
+    productToDelete = product;
+    showDeleteConfirm = true;
+  }
+
+  function cancelDelete() {
+    showDeleteConfirm = false;
+    productToDelete = null;
+  }
+
+  async function confirmDelete() {
+    if (!productToDelete) return;
+    
+    try {
+      confirmLoading = true;
+      await DeleteProduct(productToDelete.id);
+      await loadProducts();
+      showDeleteConfirm = false;
+      productToDelete = null;
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      alert('Error deleting product: ' + error.message);
+    } finally {
+      confirmLoading = false;
     }
   }
 
@@ -319,4 +350,16 @@
   {generateBarcode}
   on:close={handleCloseProductModal}
   on:save={handleSaveProduct}
+/>
+
+<!-- Confirmation Modal -->
+<ConfirmationModal
+  show={showDeleteConfirm}
+  title="Delete Product"
+  message={productToDelete ? `Are you sure you want to delete "${productToDelete.name}"? This action cannot be undone.` : ''}
+  confirmText="Delete"
+  cancelText="Cancel"
+  loading={confirmLoading}
+  on:confirm={confirmDelete}
+  on:cancel={cancelDelete}
 />

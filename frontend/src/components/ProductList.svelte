@@ -1,6 +1,7 @@
 <script>
   import { createEventDispatcher } from 'svelte'
   import DataTable from './DataTable.svelte'
+  import ConfirmationModal from './ConfirmationModal.svelte'
   
   /** @type {Array<any>} */
   export let products = []
@@ -9,15 +10,33 @@
   /** @type {string} */
   export let searchTerm = ''
 
+  let showDeleteConfirm = false
+  let productToDelete = null
+  let confirmLoading = false
+
   const dispatch = createEventDispatcher()
 
   function editProduct(product) {
     dispatch('edit', product)
   }
 
-  function deleteProduct(product) {
-    if (confirm(`Are you sure you want to delete "${product.name}"?`)) {
-      dispatch('delete', product)
+  function showDeleteConfirmation(product) {
+    productToDelete = product
+    showDeleteConfirm = true
+  }
+
+  function cancelDelete() {
+    showDeleteConfirm = false
+    productToDelete = null
+  }
+
+  function confirmDelete() {
+    if (productToDelete) {
+      confirmLoading = true
+      dispatch('delete', productToDelete)
+      showDeleteConfirm = false
+      productToDelete = null
+      confirmLoading = false
     }
   }
 
@@ -122,7 +141,7 @@
     if (action === 'edit') {
       editProduct(item)
     } else if (action === 'delete') {
-      deleteProduct(item)
+      showDeleteConfirmation(item)
     }
   }
 
@@ -162,3 +181,17 @@
     {/if}
   </svelte:fragment>
 </DataTable>
+
+{#if showDeleteConfirm}
+  <ConfirmationModal
+    show={showDeleteConfirm}
+    title="Delete Product"
+    message={`Are you sure you want to delete "${productToDelete?.name}"? This action cannot be undone.`}
+    confirmText="Delete"
+    cancelText="Cancel"
+    confirmClass="btn-error"
+    loading={confirmLoading}
+    on:confirm={confirmDelete}
+    on:cancel={cancelDelete}
+  />
+{/if}
