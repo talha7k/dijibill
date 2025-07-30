@@ -266,13 +266,13 @@
     @apply w-full px-3 py-2 bg-white/10 border border-white/20 rounded-md text-white 
            placeholder-white/50 backdrop-blur-lg transition-all duration-200 
            focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent 
-           resize-vertical;
+           resize-y;
   }
 
   .textarea-standard {
     @apply w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 
            placeholder-gray-500 transition-all duration-200 focus:outline-none 
-           focus:ring-2 focus:ring-primary focus:border-transparent resize-vertical;
+           focus:ring-2 focus:ring-primary focus:border-transparent resize-y;
   }
 }
 

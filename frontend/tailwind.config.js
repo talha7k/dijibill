@@ -2,7 +2,31 @@
 export default {
   content: ['./src/**/*.{html,js,svelte,ts}'],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        'primary': '#667eea',
+        'primary-light': '#8b9df0',
+        'primary-dark': '#4c63d2',
+        'secondary': '#764ba2',
+        'secondary-light': '#9b7bc7',
+        'secondary-dark': '#5a3a7d',
+        'accent': '#f093fb',
+        'accent-light': '#f5b3fc',
+        'accent-dark': '#e873f8',
+        'success': '#36d399',
+        'success-light': '#6ee7b7',
+        'success-dark': '#10b981',
+        'warning': '#fbbd23',
+        'warning-light': '#fcd34d',
+        'warning-dark': '#f59e0b',
+        'error': '#f87272',
+        'error-light': '#fca5a5',
+        'error-dark': '#ef4444',
+        'info': '#3abff8',
+        'info-light': '#7dd3fc',
+        'info-dark': '#0ea5e9',
+      },
+    },
   },
   plugins: [require('daisyui')],
   daisyui: {
