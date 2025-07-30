@@ -183,6 +183,103 @@ func (d *Database) createTables() error {
 		log.Printf("Warning: Could not insert default company: %v", err)
 	}
 
+	// Insert default settings data
+	if err := d.insertDefaultSettings(); err != nil {
+		log.Printf("Warning: Could not insert default settings: %v", err)
+	}
+
+	return nil
+}
+
+// insertDefaultSettings inserts default settings data
+func (d *Database) insertDefaultSettings() error {
+	// Insert default payment types
+	var paymentCount int
+	err := d.db.QueryRow("SELECT COUNT(*) FROM payment_types").Scan(&paymentCount)
+	if err != nil {
+		return err
+	}
+
+	if paymentCount == 0 {
+		paymentTypes := []PaymentType{
+			{Name: "Cash", NameArabic: "نقدي", Code: "cash", Description: "Cash payment", IsDefault: true, IsActive: true},
+			{Name: "Credit Card", NameArabic: "بطاقة ائتمان", Code: "card", Description: "Credit card payment", IsDefault: false, IsActive: true},
+			{Name: "Bank Transfer", NameArabic: "تحويل بنكي", Code: "bank_transfer", Description: "Bank transfer payment", IsDefault: false, IsActive: true},
+		}
+
+		for _, pt := range paymentTypes {
+			if err := d.CreatePaymentType(&pt); err != nil {
+				log.Printf("Warning: Could not insert payment type %s: %v", pt.Name, err)
+			}
+		}
+	}
+
+	// Insert default sales categories
+	var salesCount int
+	err = d.db.QueryRow("SELECT COUNT(*) FROM sales_categories").Scan(&salesCount)
+	if err != nil {
+		return err
+	}
+
+	if salesCount == 0 {
+		salesCategories := []SalesCategory{
+			{Name: "Retail", NameArabic: "تجزئة", Code: "retail", Description: "Retail sales", DescriptionArabic: "مبيعات التجزئة", IsDefault: true, IsActive: true},
+			{Name: "Wholesale", NameArabic: "جملة", Code: "wholesale", Description: "Wholesale sales", DescriptionArabic: "مبيعات الجملة", IsDefault: false, IsActive: true},
+			{Name: "Service", NameArabic: "خدمة", Code: "service", Description: "Service sales", DescriptionArabic: "مبيعات الخدمات", IsDefault: false, IsActive: true},
+		}
+
+		for _, sc := range salesCategories {
+			if err := d.CreateSalesCategory(&sc); err != nil {
+				log.Printf("Warning: Could not insert sales category %s: %v", sc.Name, err)
+			}
+		}
+	}
+
+	// Insert default tax rates
+	var taxCount int
+	err = d.db.QueryRow("SELECT COUNT(*) FROM tax_rates").Scan(&taxCount)
+	if err != nil {
+		return err
+	}
+
+	if taxCount == 0 {
+		taxRates := []TaxRate{
+			{Name: "Standard VAT", NameArabic: "ضريبة القيمة المضافة", Rate: 15.0, Description: "Standard VAT rate", IsDefault: true, IsActive: true},
+			{Name: "Zero VAT", NameArabic: "معفى من الضريبة", Rate: 0.0, Description: "Zero VAT rate", IsDefault: false, IsActive: true},
+			{Name: "Exempt", NameArabic: "معفى", Rate: 0.0, Description: "VAT exempt", IsDefault: false, IsActive: true},
+		}
+
+		for _, tr := range taxRates {
+			if err := d.CreateTaxRate(&tr); err != nil {
+				log.Printf("Warning: Could not insert tax rate %s: %v", tr.Name, err)
+			}
+		}
+	}
+
+	// Insert default units of measurement
+	var unitCount int
+	err = d.db.QueryRow("SELECT COUNT(*) FROM units_of_measurement").Scan(&unitCount)
+	if err != nil {
+		return err
+	}
+
+	if unitCount == 0 {
+		units := []UnitOfMeasurement{
+			{Value: "pcs", Label: "Pieces", Arabic: "قطعة", IsDefault: true, IsActive: true},
+			{Value: "kg", Label: "Kilograms", Arabic: "كيلوغرام", IsDefault: false, IsActive: true},
+			{Value: "m", Label: "Meters", Arabic: "متر", IsDefault: false, IsActive: true},
+			{Value: "l", Label: "Liters", Arabic: "لتر", IsDefault: false, IsActive: true},
+			{Value: "box", Label: "Box", Arabic: "صندوق", IsDefault: false, IsActive: true},
+			{Value: "pack", Label: "Pack", Arabic: "عبوة", IsDefault: false, IsActive: true},
+		}
+
+		for _, u := range units {
+			if err := d.CreateUnitOfMeasurement(&u); err != nil {
+				log.Printf("Warning: Could not insert unit %s: %v", u.Label, err)
+			}
+		}
+	}
+
 	return nil
 }
 
@@ -619,9 +716,9 @@ func (d *Database) DeleteSalesCategory(id int) error {
 
 // TaxRate operations
 func (d *Database) CreateTaxRate(taxRate *TaxRate) error {
-	query := `INSERT INTO tax_rates (name, name_arabic, rate, description, is_active) VALUES (?, ?, ?, ?, ?)`
+	query := `INSERT INTO tax_rates (name, name_arabic, rate, description, is_default, is_active) VALUES (?, ?, ?, ?, ?, ?)`
 
-	result, err := d.db.Exec(query, taxRate.Name, taxRate.NameArabic, taxRate.Rate, taxRate.Description, taxRate.IsActive)
+	result, err := d.db.Exec(query, taxRate.Name, taxRate.NameArabic, taxRate.Rate, taxRate.Description, taxRate.IsDefault, taxRate.IsActive)
 	if err != nil {
 		return err
 	}
@@ -635,7 +732,7 @@ func (d *Database) CreateTaxRate(taxRate *TaxRate) error {
 }
 
 func (d *Database) GetTaxRates() ([]TaxRate, error) {
-	query := `SELECT id, name, name_arabic, rate, description, is_active, created_at, updated_at FROM tax_rates ORDER BY name`
+	query := `SELECT id, name, name_arabic, rate, description, is_default, is_active, created_at, updated_at FROM tax_rates ORDER BY name`
 
 	rows, err := d.db.Query(query)
 	if err != nil {
@@ -646,7 +743,7 @@ func (d *Database) GetTaxRates() ([]TaxRate, error) {
 	var taxRates []TaxRate
 	for rows.Next() {
 		var tr TaxRate
-		err := rows.Scan(&tr.ID, &tr.Name, &tr.NameArabic, &tr.Rate, &tr.Description, &tr.IsActive, &tr.CreatedAt, &tr.UpdatedAt)
+		err := rows.Scan(&tr.ID, &tr.Name, &tr.NameArabic, &tr.Rate, &tr.Description, &tr.IsDefault, &tr.IsActive, &tr.CreatedAt, &tr.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -656,9 +753,9 @@ func (d *Database) GetTaxRates() ([]TaxRate, error) {
 }
 
 func (d *Database) UpdateTaxRate(taxRate *TaxRate) error {
-	query := `UPDATE tax_rates SET name = ?, name_arabic = ?, rate = ?, description = ?, is_active = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`
+	query := `UPDATE tax_rates SET name = ?, name_arabic = ?, rate = ?, description = ?, is_default = ?, is_active = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`
 
-	_, err := d.db.Exec(query, taxRate.Name, taxRate.NameArabic, taxRate.Rate, taxRate.Description, taxRate.IsActive, taxRate.ID)
+	_, err := d.db.Exec(query, taxRate.Name, taxRate.NameArabic, taxRate.Rate, taxRate.Description, taxRate.IsDefault, taxRate.IsActive, taxRate.ID)
 	return err
 }
 
@@ -669,9 +766,9 @@ func (d *Database) DeleteTaxRate(id int) error {
 
 // UnitOfMeasurement operations
 func (d *Database) CreateUnitOfMeasurement(unit *UnitOfMeasurement) error {
-	query := `INSERT INTO units_of_measurement (name, name_arabic, abbreviation, abbreviation_arabic, description, description_arabic, is_active) VALUES (?, ?, ?, ?, ?, ?, ?)`
+	query := `INSERT INTO units_of_measurement (value, label, arabic, is_default, is_active) VALUES (?, ?, ?, ?, ?)`
 
-	result, err := d.db.Exec(query, unit.Value, unit.Arabic, unit.Label, unit.Arabic, "", "", unit.IsActive)
+	result, err := d.db.Exec(query, unit.Value, unit.Label, unit.Arabic, unit.IsDefault, unit.IsActive)
 	if err != nil {
 		return err
 	}
@@ -685,7 +782,7 @@ func (d *Database) CreateUnitOfMeasurement(unit *UnitOfMeasurement) error {
 }
 
 func (d *Database) GetUnitsOfMeasurement() ([]UnitOfMeasurement, error) {
-	query := `SELECT id, name, name_arabic, abbreviation, abbreviation_arabic, description, description_arabic, is_active, created_at, updated_at FROM units_of_measurement ORDER BY name`
+	query := `SELECT id, value, label, arabic, is_default, is_active, created_at, updated_at FROM units_of_measurement ORDER BY label`
 
 	rows, err := d.db.Query(query)
 	if err != nil {
@@ -696,23 +793,19 @@ func (d *Database) GetUnitsOfMeasurement() ([]UnitOfMeasurement, error) {
 	var units []UnitOfMeasurement
 	for rows.Next() {
 		var u UnitOfMeasurement
-		var name, nameArabic, abbrev, abbreviArabic, desc, descArabic string
-		err := rows.Scan(&u.ID, &name, &nameArabic, &abbrev, &abbreviArabic, &desc, &descArabic, &u.IsActive, &u.CreatedAt, &u.UpdatedAt)
+		err := rows.Scan(&u.ID, &u.Value, &u.Label, &u.Arabic, &u.IsDefault, &u.IsActive, &u.CreatedAt, &u.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
-		u.Value = name
-		u.Label = abbrev
-		u.Arabic = nameArabic
 		units = append(units, u)
 	}
 	return units, nil
 }
 
 func (d *Database) UpdateUnitOfMeasurement(unit *UnitOfMeasurement) error {
-	query := `UPDATE units_of_measurement SET name = ?, name_arabic = ?, abbreviation = ?, abbreviation_arabic = ?, description = ?, description_arabic = ?, is_active = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`
+	query := `UPDATE units_of_measurement SET value = ?, label = ?, arabic = ?, is_default = ?, is_active = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`
 
-	_, err := d.db.Exec(query, unit.Value, unit.Arabic, unit.Label, unit.Arabic, "", "", unit.IsActive, unit.ID)
+	_, err := d.db.Exec(query, unit.Value, unit.Label, unit.Arabic, unit.IsDefault, unit.IsActive, unit.ID)
 	return err
 }
 

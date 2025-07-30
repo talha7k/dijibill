@@ -369,6 +369,7 @@ export namespace main {
 		}
 	}
 	
+	
 	export class SalesCategory {
 	    id: number;
 	    name: string;
@@ -419,7 +420,6 @@ export namespace main {
 		    return a;
 		}
 	}
-	
 	export class TaxRate {
 	    id: number;
 	    name: string;
@@ -468,7 +468,6 @@ export namespace main {
 		    return a;
 		}
 	}
-	
 	export class UnitOfMeasurement {
 	    id: number;
 	    value: string;

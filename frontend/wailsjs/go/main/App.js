@@ -10,6 +10,10 @@ export function CreateInvoice(arg1) {
   return window['go']['main']['App']['CreateInvoice'](arg1);
 }
 
+export function CreatePaymentType(arg1) {
+  return window['go']['main']['App']['CreatePaymentType'](arg1);
+}
+
 export function CreateProduct(arg1) {
   return window['go']['main']['App']['CreateProduct'](arg1);
 }
@@ -18,8 +22,36 @@ export function CreateProductCategory(arg1) {
   return window['go']['main']['App']['CreateProductCategory'](arg1);
 }
 
+export function CreateSalesCategory(arg1) {
+  return window['go']['main']['App']['CreateSalesCategory'](arg1);
+}
+
+export function CreateTaxRate(arg1) {
+  return window['go']['main']['App']['CreateTaxRate'](arg1);
+}
+
+export function CreateUnitOfMeasurement(arg1) {
+  return window['go']['main']['App']['CreateUnitOfMeasurement'](arg1);
+}
+
 export function DeleteCustomer(arg1) {
   return window['go']['main']['App']['DeleteCustomer'](arg1);
+}
+
+export function DeletePaymentType(arg1) {
+  return window['go']['main']['App']['DeletePaymentType'](arg1);
+}
+
+export function DeleteSalesCategory(arg1) {
+  return window['go']['main']['App']['DeleteSalesCategory'](arg1);
+}
+
+export function DeleteTaxRate(arg1) {
+  return window['go']['main']['App']['DeleteTaxRate'](arg1);
+}
+
+export function DeleteUnitOfMeasurement(arg1) {
+  return window['go']['main']['App']['DeleteUnitOfMeasurement'](arg1);
 }
 
 export function GenerateInvoicePDF(arg1) {
@@ -50,6 +82,10 @@ export function GetInvoices() {
   return window['go']['main']['App']['GetInvoices']();
 }
 
+export function GetPaymentTypes() {
+  return window['go']['main']['App']['GetPaymentTypes']();
+}
+
 export function GetProductCategories() {
   return window['go']['main']['App']['GetProductCategories']();
 }
@@ -60,6 +96,18 @@ export function GetProducts() {
 
 export function GetQRCodeInfo(arg1) {
   return window['go']['main']['App']['GetQRCodeInfo'](arg1);
+}
+
+export function GetSalesCategories() {
+  return window['go']['main']['App']['GetSalesCategories']();
+}
+
+export function GetTaxRates() {
+  return window['go']['main']['App']['GetTaxRates']();
+}
+
+export function GetUnitsOfMeasurement() {
+  return window['go']['main']['App']['GetUnitsOfMeasurement']();
 }
 
 export function Greet(arg1) {
@@ -92,6 +140,22 @@ export function UpdateCompany(arg1) {
 
 export function UpdateCustomer(arg1) {
   return window['go']['main']['App']['UpdateCustomer'](arg1);
+}
+
+export function UpdatePaymentType(arg1) {
+  return window['go']['main']['App']['UpdatePaymentType'](arg1);
+}
+
+export function UpdateSalesCategory(arg1) {
+  return window['go']['main']['App']['UpdateSalesCategory'](arg1);
+}
+
+export function UpdateTaxRate(arg1) {
+  return window['go']['main']['App']['UpdateTaxRate'](arg1);
+}
+
+export function UpdateUnitOfMeasurement(arg1) {
+  return window['go']['main']['App']['UpdateUnitOfMeasurement'](arg1);
 }
 
 export function ValidateZATCAQRCode(arg1) {

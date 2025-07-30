@@ -6,11 +6,27 @@ export function CreateCustomer(arg1:main.Customer):Promise<void>;
 
 export function CreateInvoice(arg1:main.Invoice):Promise<void>;
 
+export function CreatePaymentType(arg1:main.PaymentType):Promise<void>;
+
 export function CreateProduct(arg1:main.Product):Promise<void>;
 
 export function CreateProductCategory(arg1:main.ProductCategory):Promise<void>;
 
+export function CreateSalesCategory(arg1:main.SalesCategory):Promise<void>;
+
+export function CreateTaxRate(arg1:main.TaxRate):Promise<void>;
+
+export function CreateUnitOfMeasurement(arg1:main.UnitOfMeasurement):Promise<void>;
+
 export function DeleteCustomer(arg1:number):Promise<void>;
+
+export function DeletePaymentType(arg1:number):Promise<void>;
+
+export function DeleteSalesCategory(arg1:number):Promise<void>;
+
+export function DeleteTaxRate(arg1:number):Promise<void>;
+
+export function DeleteUnitOfMeasurement(arg1:number):Promise<void>;
 
 export function GenerateInvoicePDF(arg1:number):Promise<string>;
 
@@ -26,11 +42,19 @@ export function GetInvoiceByID(arg1:number):Promise<main.Invoice>;
 
 export function GetInvoices():Promise<Array<main.Invoice>>;
 
+export function GetPaymentTypes():Promise<Array<main.PaymentType>>;
+
 export function GetProductCategories():Promise<Array<main.ProductCategory>>;
 
 export function GetProducts():Promise<Array<main.Product>>;
 
 export function GetQRCodeInfo(arg1:string):Promise<Record<string, any>>;
+
+export function GetSalesCategories():Promise<Array<main.SalesCategory>>;
+
+export function GetTaxRates():Promise<Array<main.TaxRate>>;
+
+export function GetUnitsOfMeasurement():Promise<Array<main.UnitOfMeasurement>>;
 
 export function Greet(arg1:string):Promise<string>;
 
@@ -47,5 +71,13 @@ export function ShowSaveDialog(arg1:string):Promise<string>;
 export function UpdateCompany(arg1:main.Company):Promise<void>;
 
 export function UpdateCustomer(arg1:main.Customer):Promise<void>;
+
+export function UpdatePaymentType(arg1:main.PaymentType):Promise<void>;
+
+export function UpdateSalesCategory(arg1:main.SalesCategory):Promise<void>;
+
+export function UpdateTaxRate(arg1:main.TaxRate):Promise<void>;
+
+export function UpdateUnitOfMeasurement(arg1:main.UnitOfMeasurement):Promise<void>;
 
 export function ValidateZATCAQRCode(arg1:string):Promise<void>;
