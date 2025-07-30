@@ -144,6 +144,7 @@
   }
   
   function validateForm() {
+    console.log('validateForm called')
     // Reset errors
     formErrors = {
       customer_id: '',
@@ -158,6 +159,7 @@
     if (!invoiceData.issue_date) {
       formErrors.issue_date = 'Please select an invoice date'
       isValid = false
+      console.log('Issue date validation failed')
     }
     
     // Validate invoice items
@@ -172,21 +174,26 @@
       if (!item.product_id || item.product_id === 0) {
         itemErrors.product_id = 'Please select a product'
         isValid = false
+        console.log(`Item ${index + 1} product validation failed`)
       }
       
       if (!item.quantity || item.quantity <= 0) {
         itemErrors.quantity = 'Quantity must be greater than 0'
         isValid = false
+        console.log(`Item ${index + 1} quantity validation failed`)
       }
       
       if (!item.unit_price || item.unit_price < 0) {
         itemErrors.unit_price = 'Unit price must be 0 or greater'
         isValid = false
+        console.log(`Item ${index + 1} unit price validation failed`)
       }
       
       formErrors.items[index] = itemErrors
     })
     
+    console.log('Final formErrors:', formErrors)
+    console.log('Validation result:', isValid)
     return isValid
   }
   
@@ -200,7 +207,10 @@
   }
 
   async function saveInvoice() {
+    console.log('=== SAVE INVOICE START ===')
     console.log('saveInvoice called')
+    console.log('Current invoiceData:', JSON.stringify(invoiceData, null, 2))
+    console.log('Current invoiceItems:', JSON.stringify(invoiceItems, null, 2))
     
     // Validate form first
     if (!validateForm()) {
@@ -209,18 +219,19 @@
     }
     
     console.log('Form validation passed')
-    console.log('invoiceData:', invoiceData)
-    console.log('invoiceItems:', invoiceItems)
     
     // Check if any items have valid product_id
     const validItems = invoiceItems.filter(item => item.product_id > 0)
+    console.log('Valid items:', validItems)
     if (validItems.length === 0) {
+      console.log('No valid items found')
       alert('Please select products for your invoice items')
       return
     }
     
     isSaving = true
     try {
+      console.log('Creating invoice object...')
       const invoiceObj = {
         id: 0,
         invoice_number: '',
@@ -231,7 +242,7 @@
         sub_total: 0,
         vat_amount: 0,
         total_amount: 0,
-        status: 'draft',
+        status: invoiceData.status || 'draft',
         notes: invoiceData.notes || '',
         notes_arabic: '',
         qr_code: '',
@@ -250,12 +261,10 @@
         }))
       }
       
-      console.log('invoiceObj before createFrom:', invoiceObj)
-      const invoice = database.Invoice.createFrom(invoiceObj)
-      console.log('invoice after createFrom:', invoice)
+      console.log('invoiceObj created:', JSON.stringify(invoiceObj, null, 2))
       
-      console.log('Calling CreateInvoice...')
-      const result = await CreateInvoice(invoice)
+      console.log('Calling CreateInvoice backend function...')
+      const result = await CreateInvoice(new database.Invoice(invoiceObj))
       console.log('CreateInvoice result:', result)
       console.log('CreateInvoice completed successfully')
       
@@ -263,10 +272,15 @@
       dispatch('saved')
       closeModal()
     } catch (error) {
-      console.error('Error saving invoice:', error)
+      console.error('=== ERROR SAVING INVOICE ===')
+      console.error('Error type:', typeof error)
+      console.error('Error message:', error.message)
+      console.error('Error stack:', error.stack)
+      console.error('Full error object:', error)
       alert('Error saving invoice: ' + (error.message || error.toString()))
     } finally {
       isSaving = false
+      console.log('=== SAVE INVOICE END ===')
     }
   }
   
@@ -283,7 +297,8 @@
       issue_date: new Date().toISOString().split('T')[0],
       due_date: '',
       payment_terms: '',
-      notes: ''
+      notes: '',
+      status: 'draft'
     }
     invoiceItems = [{
       product_id: 0,
@@ -321,13 +336,46 @@
             <div class="loading loading-spinner loading-lg text-primary"></div>
           </div>
         {:else}
+          <!-- Error Display -->
+          {#if formErrors.issue_date || formErrors.items.some(item => item.product_id || item.quantity || item.unit_price)}
+            <div class="bg-error/10 border border-error/20 rounded-lg p-4 mb-6">
+              <div class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-error mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <div>
+                  <h4 class="text-error font-medium mb-2">Please fix the following errors:</h4>
+                  <ul class="text-error text-sm space-y-1">
+                    {#if formErrors.issue_date}
+                      <li>• {formErrors.issue_date}</li>
+                    {/if}
+                    {#each formErrors.items as itemError, index}
+                      {#if itemError && (itemError.product_id || itemError.quantity || itemError.unit_price)}
+                        {#if itemError.product_id}
+                          <li>• Item {index + 1}: {itemError.product_id}</li>
+                        {/if}
+                        {#if itemError.quantity}
+                          <li>• Item {index + 1}: {itemError.quantity}</li>
+                        {/if}
+                        {#if itemError.unit_price}
+                          <li>• Item {index + 1}: {itemError.unit_price}</li>
+                        {/if}
+                      {/if}
+                    {/each}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          {/if}
+          
           <form on:submit|preventDefault={saveInvoice} class="space-y-6">
             <!-- Customer and Invoice Details -->
-            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
               <!-- Customer Selection -->
               <div class="form-group">
-                <label class="label-standard">Customer <span class="text-white/50">(Optional)</span></label>
+                <label for="customer-select" class="label-standard">Customer <span class="text-white/50">(Optional)</span></label>
                 <select 
+                  id="customer-select"
                   bind:value={invoiceData.customer_id}
                   class="select-glass w-full"
                 >
@@ -336,12 +384,16 @@
                     <option value={customer.id}>{customer.name}</option>
                   {/each}
                 </select>
+                {#if formErrors.customer_id}
+                  <p class="text-error text-sm mt-1">{formErrors.customer_id}</p>
+                {/if}
               </div>
               
               <!-- Sales Category Selection -->
               <div class="form-group">
-                <label class="label-standard">Sales Category <span class="text-white/50">(Optional)</span></label>
+                <label for="sales-category-select" class="label-standard">Sales Category <span class="text-white/50">(Optional)</span></label>
                 <select 
+                  id="sales-category-select"
                   bind:value={invoiceData.sales_category_id}
                   class="select-glass w-full"
                 >
@@ -350,34 +402,59 @@
                     <option value={category.id}>{category.name}</option>
                   {/each}
                 </select>
+                {#if formErrors.sales_category_id}
+                  <p class="text-error text-sm mt-1">{formErrors.sales_category_id}</p>
+                {/if}
               </div>
               
               <!-- Invoice Date -->
               <div class="form-group">
-                <label class="label-standard">Invoice Date</label>
+                <label for="invoice-date" class="label-standard">Invoice Date</label>
                 <input 
+                  id="invoice-date"
                   type="date"
                   bind:value={invoiceData.issue_date}
                   class="input-glass w-full"
                   required
                 />
+                {#if formErrors.issue_date}
+                  <p class="text-error text-sm mt-1">{formErrors.issue_date}</p>
+                {/if}
               </div>
               
               <!-- Due Date (Optional) -->
               <div class="form-group">
-                <label class="label-standard">Due Date <span class="text-white/50">(Optional)</span></label>
+                <label for="due-date" class="label-standard">Due Date <span class="text-white/50">(Optional)</span></label>
                 <input 
+                  id="due-date"
                   type="date"
                   bind:value={invoiceData.due_date}
                   class="input-glass w-full"
                 />
               </div>
+              
+              <!-- Status -->
+              <div class="form-group">
+                <label for="status-select" class="label-standard">Status</label>
+                <select 
+                  id="status-select"
+                  bind:value={invoiceData.status}
+                  class="select-glass w-full"
+                >
+                  <option value="draft">Draft</option>
+                  <option value="sent">Sent</option>
+                  <option value="paid">Paid</option>
+                  <option value="overdue">Overdue</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+              </div>
             </div>
             
             <!-- Payment Terms (Optional) -->
             <div class="form-group">
-              <label class="label-standard">Payment Terms <span class="text-white/50">(Optional)</span></label>
+              <label for="payment-terms" class="label-standard">Payment Terms <span class="text-white/50">(Optional)</span></label>
               <input 
+                id="payment-terms"
                 type="text"
                 bind:value={invoiceData.payment_terms}
                 placeholder="e.g., Net 30, Due on receipt"
@@ -414,8 +491,9 @@
                   <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
                     <!-- Product Selection -->
                     <div class="col-span-1 lg:col-span-4">
-                      <label class="label-standard lg:hidden">Product</label>
+                      <label for="product-{index}" class="label-standard lg:hidden">Product</label>
                       <select 
+                        id="product-{index}"
                         bind:value={item.product_id}
                         on:change={(e) => handleProductChange(index, e)}
                         class="select-glass w-full"
@@ -426,12 +504,16 @@
                           <option value={product.id}>{product.name}</option>
                         {/each}
                       </select>
+                      {#if formErrors.items[index]?.product_id}
+                        <p class="text-error text-sm mt-1">{formErrors.items[index].product_id}</p>
+                      {/if}
                     </div>
                     
                     <!-- Quantity -->
                     <div class="col-span-1 lg:col-span-2">
-                      <label class="label-standard lg:hidden">Quantity</label>
+                      <label for="quantity-{index}" class="label-standard lg:hidden">Quantity</label>
                       <input 
+                        id="quantity-{index}"
                         type="number"
                         bind:value={item.quantity}
                         on:input={calculateTotals}
@@ -440,12 +522,16 @@
                         class="input-glass w-full"
                         required
                       />
+                      {#if formErrors.items[index]?.quantity}
+                        <p class="text-error text-sm mt-1">{formErrors.items[index].quantity}</p>
+                      {/if}
                     </div>
                     
                     <!-- Unit Price -->
                     <div class="col-span-1 lg:col-span-2">
-                      <label class="label-standard lg:hidden">Unit Price</label>
+                      <label for="unit-price-{index}" class="label-standard lg:hidden">Unit Price</label>
                       <input 
+                        id="unit-price-{index}"
                         type="number"
                         bind:value={item.unit_price}
                         on:input={calculateTotals}
@@ -454,12 +540,16 @@
                         class="input-glass w-full"
                         required
                       />
+                      {#if formErrors.items[index]?.unit_price}
+                        <p class="text-error text-sm mt-1">{formErrors.items[index].unit_price}</p>
+                      {/if}
                     </div>
                     
                     <!-- VAT Rate -->
                     <div class="col-span-1 lg:col-span-1">
-                      <label class="label-standard lg:hidden">VAT %</label>
+                      <label for="vat-rate-{index}" class="label-standard lg:hidden">VAT %</label>
                       <input 
+                        id="vat-rate-{index}"
                         type="number"
                         bind:value={item.vat_rate}
                         on:input={calculateTotals}
@@ -472,7 +562,7 @@
                     
                     <!-- Total -->
                     <div class="col-span-1 lg:col-span-2">
-                      <label class="label-standard lg:hidden">Total</label>
+                      <div class="text-sm font-medium text-white/70 mb-2 lg:hidden">Total</div>
                       <div class="input-glass w-full bg-white/5 text-white/70 flex items-center">
                         {calculateItemTotal(item).toFixed(2)}
                       </div>
@@ -485,6 +575,7 @@
                         class="btn-icon text-error hover:bg-error/20 w-full lg:w-auto"
                         on:click={() => removeItem(index)}
                         disabled={invoiceItems.length === 1}
+                        aria-label="Remove item {index + 1}"
                       >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
@@ -502,8 +593,9 @@
               <div class="space-y-4">
                 <!-- Notes -->
                 <div class="form-group">
-                  <label class="label-standard">Notes <span class="text-white/50">(Optional)</span></label>
+                  <label for="invoice-notes" class="label-standard">Notes <span class="text-white/50">(Optional)</span></label>
                   <textarea 
+                    id="invoice-notes"
                     bind:value={invoiceData.notes}
                     placeholder="Add any additional notes or comments about this invoice"
                     class="textarea-glass w-full h-24 resize-y"
@@ -516,8 +608,9 @@
                   
                   <!-- Discount -->
                   <div class="form-group">
-                    <label class="label-standard text-sm">Discount</label>
+                    <label for="invoice-discount" class="label-standard text-sm">Discount</label>
                     <input 
+                      id="invoice-discount"
                       type="number"
                       bind:value={discount}
                       on:input={calculateTotals}
@@ -530,8 +623,9 @@
                   
                   <!-- Delivery Fees -->
                   <div class="form-group">
-                    <label class="label-standard text-sm">Delivery Fees</label>
+                    <label for="delivery-fees" class="label-standard text-sm">Delivery Fees</label>
                     <input 
+                      id="delivery-fees"
                       type="number"
                       bind:value={deliveryFees}
                       on:input={calculateTotals}

@@ -1,6 +1,6 @@
 <script>
   import { onMount } from 'svelte'
-  import { GetInvoices } from '../wailsjs/go/main/App.js'
+  import { GetInvoices, GenerateInvoicePDF } from '../wailsjs/go/main/App.js'
   import InvoiceModal from './InvoiceModal.svelte'
   
   let invoices = []
@@ -56,6 +56,34 @@
       case 'draft': return 'badge-warning'
       case 'cancelled': return 'badge-error'
       default: return 'badge-neutral'
+    }
+  }
+
+  async function downloadInvoicePDF(invoiceId) {
+    try {
+      console.log('Downloading PDF for invoice:', invoiceId)
+      const filePath = await GenerateInvoicePDF(invoiceId)
+      console.log('PDF generated at:', filePath)
+      
+      // Show success message
+      alert(`PDF downloaded successfully to: ${filePath}`)
+    } catch (error) {
+      console.error('Error generating PDF:', error)
+      alert('Failed to generate PDF. Please try again.')
+    }
+  }
+
+  async function viewInvoicePDF(invoiceId) {
+    try {
+      console.log('Viewing PDF for invoice:', invoiceId)
+      const filePath = await GenerateInvoicePDF(invoiceId)
+      console.log('PDF generated at:', filePath)
+      
+      // For now, just show the file path. In a real app, you might open the PDF viewer
+      alert(`PDF generated at: ${filePath}\n\nThe PDF has been saved to your Documents/dijibill folder.`)
+    } catch (error) {
+      console.error('Error generating PDF:', error)
+      alert('Failed to generate PDF. Please try again.')
     }
   }
   
@@ -171,7 +199,11 @@
                   </td>
                   <td>
                     <div class="flex gap-2">
-                      <button class="btn-icon btn-sm text-info hover:bg-info/20" title="View">
+                      <button 
+                        class="btn-icon btn-sm text-info hover:bg-info/20" 
+                        title="View PDF"
+                        on:click={() => viewInvoicePDF(invoice.id)}
+                      >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
@@ -182,7 +214,11 @@
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                         </svg>
                       </button>
-                      <button class="btn-icon btn-sm text-success hover:bg-success/20" title="Download PDF">
+                      <button 
+                        class="btn-icon btn-sm text-success hover:bg-success/20" 
+                        title="Download PDF"
+                        on:click={() => downloadInvoicePDF(invoice.id)}
+                      >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                         </svg>
