@@ -21,9 +21,9 @@
     try {
       // Validate the QR code
       const isValid = await ValidateZATCAQRCode(qrCodeInput.trim())
-      validationResult = isValid
+      validationResult = Boolean(isValid)
 
-      if (isValid) {
+      if (validationResult) {
         // Get QR code information
         const info = await GetQRCodeInfo(qrCodeInput.trim())
         qrInfo = info

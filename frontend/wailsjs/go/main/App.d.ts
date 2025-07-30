@@ -14,6 +14,8 @@ export function DeleteCustomer(arg1:number):Promise<void>;
 
 export function GenerateInvoicePDF(arg1:number):Promise<string>;
 
+export function GenerateSampleQRCode():Promise<string>;
+
 export function GetCompany():Promise<main.Company>;
 
 export function GetCustomerByID(arg1:number):Promise<main.Customer>;

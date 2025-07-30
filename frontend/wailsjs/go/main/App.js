@@ -26,6 +26,10 @@ export function GenerateInvoicePDF(arg1) {
   return window['go']['main']['App']['GenerateInvoicePDF'](arg1);
 }
 
+export function GenerateSampleQRCode() {
+  return window['go']['main']['App']['GenerateSampleQRCode']();
+}
+
 export function GetCompany() {
   return window['go']['main']['App']['GetCompany']();
 }
