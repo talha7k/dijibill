@@ -1,5 +1,5 @@
 /* Import Design System */
-/* @import './styles/design-system.css'; */
+@import './styles/design-system.css';
 
 @tailwind base;
 @tailwind components;

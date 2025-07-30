@@ -48,7 +48,6 @@
     stock: 0,
     min_stock: 0,
     is_active: true,
-    default_quantity: false,
     service_not_using_stock: false,
     price_includes_tax: true,
     price_change_allowed: false,
@@ -181,7 +180,6 @@
       stock: 0,
       min_stock: 0,
       is_active: true,
-      default_quantity: false,
       service_not_using_stock: false,
       price_includes_tax: true,
       price_change_allowed: false,
@@ -192,10 +190,11 @@
 
   function applyDefaultSettings() {
     if (defaultProductSettings) {
+      // Set current stock from default stock setting
       productForm.stock = defaultProductSettings.default_stock || 0
       productForm.markup = defaultProductSettings.default_markup || 0
       productForm.is_active = defaultProductSettings.default_product_status !== false
-      productForm.price_includes_tax = defaultProductSettings.default_price_includes_tax || false
+      productForm.price_includes_tax = defaultProductSettings.default_price_includes_tax !== false
       productForm.price_change_allowed = defaultProductSettings.default_price_change_allowed !== false
       
       // Apply default tax rate if available
@@ -212,6 +211,11 @@
         if (defaultUnit) {
           productForm.unit = defaultUnit.value
         }
+      }
+      
+      // Apply default category if available
+      if (defaultProductSettings.default_category_id) {
+        productForm.category_id = defaultProductSettings.default_category_id
       }
     }
   }

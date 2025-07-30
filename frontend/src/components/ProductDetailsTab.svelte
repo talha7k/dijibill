@@ -1,9 +1,13 @@
 <script>
+  import { createEventDispatcher } from 'svelte'
+  
   export let productForm = {}
   export let categories = []
   export let units = []
   export let generateSKU = () => {}
   export let generateBarcode = () => {}
+
+  const dispatch = createEventDispatcher()
 </script>
 
 <div class="space-y-6">
@@ -86,12 +90,24 @@
         <!-- Category -->
         <div class="form-control">
           <label class="label-glass">Category</label>
-          <select class="select-glass" bind:value={productForm.category_id}>
-            <option value={0}>Select Category</option>
-            {#each (categories || []) as category}
-              <option value={category.id}>{category.name}</option>
-            {/each}
-          </select>
+          <div class="flex space-x-2">
+            <select class="select-glass flex-1" bind:value={productForm.category_id}>
+              <option value={0}>Select Category</option>
+              {#each (categories || []) as category}
+                <option value={category.id}>{category.name}</option>
+              {/each}
+            </select>
+            <button 
+              type="button" 
+              class="btn-glass"
+              title="Add Category"
+              on:click={() => dispatch('addCategory')}
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+              </svg>
+            </button>
+          </div>
         </div>
 
         <!-- Unit of Measurement -->
@@ -139,9 +155,9 @@
        </div>
 
        <!-- Status Checkboxes -->
-       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
          <div class="form-control">
-           <label class="label-glass">Status Options</label>
+           <label class="label-glass">Product Status</label>
            <div class="space-y-3">
              <label class="checkbox-glass">
                <input 
@@ -149,16 +165,7 @@
                  class="checkbox-primary"
                  bind:checked={productForm.is_active}
                />
-               <span>Active</span>
-             </label>
-             
-             <label class="checkbox-glass">
-               <input 
-                 type="checkbox" 
-                 class="checkbox-primary"
-                 bind:checked={productForm.default_quantity}
-               />
-               <span>Default quantity</span>
+               <span>Active Product</span>
              </label>
              
              <label class="checkbox-glass">
