@@ -26,23 +26,24 @@
   let errors = {}
 
   // Reset form when modal opens/closes or when editing customer changes
-  $: if (show && editingCustomer) {
-    const customer = editingCustomer
+  $: if (show && editingCustomer && typeof editingCustomer === 'object') {
+    console.log('🔄 Resetting form for editing customer:', editingCustomer);
     customerForm = {
-      name: customer.name || '',
-      name_arabic: customer.name_arabic || '',
-      vat_number: customer.vat_number || '',
-      email: customer.email || '',
-      phone: customer.phone || '',
-      address: customer.address || '',
-      address_arabic: customer.address_arabic || '',
-      city: customer.city || '',
-      city_arabic: customer.city_arabic || '',
-      country: customer.country || 'SA',
-      country_arabic: customer.country_arabic || 'المملكة العربية السعودية'
+      name: editingCustomer.name || '',
+      name_arabic: editingCustomer.name_arabic || '',
+      vat_number: editingCustomer.vat_number || '',
+      email: editingCustomer.email || '',
+      phone: editingCustomer.phone || '',
+      address: editingCustomer.address || '',
+      address_arabic: editingCustomer.address_arabic || '',
+      city: editingCustomer.city || '',
+      city_arabic: editingCustomer.city_arabic || '',
+      country: editingCustomer.country || 'SA',
+      country_arabic: editingCustomer.country_arabic || 'المملكة العربية السعودية'
     }
     errors = {}
   } else if (show && !editingCustomer) {
+    console.log('🔄 Resetting form for new customer');
     customerForm = {
       name: '',
       name_arabic: '',
@@ -83,11 +84,20 @@
   }
 
   function handleSave() {
+    console.log('💾 CustomerModal handleSave called');
+    console.log('💾 Current customerForm:', customerForm);
+    console.log('💾 editingCustomer:', editingCustomer);
+    
     if (validateForm()) {
-      dispatch('save', {
+      console.log('✅ Form validation passed');
+      const eventData = {
         customer: customerForm,
         isEditing: !!editingCustomer
-      })
+      };
+      console.log('💾 Dispatching save event with data:', eventData);
+      dispatch('save', eventData);
+    } else {
+      console.log('❌ Form validation failed, errors:', errors);
     }
   }
 

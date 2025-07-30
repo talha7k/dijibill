@@ -1,28 +1,35 @@
 <script>
 	import { onMount } from 'svelte';
+	import { wailsReady } from './stores/wailsStore.js';
 	import { GetCustomers, CreateCustomer, UpdateCustomer, DeleteCustomer } from '../wailsjs/go/main/App.js';
 	import { database } from '../wailsjs/go/models';
 	import PageLayout from './components/PageLayout.svelte';
 	import DataTable from './components/DataTable.svelte';
-	import StatusBadge from './components/StatusBadge.svelte';
 	import CustomerModal from './components/CustomerModal.svelte';
+	import ConfirmationModal from './components/ConfirmationModal.svelte';
+	import StatusBadge from './components/StatusBadge.svelte';
 
 	let customers = [];
-	let searchTerm = '';
-	let showModal = false;
-	let editingCustomer = null;
 	let loading = false;
+	let showModal = false;
+	let showDeleteConfirm = false;
+	let editingCustomer = null;
+	let customerToDelete = null;
+	let searchTerm = '';
 
-	onMount(async () => {
-		await loadCustomers();
-	});
+	// Reactive statement to load customers when Wails is ready
+	$: if ($wailsReady) {
+		loadCustomers();
+	}
 
 	async function loadCustomers() {
+		console.log('📋 Loading customers...');
 		loading = true;
 		try {
 			customers = await GetCustomers();
+			console.log('✅ Customers loaded successfully:', customers.length, 'customers');
 		} catch (error) {
-			console.error('Error loading customers:', error);
+			console.error('❌ Error loading customers:', error);
 			customers = [];
 		} finally {
 			loading = false;
@@ -30,52 +37,110 @@
 	}
 
 	function openModal(customer = null) {
+		console.log('🚪 openModal called with customer:', customer);
 		editingCustomer = customer;
 		showModal = true;
+		console.log('🚪 Modal state - editingCustomer:', editingCustomer, 'showModal:', showModal);
 	}
 
 	function closeModal() {
+		console.log('🚪 closeModal called');
 		showModal = false;
 		editingCustomer = null;
 	}
 
 	async function handleSaveCustomer(event) {
-		const customerData = event.detail;
+		console.log('💾 handleSaveCustomer called with event:', event);
+		console.log('💾 Event detail:', event.detail);
+		const { customer: customerData, isEditing } = event.detail;
+		console.log('💾 Customer data:', customerData, 'isEditing:', isEditing);
 		loading = true;
 		
 		try {
 			const customer = new database.Customer();
 			Object.assign(customer, customerData);
+			console.log('💾 Created customer object:', customer);
 
-			if (editingCustomer) {
+			if (isEditing && editingCustomer) {
 				customer.id = editingCustomer.id;
-				await UpdateCustomer(customer);
+				console.log('💾 Updating customer with ID:', customer.id);
+				console.log('💾 Customer object before update:', customer);
+				const updateResult = await UpdateCustomer(customer);
+				console.log('✅ Customer updated successfully, result:', updateResult);
 			} else {
-				await CreateCustomer(customer);
+				console.log('💾 Creating new customer');
+				console.log('💾 Customer object before create:', customer);
+				const createResult = await CreateCustomer(customer);
+				console.log('✅ Customer created successfully, result:', createResult);
 			}
 
 			await loadCustomers();
 			closeModal();
 		} catch (error) {
-			console.error('Error saving customer:', error);
+			console.error('❌ Error saving customer:', error);
 			alert('Error saving customer: ' + error.message);
 		} finally {
 			loading = false;
 		}
 	}
 
-	async function deleteCustomer(id) {
-		if (confirm('Are you sure you want to delete this customer?')) {
-			loading = true;
-			try {
-				await DeleteCustomer(id);
-				await loadCustomers();
-			} catch (error) {
-				console.error('Error deleting customer:', error);
-				alert('Error deleting customer: ' + error.message);
-			} finally {
-				loading = false;
+	function showDeleteConfirmation(customerId) {
+		console.log('🗑️ showDeleteConfirmation called with ID:', customerId);
+		console.log('🗑️ Customer ID type:', typeof customerId);
+		console.log('🗑️ Wails runtime ready:', $wailsReady);
+		console.log('🗑️ DeleteCustomer function available:', typeof DeleteCustomer);
+		
+		customerToDelete = customerId;
+		showDeleteConfirm = true;
+	}
+
+	function cancelDelete() {
+		console.log('🗑️ Delete cancelled');
+		customerToDelete = null;
+		showDeleteConfirm = false;
+	}
+
+	async function confirmDelete() {
+		console.log('🗑️ Delete confirmed for customer ID:', customerToDelete);
+		
+		if (!customerToDelete) {
+			console.error('❌ No customer ID to delete');
+			return;
+		}
+
+		loading = true;
+		
+		try {
+			// Ensure we have a valid ID
+			const id = parseInt(customerToDelete);
+			if (isNaN(id)) {
+				throw new Error(`Invalid customer ID: ${customerToDelete}`);
 			}
+			
+			console.log('🗑️ Calling DeleteCustomer API with parsed ID:', id);
+			console.log('🗑️ About to call DeleteCustomer function...');
+			
+			const deleteResult = await DeleteCustomer(id);
+			console.log('✅ Customer deleted successfully, result:', deleteResult);
+			
+			console.log('🔄 Reloading customer list...');
+			await loadCustomers();
+			console.log('✅ Customer list reloaded after deletion');
+			
+			// Close the confirmation modal
+			showDeleteConfirm = false;
+			customerToDelete = null;
+			
+		} catch (error) {
+			console.error('❌ Error deleting customer:', error);
+			console.error('❌ Error details:', {
+				message: error.message,
+				stack: error.stack,
+				name: error.name
+			});
+			alert('Failed to delete customer: ' + error.message);
+		} finally {
+			loading = false;
 		}
 	}
 
@@ -99,12 +164,12 @@
 		{ key: 'phone', label: 'Phone', render: (item) => item.phone || '-' },
 		{ key: 'company', label: 'Company', render: (item) => item.company || '-' },
 		{ key: 'city', label: 'City', render: (item) => `${item.city || '-'}, ${item.country || ''}` },
+		{ key: 'status', label: 'Status' },
 		{ 
-			key: 'status', 
-			label: 'Status',
+			label: 'Actions',
 			actions: [
-				{ key: 'edit', icon: 'fa-edit', class: 'btn-secondary', title: 'Edit Customer' },
-				{ key: 'delete', icon: 'fa-trash', class: 'btn-error', title: 'Delete Customer' }
+				{ key: 'edit', text: 'Edit', icon: 'fa-edit', class: 'btn-secondary', title: 'Edit Customer' },
+				{ key: 'delete', text: 'Delete', icon: 'fa-trash', class: 'btn-error', title: 'Delete Customer' }
 			]
 		}
 	];
@@ -138,13 +203,28 @@
 	}
 
 	function handleRowAction(event) {
-		const { action, item } = event.detail;
-		if (action === 'edit') {
-			openModal(item);
-		} else if (action === 'delete') {
-			deleteCustomer(item.id);
-		}
-	}
+    console.log('🎯 Row action triggered:', event.detail);
+    const { action, item } = event.detail;
+    console.log('🎯 Action type:', action);
+    console.log('🎯 Row data:', item);
+    console.log('🎯 Item keys:', Object.keys(item));
+    console.log('🎯 Item.id:', item.id);
+    console.log('🎯 Item.ID:', item.ID);
+    console.log('🎯 Full item structure:', JSON.stringify(item, null, 2));
+    
+    if (action === 'edit') {
+      console.log('✏️ Edit action triggered for customer:', item);
+      openModal(item);
+    } else if (action === 'delete') {
+      console.log('🗑️ Delete action triggered for customer:', item);
+      // Try both possible ID field names
+      const customerId = item.id || item.ID;
+      console.log('🗑️ Resolved customer ID:', customerId);
+      showDeleteConfirmation(customerId);
+    } else {
+      console.log('❓ Unknown action:', action);
+    }
+  }
 
 	function handleSearch(event) {
 		searchTerm = event.detail.searchTerm;
@@ -190,9 +270,24 @@
 
 {#if showModal}
 	<CustomerModal
+		show={showModal}
 		{editingCustomer}
 		{loading}
 		on:save={handleSaveCustomer}
 		on:close={closeModal}
+	/>
+{/if}
+
+{#if showDeleteConfirm}
+	<ConfirmationModal
+		show={showDeleteConfirm}
+		title="Delete Customer"
+		message="Are you sure you want to delete this customer? This action cannot be undone."
+		confirmText="Delete"
+		cancelText="Cancel"
+		confirmClass="btn-error"
+		{loading}
+		on:confirm={confirmDelete}
+		on:cancel={cancelDelete}
 	/>
 {/if}

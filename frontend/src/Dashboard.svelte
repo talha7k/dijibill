@@ -1,8 +1,12 @@
 <script>
   import { onMount } from 'svelte'
-  import { GetCustomers, GetInvoices, GetProducts } from '../wailsjs/go/main/App.js'
+  import { wailsReady } from './stores/wailsStore.js'
   import PageLayout from './components/PageLayout.svelte'
+  import { GetCustomers, GetInvoices, GetProducts } from '../wailsjs/go/main/App.js'
 
+  let customers = []
+  let invoices = []
+  let isLoading = true
   let stats = {
     items: 0,
     customers: 0,
@@ -10,18 +14,19 @@
     payments: 0
   }
 
-  let invoices = []
-  let customers = []
-  let isLoading = true
+  // Load data when Wails is ready
+  $: if ($wailsReady) {
+    loadDashboardData()
+  }
 
-  // Mock data for charts - in a real app, this would come from your backend
+  // Mock data for payments chart
   let paymentsData = [
     { month: 'Jan', amount: 0 },
     { month: 'Feb', amount: 0 },
     { month: 'Mar', amount: 0 },
     { month: 'Apr', amount: 0 },
     { month: 'May', amount: 0 },
-    { month: 'Jun', amount: 4500 },
+    { month: 'Jun', amount: 0 },
     { month: 'Jul', amount: 0 },
     { month: 'Aug', amount: 0 },
     { month: 'Sep', amount: 0 },
@@ -30,34 +35,30 @@
     { month: 'Dec', amount: 0 }
   ]
 
-  onMount(async () => {
+  async function loadDashboardData() {
     try {
-      // Check if Wails runtime is available
-      if (typeof window !== 'undefined' && window['go'] && window['go']['main'] && window['go']['main']['App']) {
-        // Load data from backend
-        const [customersData, invoicesData, productsData] = await Promise.all([
-          GetCustomers(),
-          GetInvoices(),
-          GetProducts()
-        ])
+      isLoading = true
+      console.log('📊 Loading dashboard data...')
+      
+      // Load data from backend
+      const [customersData, invoicesData, productsData] = await Promise.all([
+        GetCustomers(),
+        GetInvoices(),
+        GetProducts()
+      ])
 
-        customers = customersData || []
-        invoices = invoicesData || []
-        
-        // Calculate stats
-        stats.customers = customers.length
-        stats.items = productsData?.length || 0
-        stats.products = productsData?.length || 0
-        stats.payments = (invoices || []).filter(inv => inv.status === 'paid').length
-      } else {
-        console.warn('Wails runtime not available, using mock data')
-        // Use mock data when Wails runtime is not available
-        customers = []
-        invoices = []
-        stats = { items: 0, customers: 0, products: 0, payments: 0 }
-      }
+      customers = customersData || []
+      invoices = invoicesData || []
+      
+      // Calculate stats
+      stats.customers = customers.length
+      stats.items = productsData?.length || 0
+      stats.products = productsData?.length || 0
+      stats.payments = (invoices || []).filter(inv => inv.status === 'paid').length
+      
+      console.log('✅ Dashboard data loaded successfully')
     } catch (error) {
-      console.error('Error loading dashboard data:', error)
+      console.error('❌ Error loading dashboard data:', error)
       // Fallback to empty data
       customers = []
       invoices = []
@@ -65,7 +66,7 @@
     } finally {
       isLoading = false
     }
-  })
+  }
 
   // Calculate invoice statistics
   $: paidInvoices = (invoices || []).filter(inv => inv.status === 'paid').length

@@ -1,4 +1,6 @@
 <script>
+  import { onMount } from 'svelte'
+  import { wailsReady, wailsError, initializeWailsRuntime } from './stores/wailsStore.js'
   import Dashboard from './Dashboard.svelte'
   import QRValidation from './QRValidation.svelte'
   import SalesInvoices from './SalesInvoices.svelte'
@@ -15,8 +17,23 @@
 
   let currentView = 'dashboard' // Default to dashboard
   let resultText = "Welcome to DijiBill - ZATCA Compliant Invoicing"
+  
+  // Get runtime status for display
+  $: runtimeStatus = $wailsReady ? 'Runtime Ready' : $wailsError ? 'Runtime Error' : 'Initializing...'
   let name = ''
   let searchTerm = ''
+
+  // Initialize Wails runtime on mount
+  onMount(async () => {
+    console.log('🎯 App component mounted, initializing Wails runtime...');
+    await initializeWailsRuntime();
+  });
+
+  // Retry function for manual retry
+  async function retryInitialization() {
+    console.log('🔄 Retrying Wails runtime initialization...');
+    await initializeWailsRuntime();
+  }
 
   function greet() {
     Greet(name).then(result => resultText = result)
@@ -205,6 +222,30 @@
         </div>
         
         <div class="flex items-center gap-4">
+          <!-- Runtime Status -->
+          <div class="flex items-center gap-2">
+            {#if $wailsReady}
+              <div class="badge badge-success badge-sm">
+                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                </svg>
+                Connected
+              </div>
+            {:else if $wailsError}
+              <div class="badge badge-error badge-sm">
+                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                </svg>
+                Error
+              </div>
+            {:else}
+              <div class="badge badge-warning badge-sm">
+                <div class="loading loading-spinner loading-xs mr-1"></div>
+                Connecting...
+              </div>
+            {/if}
+          </div>
+          
           <!-- Search -->
           <div class="form-control">
             <FormField
@@ -234,30 +275,63 @@
 
     <!-- Page Content -->
     <main class="flex-1 overflow-y-auto">
-      {#if currentView === 'dashboard'}
-        <Dashboard />
-      {:else if currentView === 'qr-validation'}
-        <div class="p-6">
-          <QRValidation />
+      {#if !$wailsReady}
+        <!-- Loading Screen -->
+        <div class="flex items-center justify-center h-full">
+          <div class="text-center">
+            {#if $wailsError}
+              <!-- Error State -->
+              <div class="alert alert-error max-w-md mx-auto">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                </svg>
+                <div>
+                  <h3 class="font-bold">Initialization Error</h3>
+                  <div class="text-xs">{$wailsError}</div>
+                </div>
+                <button class="btn btn-sm" on:click={retryInitialization}>
+                  Retry
+                </button>
+              </div>
+            {:else}
+              <!-- Loading State -->
+              <div class="flex flex-col items-center gap-4">
+                <div class="loading loading-spinner loading-lg text-primary"></div>
+                <div class="text-white">
+                  <h3 class="text-lg font-semibold">Initializing Application</h3>
+                  <p class="text-sm opacity-70">Please wait while we connect to the backend...</p>
+                </div>
+              </div>
+            {/if}
+          </div>
         </div>
-      {:else if currentView === 'sales-invoices'}
-        <SalesInvoices />
-      {:else if currentView === 'customer'}
-        <Customer />
-      {:else if currentView === 'payments'}
-        <Payments />
-      {:else if currentView === 'purchase-invoices'}
-        <PurchaseInvoices />
-      {:else if currentView === 'suppliers'}
-        <Suppliers />
-      {:else if currentView === 'products'}
-        <Products />
-      {:else if currentView === 'users'}
-        <Users />
-      {:else if currentView === 'general-settings'}
-        <GeneralSettings />
-      {:else if currentView === 'administration'}
-        <Administration />
+      {:else}
+        <!-- Application Content -->
+        {#if currentView === 'dashboard'}
+          <Dashboard />
+        {:else if currentView === 'qr-validation'}
+          <div class="p-6">
+            <QRValidation />
+          </div>
+        {:else if currentView === 'sales-invoices'}
+          <SalesInvoices />
+        {:else if currentView === 'customer'}
+          <Customer />
+        {:else if currentView === 'payments'}
+          <Payments />
+        {:else if currentView === 'purchase-invoices'}
+          <PurchaseInvoices />
+        {:else if currentView === 'suppliers'}
+          <Suppliers />
+        {:else if currentView === 'products'}
+          <Products />
+        {:else if currentView === 'users'}
+          <Users />
+        {:else if currentView === 'general-settings'}
+          <GeneralSettings />
+        {:else if currentView === 'administration'}
+          <Administration />
+        {/if}
       {/if}
     </main>
   </div>
