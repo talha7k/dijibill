@@ -28,6 +28,8 @@ export function DeletePayment(arg1:number):Promise<void>;
 
 export function DeletePaymentType(arg1:number):Promise<void>;
 
+export function DeleteProduct(arg1:number):Promise<void>;
+
 export function DeleteSalesCategory(arg1:number):Promise<void>;
 
 export function DeleteTaxRate(arg1:number):Promise<void>;

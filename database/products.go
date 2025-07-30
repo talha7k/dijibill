@@ -137,3 +137,9 @@ func (d *Database) GetProductByID(id int) (*Product, error) {
 	
 	return &product, nil
 }
+
+func (d *Database) DeleteProduct(id int) error {
+	query := `DELETE FROM products WHERE id = ?`
+	_, err := d.db.Exec(query, id)
+	return err
+}

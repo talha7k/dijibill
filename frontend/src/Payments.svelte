@@ -5,6 +5,7 @@
 	import PageLayout from './components/PageLayout.svelte';
 	import DataTable from './components/DataTable.svelte';
 	import StatusBadge from './components/StatusBadge.svelte';
+	import PaymentModal from './components/PaymentModal.svelte';
 
 	let payments = [];
 	let paymentTypes = [];
@@ -13,18 +14,6 @@
 	let showModal = false;
 	let editingPayment = null;
 	let loading = false;
-
-	// Form data
-	let paymentData = {
-		invoice_id: 0,
-		payment_type_id: 0,
-		amount: 0,
-		payment_date: new Date().toISOString().split('T')[0],
-		reference: '',
-		notes: '',
-		notes_arabic: '',
-		status: 'completed'
-	};
 
 	onMount(async () => {
 		loading = true;
@@ -76,61 +65,34 @@
 
 	function openModal(payment = null) {
 		editingPayment = payment;
-		if (payment) {
-			paymentData = {
-				invoice_id: payment.invoice_id,
-				payment_type_id: payment.payment_type_id,
-				amount: payment.amount,
-				payment_date: new Date(payment.payment_date).toISOString().split('T')[0],
-				reference: payment.reference || '',
-				notes: payment.notes || '',
-				notes_arabic: payment.notes_arabic || '',
-				status: payment.status || 'completed'
-			};
-		} else {
-			resetForm();
-		}
 		showModal = true;
 	}
 
 	function closeModal() {
 		showModal = false;
 		editingPayment = null;
-		resetForm();
 	}
 
-	function resetForm() {
-		paymentData = {
-			invoice_id: 0,
-			payment_type_id: 0,
-			amount: 0,
-			payment_date: new Date().toISOString().split('T')[0],
-			reference: '',
-			notes: '',
-			notes_arabic: '',
-			status: 'completed'
-		};
-	}
-
-	async function savePayment() {
+	async function handleSavePayment(event) {
 		try {
 			loading = true;
+			const { payment, isEditing } = event.detail;
 			
-			const payment = new database.Payment();
-			payment.invoice_id = Number(paymentData.invoice_id);
-			payment.payment_type_id = Number(paymentData.payment_type_id);
-			payment.amount = Number(paymentData.amount);
-			payment.payment_date = new Date(paymentData.payment_date);
-			payment.reference = paymentData.reference;
-			payment.notes = paymentData.notes;
-			payment.notes_arabic = paymentData.notes_arabic;
-			payment.status = paymentData.status;
+			const paymentObj = new database.Payment();
+			paymentObj.invoice_id = payment.invoice_id;
+			paymentObj.payment_type_id = payment.payment_type_id;
+			paymentObj.amount = payment.amount;
+			paymentObj.payment_date = new Date(payment.payment_date);
+			paymentObj.reference = payment.reference;
+			paymentObj.notes = payment.notes;
+			paymentObj.notes_arabic = payment.notes_arabic;
+			paymentObj.status = payment.status;
 
-			if (editingPayment) {
-				payment.id = editingPayment.id;
-				await UpdatePayment(payment);
+			if (isEditing) {
+				paymentObj.id = editingPayment.id;
+				await UpdatePayment(paymentObj);
 			} else {
-				await CreatePayment(payment);
+				await CreatePayment(paymentObj);
 			}
 
 			await loadPayments();
@@ -303,3 +265,13 @@
 		</svelte:fragment>
 	</DataTable>
 </PageLayout>
+
+<PaymentModal
+	bind:show={showModal}
+	{editingPayment}
+	{loading}
+	{invoices}
+	{paymentTypes}
+	on:save={handleSavePayment}
+	on:close={closeModal}
+/>

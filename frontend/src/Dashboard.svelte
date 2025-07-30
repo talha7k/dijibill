@@ -1,6 +1,7 @@
 <script>
   import { onMount } from 'svelte'
   import { GetCustomers, GetInvoices, GetProducts } from '../wailsjs/go/main/App.js'
+  import PageLayout from './components/PageLayout.svelte'
 
   let stats = {
     items: 0,
@@ -61,12 +62,14 @@
   $: topCustomers = (customers || []).slice(0, 3) // Mock top customers
 </script>
 
-<div class="p-6 min-h-screen">
-  <!-- Header -->
-  <div class="mb-8">
-    <h1 class="text-3xl font-bold text-white">Dashboard</h1>
-    <p class="text-white/80 mt-1">Welcome back! Here's what's happening with your business.</p>
-  </div>
+<PageLayout 
+  title="Dashboard" 
+  icon="fa-tachometer-alt" 
+  showIndicator={true}
+>
+  <svelte:fragment slot="subtitle">
+    Welcome back! Here's what's happening with your business.
+  </svelte:fragment>
 
   {#if isLoading}
     <div class="flex justify-center items-center h-64">
@@ -269,4 +272,4 @@
       </div>
     </div>
   {/if}
-</div>
+</PageLayout>

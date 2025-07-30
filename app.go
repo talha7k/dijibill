@@ -109,6 +109,10 @@ func (a *App) UpdateProduct(product database.Product) error {
 	return a.db.UpdateProduct(&product)
 }
 
+func (a *App) DeleteProduct(id int) error {
+	return a.db.DeleteProduct(id)
+}
+
 // Invoice Management Methods
 
 func (a *App) CreateInvoice(invoice database.Invoice) error {

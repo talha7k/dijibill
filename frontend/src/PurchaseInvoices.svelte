@@ -1,66 +1,137 @@
 <script>
+  import PageLayout from './components/PageLayout.svelte'
+  import DataTable from './components/DataTable.svelte'
+  import StatusBadge from './components/StatusBadge.svelte'
+  
   // Purchase Invoices functionality will be implemented here
   let purchaseInvoices = []
-  let isLoading = false
+  let loading = false
+  let searchTerm = ''
+
+  // Mock data for demonstration
+  purchaseInvoices = [
+    // Add some mock data when backend is ready
+  ]
+
+  function formatDate(dateString) {
+    if (!dateString) return 'N/A'
+    try {
+      return new Date(dateString).toLocaleDateString()
+    } catch (error) {
+      return 'Invalid Date'
+    }
+  }
+
+  function formatCurrency(amount) {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'SAR'
+    }).format(amount)
+  }
+
+  $: filteredPurchases = (purchaseInvoices || []).filter(purchase => 
+    purchase.invoice_number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (purchase.supplier && purchase.supplier.name?.toLowerCase().includes(searchTerm.toLowerCase()))
+  )
+
+  // Table configuration
+  const columns = [
+    { key: 'invoice_number', label: 'Invoice #', render: (item) => `<span class="font-medium">${item.invoice_number}</span>` },
+    { 
+      key: 'supplier', 
+      label: 'Supplier', 
+      render: (item) => {
+        if (item.supplier) {
+          return `<div><div class="font-medium">${item.supplier.name}</div>${item.supplier.email ? `<div class="text-sm opacity-70">${item.supplier.email}</div>` : ''}</div>`
+        }
+        return '<span class="opacity-40">No supplier</span>'
+      }
+    },
+    { key: 'date', label: 'Date', render: (item) => formatDate(item.date) },
+    { key: 'total_amount', label: 'Amount', render: (item) => `<span class="font-medium">${formatCurrency(item.total_amount)}</span>` },
+    { 
+      key: 'status', 
+      label: 'Status',
+      actions: [
+        { key: 'edit', icon: 'fa-edit', class: 'btn-warning', title: 'Edit Purchase' },
+        { key: 'delete', icon: 'fa-trash', class: 'btn-error', title: 'Delete Purchase' }
+      ]
+    }
+  ]
+
+  const primaryAction = {
+    text: 'New Purchase',
+    icon: 'fa-plus'
+  }
+
+  const secondaryActions = [
+    {
+      text: 'Import',
+      icon: 'fa-upload'
+    }
+  ]
+
+  function handlePrimaryAction() {
+    console.log('New Purchase clicked')
+    // TODO: Implement new purchase functionality
+  }
+
+  function handleSecondaryAction(action) {
+    if (action.text === 'Import') {
+      console.log('Import clicked')
+      // TODO: Implement import functionality
+    }
+  }
+
+  function handleRowAction(event) {
+    const { action, item } = event.detail
+    if (action === 'edit') {
+      console.log('Edit purchase:', item)
+      // TODO: Implement edit functionality
+    } else if (action === 'delete') {
+      console.log('Delete purchase:', item)
+      // TODO: Implement delete functionality
+    }
+  }
+
+  function handleSearch(event) {
+    searchTerm = event.detail.searchTerm
+  }
 </script>
 
-<div class="p-6">
-  <div class="card bg-base-100/20 backdrop-blur-lg border border-white/20 shadow-xl">
-    <div class="card-body">
-      <h2 class="card-title text-white text-2xl mb-4">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-        </svg>
-        Purchase Invoices
-      </h2>
-      
-      <div class="flex justify-between items-center mb-6">
-        <div class="flex gap-2">
-          <button class="btn btn-primary">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-            </svg>
-            New Purchase
-          </button>
-          <button class="btn btn-outline btn-secondary">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2z"></path>
-            </svg>
-            Import
-          </button>
-        </div>
-        <div class="form-control">
-          <input type="text" placeholder="Search purchases..." class="input input-bordered bg-white/10 border-white/20 text-white placeholder-white/60" />
-        </div>
-      </div>
+<PageLayout 
+  title="Purchase Invoices" 
+  icon="fa-file-invoice-dollar" 
+  showIndicator={true}
+>
+  <svelte:fragment slot="actions">
+    <!-- Actions are handled by DataTable -->
+  </svelte:fragment>
 
-      <div class="overflow-x-auto">
-        <table class="table table-zebra">
-          <thead>
-            <tr class="text-white/80">
-              <th>Invoice #</th>
-              <th>Supplier</th>
-              <th>Date</th>
-              <th>Amount</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody class="text-white/70">
-            <tr>
-              <td colspan="6" class="text-center py-8">
-                <div class="flex flex-col items-center gap-2">
-                  <svg class="w-12 h-12 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                  </svg>
-                  <p class="text-white/60">No purchase invoices found</p>
-                  <button class="btn btn-primary btn-sm">Create your first purchase</button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-</div>
+  <DataTable
+    data={filteredPurchases}
+    {columns}
+    {loading}
+    {searchTerm}
+    searchPlaceholder="Search purchases..."
+    emptyStateTitle="No purchase invoices found"
+    emptyStateMessage="Create your first purchase to get started"
+    emptyStateIcon="fa-file-invoice-dollar"
+    {primaryAction}
+    {secondaryActions}
+    on:primary-action={handlePrimaryAction}
+    on:secondary-action={handleSecondaryAction}
+    on:row-action={handleRowAction}
+    on:search={handleSearch}
+  >
+    <svelte:fragment slot="cell" let:item let:column>
+      {#if column.key === 'status'}
+        <StatusBadge status={item.status} />
+      {:else if column.render}
+        {@html column.render(item)}
+      {:else}
+        {item[column.key] || '-'}
+      {/if}
+    </svelte:fragment>
+  </DataTable>
+</PageLayout>

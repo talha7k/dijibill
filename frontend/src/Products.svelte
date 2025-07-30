@@ -1,6 +1,6 @@
 <script>
   import { onMount } from 'svelte'
-  import { GetProducts, CreateProduct, UpdateProduct, GetProductCategories, CreateProductCategory, GetDefaultProductSettings } from '../wailsjs/go/main/App.js'
+  import { GetProducts, CreateProduct, UpdateProduct, DeleteProduct, GetProductCategories, CreateProductCategory, GetDefaultProductSettings } from '../wailsjs/go/main/App.js'
   import {database} from '../wailsjs/go/models'
   
   // Import components
@@ -8,6 +8,7 @@
   import ProductCategoriesTab from './components/ProductCategoriesTab.svelte'
   import ProductModal from './components/ProductModal.svelte'
   import HorizontalTabs from './components/HorizontalTabs.svelte'
+  import PageLayout from './components/PageLayout.svelte'
 
   // State variables
   let products = []
@@ -130,6 +131,17 @@
     showProductModal = true
   }
 
+  function handleProductReports() {
+    // TODO: Implement product reports functionality
+    // This could include:
+    // - Product inventory report
+    // - Low stock report
+    // - Product sales report
+    // - Product profitability report
+    console.log('Product reports functionality - to be implemented')
+    alert('Product reports functionality will be implemented soon!')
+  }
+
   function handleEditProduct(event) {
     editingProduct = event.detail
     productForm = { ...event.detail }
@@ -137,8 +149,23 @@
   }
 
   function handleDeleteProduct(event) {
-    // TODO: Implement delete functionality
-    console.log('Delete product:', event.detail)
+    const product = event.detail;
+    if (confirm(`Are you sure you want to delete "${product.name}"?`)) {
+      deleteProduct(product.id);
+    }
+  }
+
+  async function deleteProduct(id) {
+    try {
+      isLoading = true;
+      await DeleteProduct(id);
+      await loadProducts();
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      alert('Error deleting product: ' + error.message);
+    } finally {
+      isLoading = false;
+    }
   }
 
   function handleCloseProductModal() {
@@ -241,62 +268,43 @@
   }
 </script>
 
-<div class="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 p-6">
-  <div class="max-w-7xl mx-auto">
-    <!-- Header -->
-    <div class="glass-card mb-8">
-      <div class="p-6">
-        <div class="flex items-center justify-between">
-          <div>
-            <h1 class="heading-1 mb-2">Product Management</h1>
-            <p class="text-secondary">Manage your product inventory and categories</p>
-          </div>
-          {#if activeTab === 'products'}
-            <button 
-              class="btn-primary"
-              on:click={handleAddProduct}
-            >
-              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-              </svg>
-              Add Product
-            </button>
-          {/if}
-        </div>
-
-        <!-- Horizontal Tabs -->
-        <div class="mt-6">
-          <HorizontalTabs 
-            {tabs}
-            {activeTab}
-            variant="glass"
-            showScrollButtons={false}
-            on:tabChange={handleTabChange}
-          />
-        </div>
-      </div>
-    </div>
-
-    <!-- Tab Content -->
-    <div class="space-y-6">
-      {#if activeTab === 'products'}
-        <ProductList 
-          {products}
-          {isLoading}
-          bind:searchTerm
-          on:edit={handleEditProduct}
-          on:delete={handleDeleteProduct}
-        />
-      {:else if activeTab === 'categories'}
-        <ProductCategoriesTab 
-          {categories}
-          {isLoading}
-          on:categoriesUpdated={loadCategories}
-        />
-      {/if}
-    </div>
+<PageLayout 
+  title="Product Management" 
+  icon="fa-box" 
+  showIndicator={true}
+>
+  <!-- Horizontal Tabs -->
+  <div class="mb-6">
+    <HorizontalTabs 
+      {tabs}
+      {activeTab}
+      variant="glass"
+      showScrollButtons={false}
+      on:tabChange={handleTabChange}
+    />
   </div>
-</div>
+
+  <!-- Tab Content -->
+  <div class="space-y-6">
+    {#if activeTab === 'products'}
+      <ProductList 
+        {products}
+        loading={isLoading}
+        bind:searchTerm
+        on:edit={handleEditProduct}
+        on:delete={handleDeleteProduct}
+        on:add={handleAddProduct}
+        on:reports={handleProductReports}
+      />
+    {:else if activeTab === 'categories'}
+      <ProductCategoriesTab 
+        {categories}
+        {isLoading}
+        on:categoriesUpdated={loadCategories}
+      />
+    {/if}
+  </div>
+</PageLayout>
 
 <!-- Product Modal -->
 <ProductModal 

@@ -54,6 +54,10 @@ export function DeletePaymentType(arg1) {
   return window['go']['main']['App']['DeletePaymentType'](arg1);
 }
 
+export function DeleteProduct(arg1) {
+  return window['go']['main']['App']['DeleteProduct'](arg1);
+}
+
 export function DeleteSalesCategory(arg1) {
   return window['go']['main']['App']['DeleteSalesCategory'](arg1);
 }

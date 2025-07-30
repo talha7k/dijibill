@@ -470,7 +470,7 @@
 /* Tab System */
 @layer components {
   .tabs-glass {
-    @apply bg-white/10 backdrop-blur-lg rounded-lg p-1;
+    @apply flex bg-white/10 backdrop-blur-lg rounded-lg p-1;
   }
 
   .tab-glass {
