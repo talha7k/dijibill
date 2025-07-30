@@ -116,17 +116,24 @@ func (p *PDFService) GenerateInvoicePDF(invoiceID int) ([]byte, error) {
 	fmt.Printf("DEBUG: About to add company name cell: %s\n", companyName)
 	pdf.Cell(50, 10, companyName) // English Name
 	fmt.Printf("DEBUG: Company name cell added successfully\n")
+	
+	// Add static Arabic text to test Arabic rendering
+	pdf.SetXY(10, 20)
+	pdf.SetFont("Arial", "", 12)
+	arabicText := "فاتورة ضريبية - Invoice"
+	pdf.Cell(100, 6, arabicText)
+	fmt.Printf("DEBUG: Arabic text added: %s\n", arabicText)
 
 	pdf.SetFont("Arial", "", 10)
-	pdf.SetXY(10, 18)
+	pdf.SetXY(10, 28)
 	pdf.Cell(100, 6, fmt.Sprintf("Address: %s, %s", companyAddress, companyCity))
-	pdf.SetXY(10, 24)
+	pdf.SetXY(10, 34)
 	pdf.Cell(100, 6, fmt.Sprintf("Tax Number: %s", companyVAT))
-	pdf.SetXY(10, 30)
+	pdf.SetXY(10, 40)
 	pdf.Cell(100, 6, fmt.Sprintf("Commercial Registration Number: %s", companyCR))
 
 	// --- Billed For Box ---
-	pdf.SetXY(10, 50)
+	pdf.SetXY(10, 60)  // Moved down to accommodate Arabic text
 	pdf.SetFont("Arial", "", 10)
 	pdf.Cell(95, 7, "Billed for:")
 	pdf.Ln(8)
@@ -155,7 +162,7 @@ func (p *PDFService) GenerateInvoicePDF(invoiceID int) ([]byte, error) {
 	pdf.Rect(10, 50, 95, 35, "D") // Draw a box around the customer info
 
 	// --- Invoice Details Box ---
-	pdf.SetXY(115, 50)
+	pdf.SetXY(115, 60)  // Moved down to accommodate Arabic text
 	pdf.SetFont("Arial", "", 10)
 	pdf.Cell(40, 7, "Invoice Number:")
 	
