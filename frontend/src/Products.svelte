@@ -27,7 +27,7 @@
 
   // Handle tab change
   function handleTabChange(event) {
-    activeTab = event.detail.tabId
+    activeTab = event.detail
   }
 
   // Form data with default values
@@ -79,40 +79,95 @@
   // Load data on mount
   onMount(async () => {
     await loadData()
+    // Create a test product if no products exist
+    if (products.length === 0) {
+      console.log('No products found, creating a test product...')
+      await createTestProduct()
+    }
   })
 
+  async function createTestProduct() {
+    try {
+      const testProduct = main.Product.createFrom({
+        name: 'Test Product',
+        name_arabic: 'منتج تجريبي',
+        description: 'This is a test product',
+        description_arabic: 'هذا منتج تجريبي',
+        category_id: 0,
+        unit_price: 100.0,
+        cost: 50.0,
+        markup: 100.0,
+        vat_rate: 15.0,
+        unit: 'pcs',
+        unit_arabic: 'قطعة',
+        sku: 'TEST001',
+        barcode: '1234567890',
+        stock: 10,
+        min_stock: 5,
+        is_active: true,
+        default_quantity: false,
+        service_not_using_stock: false,
+        price_includes_tax: true,
+        price_change_allowed: false,
+        image_url: '',
+        color: '#FF5733'
+      })
+      await CreateProduct(testProduct)
+      await loadProducts()
+      console.log('Test product created successfully')
+    } catch (error) {
+      console.error('Error creating test product:', error)
+    }
+  }
+
   async function loadData() {
-    await Promise.all([
-      loadProducts(),
-      loadCategories(),
-      loadDefaultProductSettings()
-    ])
+    try {
+      isLoading = true
+      console.log('Starting to load data...')
+      await Promise.all([
+        loadProducts(),
+        loadCategories(),
+        loadDefaultProductSettings()
+      ])
+      console.log('All data loaded successfully')
+    } catch (error) {
+      console.error('Error loading data:', error)
+    } finally {
+      isLoading = false
+      console.log('Loading state set to false')
+    }
   }
 
   async function loadProducts() {
     try {
-      isLoading = true
+      console.log('Loading products...')
       products = await GetProducts()
+      console.log('Products loaded:', products)
     } catch (error) {
       console.error('Error loading products:', error)
-    } finally {
-      isLoading = false
+      products = [] // Ensure products is always an array
     }
   }
 
   async function loadCategories() {
     try {
+      console.log('Loading categories...')
       categories = await GetProductCategories()
+      console.log('Categories loaded:', categories)
     } catch (error) {
       console.error('Error loading categories:', error)
+      categories = [] // Ensure categories is always an array
     }
   }
 
   async function loadDefaultProductSettings() {
     try {
+      console.log('Loading default product settings...')
       defaultProductSettings = await GetDefaultProductSettings()
+      console.log('Default product settings loaded:', defaultProductSettings)
     } catch (error) {
       console.error('Error loading default product settings:', error)
+      defaultProductSettings = null
     }
   }
 
@@ -265,7 +320,6 @@
           {products}
           {isLoading}
           bind:searchTerm
-          on:add={handleAddProduct}
           on:edit={handleEditProduct}
           on:delete={handleDeleteProduct}
         />

@@ -27,31 +27,20 @@
 <div class="bg-white/5 backdrop-blur-lg rounded-lg border border-white/20 overflow-hidden">
   <!-- Search Bar -->
   <div class="p-4 border-b border-white/10">
-    <div class="flex gap-4 items-center">
-      <div class="form-control flex-1">
-        <div class="input-group">
-          <span class="bg-white/10 border-white/20 text-white">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-            </svg>
-          </span>
-          <input 
-            type="text" 
-            bind:value={searchTerm}
-            placeholder="Search products by name, SKU, or barcode..." 
-            class="input input-bordered flex-1 bg-white/10 text-white placeholder-white/50 border-white/20"
-          />
-        </div>
+    <div class="form-control">
+      <div class="input-group">
+        <span class="bg-white/10 border-white/20 text-white">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+        </span>
+        <input 
+          type="text" 
+          bind:value={searchTerm}
+          placeholder="Search products by name, SKU, or barcode..." 
+          class="input input-bordered flex-1 bg-white/10 text-white placeholder-white/50 border-white/20"
+        />
       </div>
-      <button 
-        class="btn btn-primary"
-        on:click={() => dispatch('add')}
-      >
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-        </svg>
-        Add Product
-      </button>
     </div>
   </div>
 

@@ -203,6 +203,7 @@ export namespace main {
 	    description: string;
 	    description_arabic: string;
 	    category_id: number;
+	    category_name: string;
 	    category?: ProductCategory;
 	    unit_price: number;
 	    vat_rate: number;
@@ -213,6 +214,9 @@ export namespace main {
 	    stock: number;
 	    min_stock: number;
 	    is_active: boolean;
+	    color: string;
+	    image_url: string;
+	    service_not_using_stock: boolean;
 	    // Go type: time
 	    created_at: any;
 	    // Go type: time
@@ -230,6 +234,7 @@ export namespace main {
 	        this.description = source["description"];
 	        this.description_arabic = source["description_arabic"];
 	        this.category_id = source["category_id"];
+	        this.category_name = source["category_name"];
 	        this.category = this.convertValues(source["category"], ProductCategory);
 	        this.unit_price = source["unit_price"];
 	        this.vat_rate = source["vat_rate"];
@@ -240,6 +245,9 @@ export namespace main {
 	        this.stock = source["stock"];
 	        this.min_stock = source["min_stock"];
 	        this.is_active = source["is_active"];
+	        this.color = source["color"];
+	        this.image_url = source["image_url"];
+	        this.service_not_using_stock = source["service_not_using_stock"];
 	        this.created_at = this.convertValues(source["created_at"], null);
 	        this.updated_at = this.convertValues(source["updated_at"], null);
 	    }

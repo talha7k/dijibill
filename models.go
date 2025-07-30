@@ -35,24 +35,28 @@ type ProductCategory struct {
 
 // Product represents a product that can be sold
 type Product struct {
-	ID                int       `json:"id"`
-	Name              string    `json:"name"`
-	NameArabic        string    `json:"name_arabic"`
-	Description       string    `json:"description"`
-	DescriptionArabic string    `json:"description_arabic"`
-	CategoryID        int       `json:"category_id"`
-	Category          *ProductCategory `json:"category,omitempty"`
-	UnitPrice         float64   `json:"unit_price"`
-	VATRate           float64   `json:"vat_rate"`
-	Unit              string    `json:"unit"`
-	UnitArabic        string    `json:"unit_arabic"`
-	SKU               string    `json:"sku"`
-	Barcode           string    `json:"barcode"`
-	Stock             int       `json:"stock"`
-	MinStock          int       `json:"min_stock"`
-	IsActive          bool      `json:"is_active"`
-	CreatedAt         time.Time `json:"created_at"`
-	UpdatedAt         time.Time `json:"updated_at"`
+	ID                     int       `json:"id"`
+	Name                   string    `json:"name"`
+	NameArabic             string    `json:"name_arabic"`
+	Description            string    `json:"description"`
+	DescriptionArabic      string    `json:"description_arabic"`
+	CategoryID             int       `json:"category_id"`
+	CategoryName           string    `json:"category_name"`           // Joined from product_categories table
+	Category               *ProductCategory `json:"category,omitempty"`
+	UnitPrice              float64   `json:"unit_price"`
+	VATRate                float64   `json:"vat_rate"`
+	Unit                   string    `json:"unit"`
+	UnitArabic             string    `json:"unit_arabic"`
+	SKU                    string    `json:"sku"`
+	Barcode                string    `json:"barcode"`
+	Stock                  int       `json:"stock"`
+	MinStock               int       `json:"min_stock"`
+	IsActive               bool      `json:"is_active"`
+	Color                  string    `json:"color"`                   // Product color (optional)
+	ImageURL               string    `json:"image_url"`               // Product image URL (optional)
+	ServiceNotUsingStock   bool      `json:"service_not_using_stock"` // Whether this is a service that doesn't use stock
+	CreatedAt              time.Time `json:"created_at"`
+	UpdatedAt              time.Time `json:"updated_at"`
 }
 
 // Invoice represents an invoice
