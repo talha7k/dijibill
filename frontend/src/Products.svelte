@@ -1,24 +1,36 @@
 <script>
   import { onMount } from 'svelte'
-  import { GetProducts, CreateProduct, GetProductCategories, CreateProductCategory } from '../wailsjs/go/main/App.js'
+  import { GetProducts, CreateProduct, GetProductCategories, CreateProductCategory, GetDefaultProductSettings } from '../wailsjs/go/main/App.js'
   import { main } from '../wailsjs/go/models'
   
   // Import components
   import ProductList from './components/ProductList.svelte'
+  import ProductCategoriesTab from './components/ProductCategoriesTab.svelte'
   import ProductModal from './components/ProductModal.svelte'
-  import CategoryModal from './components/CategoryModal.svelte'
+  import HorizontalTabs from './components/HorizontalTabs.svelte'
 
   // State variables
   let products = []
   let categories = []
+  let defaultProductSettings = null
   let isLoading = false
   let searchTerm = ''
   let showProductModal = false
-  let showCategoryModal = false
   let editingProduct = null
-  let editingCategory = null
+  let activeTab = 'products'
 
-  // Form data
+  // Tab configuration
+  const tabs = [
+    { id: 'products', label: 'Products', icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4' },
+    { id: 'categories', label: 'Categories', icon: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10' }
+  ]
+
+  // Handle tab change
+  function handleTabChange(event) {
+    activeTab = event.detail.tabId
+  }
+
+  // Form data with default values
   let productForm = {
     name: '',
     name_arabic: '',
@@ -44,13 +56,6 @@
     color: '#000000'
   }
 
-  let categoryForm = {
-    name: '',
-    name_arabic: '',
-    description: '',
-    description_arabic: ''
-  }
-
   // Tax rates (these would normally come from backend)
   const taxRates = [
     { id: 1, name: 'Standard VAT', rate: 15.0, is_default: true },
@@ -73,9 +78,16 @@
 
   // Load data on mount
   onMount(async () => {
-    await loadProducts()
-    await loadCategories()
+    await loadData()
   })
+
+  async function loadData() {
+    await Promise.all([
+      loadProducts(),
+      loadCategories(),
+      loadDefaultProductSettings()
+    ])
+  }
 
   async function loadProducts() {
     try {
@@ -96,10 +108,19 @@
     }
   }
 
+  async function loadDefaultProductSettings() {
+    try {
+      defaultProductSettings = await GetDefaultProductSettings()
+    } catch (error) {
+      console.error('Error loading default product settings:', error)
+    }
+  }
+
   // Product handlers
   function handleAddProduct() {
     editingProduct = null
     resetProductForm()
+    applyDefaultSettings()
     showProductModal = true
   }
 
@@ -162,40 +183,29 @@
     }
   }
 
-  // Category handlers
-  function handleAddCategory() {
-    editingCategory = null
-    resetCategoryForm()
-    showCategoryModal = true
-  }
-
-  function handleCloseCategoryModal() {
-    showCategoryModal = false
-    resetCategoryForm()
-  }
-
-  async function handleSaveCategory() {
-    try {
-      isLoading = true
-      const category = main.ProductCategory.createFrom(categoryForm)
-      await CreateProductCategory(category)
-      await loadCategories()
-      showCategoryModal = false
-      resetCategoryForm()
-    } catch (error) {
-      console.error('Error saving category:', error)
-      alert('Error saving category: ' + error.message)
-    } finally {
-      isLoading = false
-    }
-  }
-
-  function resetCategoryForm() {
-    categoryForm = {
-      name: '',
-      name_arabic: '',
-      description: '',
-      description_arabic: ''
+  function applyDefaultSettings() {
+    if (defaultProductSettings) {
+      productForm.stock = defaultProductSettings.default_stock || 0
+      productForm.markup = defaultProductSettings.default_markup || 0
+      productForm.is_active = defaultProductSettings.default_product_status !== false
+      productForm.price_includes_tax = defaultProductSettings.default_price_includes_tax || false
+      productForm.price_change_allowed = defaultProductSettings.default_price_change_allowed !== false
+      
+      // Apply default tax rate if available
+      if (defaultProductSettings.default_tax_rate_id) {
+        const defaultTaxRate = taxRates.find(rate => rate.id === defaultProductSettings.default_tax_rate_id)
+        if (defaultTaxRate) {
+          productForm.vat_rate = defaultTaxRate.rate
+        }
+      }
+      
+      // Apply default unit if available
+      if (defaultProductSettings.default_unit_id) {
+        const defaultUnit = units.find(unit => unit.id === defaultProductSettings.default_unit_id)
+        if (defaultUnit) {
+          productForm.unit = defaultUnit.value
+        }
+      }
     }
   }
 
@@ -215,33 +225,58 @@
 <div class="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 p-6">
   <div class="max-w-7xl mx-auto">
     <!-- Header -->
-    <div class="flex items-center justify-between mb-8">
-      <div>
-        <h1 class="text-3xl font-bold text-white mb-2">Products</h1>
-        <p class="text-white/60">Manage your product inventory and categories</p>
-      </div>
-      <div class="flex gap-3">
-        <button 
-          class="btn btn-outline text-white border-white/20 hover:bg-white/10"
-          on:click={handleAddCategory}
-        >
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
-          </svg>
-          Add Category
-        </button>
+    <div class="glass-card mb-8">
+      <div class="p-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="heading-1 mb-2">Product Management</h1>
+            <p class="text-secondary">Manage your product inventory and categories</p>
+          </div>
+          {#if activeTab === 'products'}
+            <button 
+              class="btn-primary"
+              on:click={handleAddProduct}
+            >
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+              </svg>
+              Add Product
+            </button>
+          {/if}
+        </div>
+
+        <!-- Horizontal Tabs -->
+        <div class="mt-6">
+          <HorizontalTabs 
+            {tabs}
+            {activeTab}
+            variant="glass"
+            showScrollButtons={false}
+            on:tabChange={handleTabChange}
+          />
+        </div>
       </div>
     </div>
 
-    <!-- Product List -->
-    <ProductList 
-      {products}
-      {isLoading}
-      bind:searchTerm
-      on:add={handleAddProduct}
-      on:edit={handleEditProduct}
-      on:delete={handleDeleteProduct}
-    />
+    <!-- Tab Content -->
+    <div class="space-y-6">
+      {#if activeTab === 'products'}
+        <ProductList 
+          {products}
+          {isLoading}
+          bind:searchTerm
+          on:add={handleAddProduct}
+          on:edit={handleEditProduct}
+          on:delete={handleDeleteProduct}
+        />
+      {:else if activeTab === 'categories'}
+        <ProductCategoriesTab 
+          {categories}
+          {isLoading}
+          on:categoriesUpdated={loadCategories}
+        />
+      {/if}
+    </div>
   </div>
 </div>
 
@@ -258,14 +293,4 @@
   {generateBarcode}
   on:close={handleCloseProductModal}
   on:save={handleSaveProduct}
-/>
-
-<!-- Category Modal -->
-<CategoryModal 
-  bind:show={showCategoryModal}
-  {editingCategory}
-  bind:categoryForm
-  {isLoading}
-  on:close={handleCloseCategoryModal}
-  on:save={handleSaveCategory}
 />
