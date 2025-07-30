@@ -13,7 +13,7 @@
   import {Greet} from '../wailsjs/go/main/App.js'
 
   let currentView = 'dashboard' // Default to dashboard
-  let resultText = "Welcome to DijInvoice - ZATCA Compliant Invoicing"
+  let resultText = "Welcome to DijiBill - ZATCA Compliant Invoicing"
   let name = ''
 
   function greet() {
@@ -99,7 +99,7 @@
   ]
 </script>
 
-<div class="min-h-screen bg-gradient-to-br from-primary to-secondary flex" data-theme="dijinvoice">
+<div class="min-h-screen bg-gradient-to-br from-primary to-secondary flex" data-theme="dijibill">
   <!-- Sidebar -->
   <div class="w-64 bg-base-100/10 backdrop-blur-lg border-r border-white/20 flex flex-col">
     <!-- Logo/Header -->

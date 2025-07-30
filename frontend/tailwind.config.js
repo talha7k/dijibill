@@ -32,7 +32,7 @@ export default {
   daisyui: {
     themes: [
       {
-        dijinvoice: {
+        dijibill: {
           "primary": "#667eea",
           "secondary": "#764ba2", 
           "accent": "#f093fb",

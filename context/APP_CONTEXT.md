@@ -1,5 +1,5 @@
 
-# DIJINVOICE: Complete Application Documentation
+# dijibill: Complete Application Documentation
 
 A cross-platform desktop invoicing and business management app for SMEs, built with **Go**, **Svelte**, and **Wails**, tailored for the **Saudi Arabian market** with bilingual (English/Arabic) support and local invoice standards (VAT, QR).
 
@@ -37,7 +37,7 @@ A cross-platform desktop invoicing and business management app for SMEs, built w
 ### 2.1 Project Structure
 
 ```
-dijinvoice/
+dijibill/
 ├── app.go                 # Wails app context and API methods
 ├── database.go           # Database operations and CRUD
 ├── main.go              # Application entry point
@@ -530,7 +530,7 @@ import { writable } from 'svelte/store';
 
 export const currentUser = writable(null);
 export const notifications = writable([]);
-export const theme = writable('dijinvoice');
+export const theme = writable('dijibill');
 ```
 
 ---
@@ -692,7 +692,7 @@ async function loadProducts() {
 ```bash
 # Clone repository
 git clone <repository-url>
-cd dijinvoice
+cd dijibill
 
 # Install frontend dependencies
 cd frontend

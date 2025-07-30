@@ -8,8 +8,9 @@ import (
 	"path/filepath"
 	"time"
 
+	"dijibill/database"
+
 	"github.com/wailsapp/wails/v2/pkg/runtime"
-	"dijinvoice/database"
 )
 
 // App struct
@@ -35,7 +36,7 @@ func (a *App) startup(ctx context.Context) {
 		log.Fatal("Failed to get user home directory:", err)
 	}
 
-	dbPath := filepath.Join(homeDir, "dijinvoice.db")
+	dbPath := filepath.Join(homeDir, "dijibill.db")
 	a.db, err = database.NewDatabase(dbPath)
 	if err != nil {
 		log.Fatal("Failed to initialize database:", err)
@@ -257,7 +258,7 @@ func (a *App) GenerateInvoicePDF(invoiceID int) (string, error) {
 		return "", err
 	}
 
-	documentsDir := filepath.Join(homeDir, "Documents", "DijInvoice")
+	documentsDir := filepath.Join(homeDir, "Documents", "dijibill")
 	if err := os.MkdirAll(documentsDir, 0755); err != nil {
 		return "", err
 	}
@@ -297,7 +298,7 @@ func (a *App) GetQRCodeInfo(qrCodeBase64 string) (map[string]interface{}, error)
 
 func (a *App) GenerateSampleQRCode() (string, error) {
 	qrService := NewZATCAQRService()
-	
+
 	// Create sample invoice data
 	sampleInvoice := &database.Invoice{
 		InvoiceNumber: "INV-2024-001",
@@ -305,13 +306,13 @@ func (a *App) GenerateSampleQRCode() (string, error) {
 		TotalAmount:   115.0,
 		VATAmount:     15.0,
 	}
-	
+
 	// Create sample company data
 	sampleCompany := &database.Company{
 		Name:      "Sample Company Ltd",
 		VATNumber: "300000000000003",
 	}
-	
+
 	return qrService.GenerateZATCAQRCode(sampleInvoice, sampleCompany)
 }
 
@@ -378,5 +379,5 @@ func (a *App) ShowError(title, message string) {
 
 // Greet returns a greeting for the given name (keeping original method for compatibility)
 func (a *App) Greet(name string) string {
-	return fmt.Sprintf("Hello %s, Welcome to DijInvoice!", name)
+	return fmt.Sprintf("Hello %s, Welcome to DijiBill!", name)
 }

@@ -1,4 +1,4 @@
-module dijinvoice
+module dijibill
 
 go 1.23
 

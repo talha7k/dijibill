@@ -5,9 +5,10 @@ import (
 	"encoding/base64"
 	"fmt"
 
+	"dijibill/database"
+
 	"github.com/jung-kurt/gofpdf"
 	"github.com/skip2/go-qrcode"
-	"dijinvoice/database"
 )
 
 type PDFService struct {

@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"time"
 
-	"dijinvoice/database"
+	"dijibill/database"
 )
 
 // ZATCAQRService handles ZATCA-compliant QR code generation
