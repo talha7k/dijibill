@@ -107,7 +107,7 @@
             <div class="h-full flex flex-col items-center justify-center">
               <div class="text-2xl mb-2">🛍️</div>
               <div class="text-center text-sm mb-1">{product.name}</div>
-              <div class="text-lg font-bold">{(product.price || 0).toFixed(2)} SAR</div>
+              <div class="text-lg font-bold">{(product.unit_price || 0).toFixed(2)} SAR</div>
             </div>
           </button>
         {/each}

@@ -80,7 +80,9 @@
   $: statusOptions = [
     { value: 'draft', label: 'Draft' },
     { value: 'sent', label: 'Sent' },
+    { value: 'partially_paid', label: 'Partially Paid' },
     { value: 'paid', label: 'Paid' },
+    { value: 'refunded', label: 'Refunded' },
     { value: 'overdue', label: 'Overdue' },
     { value: 'cancelled', label: 'Cancelled' }
   ]

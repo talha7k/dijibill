@@ -82,6 +82,7 @@
   $: statusOptions = [
     { value: 'completed', label: 'Completed' },
     { value: 'pending', label: 'Pending' },
+    { value: 'refunded', label: 'Refunded' },
     { value: 'failed', label: 'Failed' },
     { value: 'cancelled', label: 'Cancelled' }
   ]

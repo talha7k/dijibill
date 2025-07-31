@@ -143,6 +143,42 @@
 		}
 	}
 
+	async function handleRefundPayment(payment) {
+		console.log('handleRefundPayment called with payment:', payment);
+		
+		// Confirm refund action
+		const confirmed = confirm(`Are you sure you want to refund payment #${payment.id}? This will mark the payment as refunded.`);
+		if (!confirmed) return;
+		
+		// Get refund reason
+		const reason = prompt('Please enter a reason for the refund (optional):') || 'Payment refunded';
+		
+		try {
+			loading = true;
+			
+			// Create updated payment object with refunded status
+			const updatedPayment = new database.Payment();
+			updatedPayment.id = payment.id;
+			updatedPayment.invoice_id = payment.invoice_id;
+			updatedPayment.payment_type_id = payment.payment_type_id;
+			updatedPayment.amount = payment.amount;
+			updatedPayment.payment_date = new Date(payment.payment_date);
+			updatedPayment.reference = payment.reference;
+			updatedPayment.notes = payment.notes ? `${payment.notes}\n\nRefund: ${reason}` : `Refund: ${reason}`;
+			updatedPayment.notes_arabic = payment.notes_arabic;
+			updatedPayment.status = 'refunded';
+			
+			await UpdatePayment(updatedPayment);
+			alert(`Payment #${payment.id} has been successfully refunded.`);
+			await loadPayments(); // Refresh the list
+		} catch (error) {
+			console.error('Error refunding payment:', error);
+			alert('Error refunding payment: ' + error.message);
+		} finally {
+			loading = false;
+		}
+	}
+
 	function formatDate(dateString) {
 		return new Date(dateString).toLocaleDateString();
 	}
@@ -212,6 +248,7 @@
 			label: 'Actions',
 			actions: [
 				{ key: 'edit', text: 'Edit', icon: 'fa-edit', class: 'btn-secondary', title: 'Edit Payment' },
+				{ key: 'refund', text: 'Refund', icon: 'fa-undo', class: 'btn-warning', title: 'Refund Payment' },
 				{ key: 'delete', text: 'Delete', icon: 'fa-trash', class: 'btn-error', title: 'Delete Payment' }
 			]
 		}
@@ -245,6 +282,8 @@
 		const { action, item } = event.detail;
 		if (action === 'edit') {
 			openModal(item);
+		} else if (action === 'refund') {
+			handleRefundPayment(item);
 		} else if (action === 'delete') {
 			showDeleteConfirmation(item.id);
 		}

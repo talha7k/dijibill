@@ -13,6 +13,7 @@
     SaveInvoiceHTMLArabic,
     SaveInvoiceHTMLBilingual
   } from '../wailsjs/go/main/App.js'
+  import { refundInvoice } from './services/posService.js'
   import SalesInvoiceModal from './SalesInvoiceModal.svelte'
   import PageLayout from './components/PageLayout.svelte'
   import DataTable from './components/DataTable.svelte'
@@ -98,6 +99,8 @@
       case 'sent': return 'badge-info'
       case 'draft': return 'badge-warning'
       case 'cancelled': return 'badge-error'
+      case 'refunded': return 'badge-secondary'
+      case 'partially_paid': return 'badge-warning'
       default: return 'badge-neutral'
     }
   }
@@ -153,6 +156,26 @@
       alert('Error loading invoice: ' + error.message)
     }
   }
+
+  async function handleRefundInvoice(invoice) {
+    console.log('handleRefundInvoice called with invoice:', invoice)
+    
+    // Confirm refund action
+    const confirmed = confirm(`Are you sure you want to refund invoice ${invoice.invoice_number}? This will mark the invoice and all its payments as refunded.`)
+    if (!confirmed) return
+    
+    // Get refund reason
+    const reason = prompt('Please enter a reason for the refund (optional):') || 'Refund requested'
+    
+    try {
+      await refundInvoice(invoice.id, reason)
+      alert(`Invoice ${invoice.invoice_number} has been successfully refunded.`)
+      await loadInvoices() // Refresh the list
+    } catch (error) {
+      console.error('Error refunding invoice:', error)
+      alert('Error refunding invoice: ' + error.message)
+    }
+  }
   
   $: filteredInvoices = (invoices || []).filter(invoice => 
     invoice.invoice_number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -181,7 +204,8 @@
       actions: [
         { key: 'view', text: 'View', icon: 'fa-eye', class: 'btn-info', title: 'View HTML' },
         { key: 'edit', text: 'Edit', icon: 'fa-edit', class: 'btn-warning', title: 'Edit Invoice' },
-        { key: 'save', text: 'Save', icon: 'fa-download', class: 'btn-success', title: 'Save/Print' }
+        { key: 'save', text: 'Save', icon: 'fa-download', class: 'btn-success', title: 'Save/Print' },
+        { key: 'refund', text: 'Refund', icon: 'fa-undo', class: 'btn-error', title: 'Refund Invoice' }
       ]
     }
   ]
@@ -216,6 +240,8 @@
       editInvoice(item)
     } else if (action === 'save') {
       saveOrPrintInvoice(item.id)
+    } else if (action === 'refund') {
+      handleRefundInvoice(item)
     }
   }
 

@@ -178,7 +178,7 @@ func (a *App) GetInvoiceByID(id int) (*database.Invoice, error) {
 
 // Sales Invoice Management Methods
 
-func (a *App) CreateSalesInvoice(invoice database.SalesInvoice) error {
+func (a *App) CreateSalesInvoice(invoice database.SalesInvoice) (database.SalesInvoice, error) {
 	// Calculate totals
 	var subTotal, vatAmount, totalAmount float64
 
@@ -202,7 +202,12 @@ func (a *App) CreateSalesInvoice(invoice database.SalesInvoice) error {
 		invoice.Status = "draft"
 	}
 
-	return a.db.CreateSalesInvoice(&invoice)
+	err := a.db.CreateSalesInvoice(&invoice)
+	if err != nil {
+		return database.SalesInvoice{}, err
+	}
+
+	return invoice, nil
 }
 
 func (a *App) GetSalesInvoices() ([]database.SalesInvoice, error) {

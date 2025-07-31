@@ -338,7 +338,7 @@
       <button
         class="btn btn-success"
         on:click={processPayments}
-        disabled={$remainingAmount > 0.01 || $paymentItems.length === 0}
+        disabled={$paymentItems.length === 0}
       >
         Complete Payment
       </button>

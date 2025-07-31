@@ -4,9 +4,13 @@ import {
   GetSalesCategories, 
   GetCustomers, 
   CreateSalesInvoice,
+  UpdateSalesInvoice,
   GetOpenSalesInvoices,
   GetPaymentTypes,
-  CreatePayment
+  CreatePayment,
+  GetPaymentsByInvoiceID,
+  UpdatePayment,
+  GetSalesInvoiceByID
 } from '../../wailsjs/go/main/App.js'
 import { database } from '../../wailsjs/go/models'
 import { 
@@ -138,7 +142,7 @@ export async function saveSale() {
     }
 
     const invoiceObj = new database.SalesInvoice(invoiceData)
-    await CreateSalesInvoice(invoiceObj)
+    const createdInvoice = await CreateSalesInvoice(invoiceObj)
     
     alert('Sale saved successfully!')
     resetSale()
@@ -196,7 +200,7 @@ export async function refundSale() {
     }
 
     const refundInvoiceObj = new database.SalesInvoice(refundInvoiceData)
-    await CreateSalesInvoice(refundInvoiceObj)
+    const createdRefundInvoice = await CreateSalesInvoice(refundInvoiceObj)
     
     alert('Refund processed successfully!')
     resetSale()
@@ -257,7 +261,7 @@ export async function transferItems() {
       }))
     }
 
-    await CreateSalesInvoice(new database.SalesInvoice(transferInvoiceObj))
+    const createdTransferInvoice = await CreateSalesInvoice(new database.SalesInvoice(transferInvoiceObj))
     resetSale()
     showTransferModal.set(false)
     selectedTransferInvoice.set(null)
@@ -316,10 +320,10 @@ export async function openPaymentModal() {
     }
 
     const invoiceObj = new database.SalesInvoice(invoiceData)
-    await CreateSalesInvoice(invoiceObj)
+    const createdInvoice = await CreateSalesInvoice(invoiceObj)
     
-    // Set up payment modal
-    currentInvoiceForPayment.set(invoiceData)
+    // Set up payment modal with the created invoice (which now has the correct ID)
+    currentInvoiceForPayment.set(createdInvoice)
     remainingAmount.set(sale.total)
     paymentItems.set([])
     showPaymentModal.set(true)
@@ -391,18 +395,13 @@ export async function processPayments() {
     return
   }
   
-  if (remaining > 0.01) { // Allow for small rounding differences
-    alert('Please complete all payments before processing')
-    return
-  }
-  
   try {
     loading.set(true)
     
     // Create all payments
     for (const payment of payments) {
       const paymentData = {
-        invoice_id: invoice.id || 0, // This will need to be the actual invoice ID
+        invoice_id: invoice.id, // Now using the correct invoice ID
         payment_type_id: payment.payment_type_id,
         amount: payment.amount,
         payment_date: new Date().toISOString(),
@@ -415,7 +414,24 @@ export async function processPayments() {
       await CreatePayment(new database.Payment(paymentData))
     }
     
-    alert('Payment processed successfully!')
+    // Determine invoice status based on remaining amount
+    let invoiceStatus = 'paid'
+    if (remaining > 0.01) { // Allow for small rounding differences
+      invoiceStatus = 'partially_paid'
+    }
+    
+    // Update invoice status
+    const updatedInvoice = {
+      ...invoice,
+      status: invoiceStatus,
+      updated_at: new Date().toISOString()
+    }
+    
+    await UpdateSalesInvoice(new database.SalesInvoice(updatedInvoice))
+    
+    const statusMessage = invoiceStatus === 'paid' ? 'Payment completed successfully!' : 'Partial payment processed successfully!'
+    alert(statusMessage)
+    
     resetSale()
     showPaymentModal.set(false)
     currentInvoiceForPayment.set(null)
@@ -424,6 +440,60 @@ export async function processPayments() {
   } catch (error) {
     console.error('Error processing payments:', error)
     alert('Error processing payments: ' + error.message)
+  } finally {
+    loading.set(false)
+  }
+}
+
+/**
+ * Refunds an existing invoice by marking the invoice and all its payments as refunded
+ * @param {number} invoiceId - The ID of the invoice to refund
+ * @param {string} refundReason - The reason for the refund
+ */
+export async function refundInvoice(invoiceId, refundReason = '') {
+  try {
+    loading.set(true)
+    
+    // Get the full invoice details
+    const invoice = await GetSalesInvoiceByID(invoiceId)
+    if (!invoice) {
+      alert('Invoice not found')
+      return
+    }
+    
+    // Get the invoice payments
+    const payments = await GetPaymentsByInvoiceID(invoiceId)
+    
+    // Update all payments to refunded status
+    for (const payment of payments) {
+      const updatedPayment = {
+        ...payment,
+        status: 'refunded',
+        notes: payment.notes ? `${payment.notes} | REFUNDED: ${refundReason}` : `REFUNDED: ${refundReason}`,
+        updated_at: new Date().toISOString()
+      }
+      
+      await UpdatePayment(new database.Payment(updatedPayment))
+    }
+    
+    // Update the invoice with full details and refunded status
+    const updatedInvoice = {
+      ...invoice,
+      status: 'refunded',
+      notes: invoice.notes ? `${invoice.notes} | REFUNDED: ${refundReason}` : `REFUNDED: ${refundReason}`,
+      updated_at: new Date().toISOString()
+    }
+    
+    await UpdateSalesInvoice(new database.SalesInvoice(updatedInvoice))
+    
+    alert('Invoice and all associated payments have been marked as refunded successfully!')
+    
+    // Reload open invoices if needed
+    await loadOpenInvoices()
+    
+  } catch (error) {
+    console.error('Error refunding invoice:', error)
+    alert('Error refunding invoice: ' + error.message)
   } finally {
     loading.set(false)
   }

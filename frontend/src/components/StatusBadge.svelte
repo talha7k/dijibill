@@ -23,6 +23,8 @@
       case 'cancelled':
       case 'inactive':
         return 'badge-error'
+      case 'refunded':
+        return 'badge-secondary'
       case 'draft':
       case 'info':
         return 'badge-info'

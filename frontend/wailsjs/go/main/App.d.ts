@@ -22,7 +22,7 @@ export function CreatePurchaseProductCategory(arg1:database.PurchaseProductCateg
 
 export function CreateSalesCategory(arg1:database.SalesCategory):Promise<void>;
 
-export function CreateSalesInvoice(arg1:database.SalesInvoice):Promise<void>;
+export function CreateSalesInvoice(arg1:database.SalesInvoice):Promise<database.SalesInvoice>;
 
 export function CreateSampleData():Promise<void>;
 
