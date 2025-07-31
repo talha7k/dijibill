@@ -1,6 +1,7 @@
 <script>
   import { createEventDispatcher } from 'svelte'
   import FormField from './FormField.svelte'
+  import { getFaIcon } from '../utils/iconUtils.js'
   
   /** @type {Array<any>} */
   export let data = []
@@ -43,29 +44,7 @@
     dispatch('secondary-action', { action })
   }
 
-  // Helper function to get Font Awesome icon class
-  function getFaIcon(iconName) {
-    // Convert icon names to proper Font Awesome classes
-    const iconMap = {
-      'fa-table': 'fas fa-table',
-      'fa-file-invoice': 'fas fa-file-invoice',
-      'fa-users': 'fas fa-users',
-      'fa-credit-card': 'fas fa-credit-card',
-      'fa-shopping-cart': 'fas fa-shopping-cart',
-      'fa-truck': 'fas fa-truck',
-      'fa-ruler': 'fas fa-ruler',
-      'fa-percentage': 'fas fa-percentage',
-      'fa-box': 'fas fa-box',
-      'fa-tags': 'fas fa-tags',
-      'fa-plus': 'fas fa-plus',
-      'fa-edit': 'fas fa-edit',
-      'fa-trash': 'fas fa-trash',
-      'fa-eye': 'fas fa-eye',
-      'fa-download': 'fas fa-download',
-      'fa-undo': 'fas fa-undo'
-    }
-    return iconMap[iconName] || 'fas fa-table' // fallback to table icon
-  }
+
 
   function handleRowAction(action, item) {
     dispatch('row-action', { action, item })
@@ -280,22 +259,8 @@
     gap: 0.75rem;
   }
 
-  .loading-state svg {
-    width: 1.25rem;
-    height: 1.25rem;
-  }
-
-  .animate-spin {
-    animation: spin 1s linear infinite;
-  }
-
-  @keyframes spin {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(360deg);
-    }
+  .loading-state i {
+    font-size: 1.25rem;
   }
 
   .empty-state {

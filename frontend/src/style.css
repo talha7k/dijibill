@@ -1,3 +1,6 @@
+/* Import Font Awesome locally for offline usage */
+@import '@fortawesome/fontawesome-free/css/all.min.css';
+
 /* Import Design System */
 @import './styles/design-system.css';
 

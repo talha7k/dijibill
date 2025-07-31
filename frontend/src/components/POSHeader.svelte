@@ -27,9 +27,7 @@
         on:click={() => $showInvoiceSelectionModal = true}
         title="Select Previous Invoice"
       >
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-        </svg>
+        <i class="fas fa-file-invoice w-5 h-5"></i>
       </button>
       
       <!-- Table Selection -->
@@ -38,9 +36,7 @@
         on:click={() => { $showTableModal = true; onTableClick(); }}
         title="Select Table"
       >
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
-        </svg>
+        <i class="fas fa-table w-5 h-5"></i>
       </button>
       
       <!-- Sales Category Selection -->
@@ -49,9 +45,7 @@
         on:click={() => { $showSalesCategoryModal = true; onSalesCategoryClick(); }}
         title="Select Sales Category"
       >
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
-        </svg>
+        <i class="fas fa-tag w-5 h-5"></i>
       </button>
       
       <!-- Customer Selection -->
@@ -60,9 +54,7 @@
         on:click={() => { $showCustomerModal = true; onCustomerClick(); }}
         title="Select Customer"
       >
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-        </svg>
+        <i class="fas fa-user w-5 h-5"></i>
       </button>
     </div>
   </div>
