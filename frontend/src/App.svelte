@@ -757,6 +757,6 @@
   
   <!-- Intro Slider Overlay -->
   {#if showIntroSlider}
-    <IntroSlider on:complete={handleIntroComplete} />
+    <IntroSlider show={showIntroSlider} on:complete={handleIntroComplete} />
   {/if}
 </div>
