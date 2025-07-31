@@ -1,6 +1,6 @@
 <script>
   import { createEventDispatcher, onMount } from 'svelte'
-  import { GetCustomers, GetProducts, GetPaymentTypes, GetSalesCategories, CreateSalesInvoice } from '../wailsjs/go/main/App.js'
+  import { GetCustomers, GetProducts, GetPaymentTypes, GetSalesCategories, CreateSalesInvoice, UpdateSalesInvoice } from '../wailsjs/go/main/App.js'
   import {database} from '../wailsjs/go/models'
   import Modal from './components/Modal.svelte'
   import FormField from './components/FormField.svelte'
@@ -271,7 +271,7 @@
         unit_price: ''
       }
       
-      if (!item.product_id || item.product_id === 0) {
+      if (!item.product_id || parseInt(item.product_id.toString()) === 0) {
         itemErrors.product_id = 'Please select a product'
         isValid = false
         console.log(`Item ${index + 1} product validation failed`)
@@ -321,7 +321,7 @@
     console.log('Form validation passed')
     
     // Check if any items have valid product_id
-    const validItems = invoiceItems.filter(item => item.product_id > 0)
+    const validItems = invoiceItems.filter(item => item.product_id && parseInt(item.product_id.toString()) > 0)
     console.log('Valid items:', validItems)
     if (validItems.length === 0) {
       console.log('No valid items found')
@@ -333,8 +333,8 @@
     try {
       console.log('Creating invoice object...')
       const invoiceObj = {
-        id: 0,
-        invoice_number: '',
+        id: editingInvoice ? editingInvoice.id : 0,
+        invoice_number: editingInvoice ? editingInvoice.invoice_number : '',
         customer_id: invoiceData.customer_id ? parseInt(invoiceData.customer_id.toString()) : 0,
         sales_category_id: invoiceData.sales_category_id ? parseInt(invoiceData.sales_category_id.toString()) : 0,
         issue_date: new Date(invoiceData.issue_date),
@@ -345,12 +345,12 @@
         status: invoiceData.status || 'draft',
         notes: invoiceData.notes || '',
         notes_arabic: '',
-        qr_code: '',
-        created_at: new Date(),
+        qr_code: editingInvoice ? editingInvoice.qr_code || '' : '',
+        created_at: editingInvoice ? editingInvoice.created_at : new Date(),
         updated_at: new Date(),
         items: validItems.map(item => ({
           id: 0,
-          invoice_id: 0,
+          invoice_id: editingInvoice ? editingInvoice.id : 0,
           product_id: parseInt(item.product_id.toString()),
           quantity: parseFloat(item.quantity.toString()),
           unit_price: parseFloat(item.unit_price.toString()),
@@ -363,12 +363,21 @@
       
       console.log('invoiceObj created:', JSON.stringify(invoiceObj, null, 2))
       
-      console.log('Calling CreateSalesInvoice backend function...')
-      const result = await CreateSalesInvoice(new database.SalesInvoice(invoiceObj))
-      console.log('CreateSalesInvoice result:', result)
-      console.log('CreateSalesInvoice completed successfully')
+      let result
+      if (editingInvoice) {
+        console.log('Calling UpdateSalesInvoice backend function...')
+        result = await UpdateSalesInvoice(new database.SalesInvoice(invoiceObj))
+        console.log('UpdateSalesInvoice result:', result)
+        console.log('UpdateSalesInvoice completed successfully')
+        alert('Invoice updated successfully!')
+      } else {
+        console.log('Calling CreateSalesInvoice backend function...')
+        result = await CreateSalesInvoice(new database.SalesInvoice(invoiceObj))
+        console.log('CreateSalesInvoice result:', result)
+        console.log('CreateSalesInvoice completed successfully')
+        alert('Invoice saved successfully!')
+      }
       
-      alert('Invoice saved successfully!')
       dispatch('saved')
       closeModal()
     } catch (error) {
@@ -418,7 +427,7 @@
   title={modalTitle}
   size="xl"
   loading={isLoading}
-  primaryButtonText={isSaving ? 'Saving...' : 'Save Invoice'}
+  primaryButtonText={isSaving ? (editingInvoice ? 'Updating...' : 'Saving...') : (editingInvoice ? 'Update Invoice' : 'Save Invoice')}
   secondaryButtonText="Cancel"
   primaryButtonDisabled={isSaving || isLoading}
   on:close={closeModal}
