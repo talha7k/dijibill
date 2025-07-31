@@ -10,12 +10,12 @@ import (
 
 // CreateUser creates a new user
 func (d *Database) CreateUser(user *User) error {
-	query := `INSERT INTO users (username, email, password, first_name, last_name, role, is_active, company_id, created_at, updated_at) 
-			  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+	query := `INSERT INTO users (username, email, password, first_name, last_name, role, is_active, company_id, intro_viewed, created_at, updated_at) 
+			  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 	
 	now := time.Now()
 	result, err := d.db.Exec(query, user.Username, user.Email, user.Password, user.FirstName, user.LastName, 
-		user.Role, user.IsActive, user.CompanyID, now, now)
+		user.Role, user.IsActive, user.CompanyID, user.IntroViewed, now, now)
 	if err != nil {
 		return fmt.Errorf("error creating user: %v", err)
 	}
@@ -33,7 +33,7 @@ func (d *Database) CreateUser(user *User) error {
 
 // GetUserByID retrieves a user by ID
 func (d *Database) GetUserByID(id int) (*User, error) {
-	query := `SELECT id, username, email, password, first_name, last_name, role, is_active, company_id, last_login, created_at, updated_at 
+	query := `SELECT id, username, email, password, first_name, last_name, role, is_active, company_id, intro_viewed, last_login, created_at, updated_at 
 			  FROM users WHERE id = ?`
 	
 	user := &User{}
@@ -41,7 +41,7 @@ func (d *Database) GetUserByID(id int) (*User, error) {
 	
 	err := d.db.QueryRow(query, id).Scan(
 		&user.ID, &user.Username, &user.Email, &user.Password, &user.FirstName, &user.LastName,
-		&user.Role, &user.IsActive, &user.CompanyID, &lastLogin, &user.CreatedAt, &user.UpdatedAt,
+		&user.Role, &user.IsActive, &user.CompanyID, &user.IntroViewed, &lastLogin, &user.CreatedAt, &user.UpdatedAt,
 	)
 	
 	if err != nil {
@@ -60,7 +60,7 @@ func (d *Database) GetUserByID(id int) (*User, error) {
 
 // GetUserByUsername retrieves a user by username
 func (d *Database) GetUserByUsername(username string) (*User, error) {
-	query := `SELECT id, username, email, password, first_name, last_name, role, is_active, company_id, last_login, created_at, updated_at 
+	query := `SELECT id, username, email, password, first_name, last_name, role, is_active, company_id, intro_viewed, last_login, created_at, updated_at 
 			  FROM users WHERE username = ?`
 	
 	user := &User{}
@@ -68,7 +68,7 @@ func (d *Database) GetUserByUsername(username string) (*User, error) {
 	
 	err := d.db.QueryRow(query, username).Scan(
 		&user.ID, &user.Username, &user.Email, &user.Password, &user.FirstName, &user.LastName,
-		&user.Role, &user.IsActive, &user.CompanyID, &lastLogin, &user.CreatedAt, &user.UpdatedAt,
+		&user.Role, &user.IsActive, &user.CompanyID, &user.IntroViewed, &lastLogin, &user.CreatedAt, &user.UpdatedAt,
 	)
 	
 	if err != nil {
@@ -87,7 +87,7 @@ func (d *Database) GetUserByUsername(username string) (*User, error) {
 
 // GetUserByEmail retrieves a user by email
 func (d *Database) GetUserByEmail(email string) (*User, error) {
-	query := `SELECT id, username, email, password, first_name, last_name, role, is_active, company_id, last_login, created_at, updated_at 
+	query := `SELECT id, username, email, password, first_name, last_name, role, is_active, company_id, intro_viewed, last_login, created_at, updated_at 
 			  FROM users WHERE email = ?`
 	
 	user := &User{}
@@ -95,7 +95,7 @@ func (d *Database) GetUserByEmail(email string) (*User, error) {
 	
 	err := d.db.QueryRow(query, email).Scan(
 		&user.ID, &user.Username, &user.Email, &user.Password, &user.FirstName, &user.LastName,
-		&user.Role, &user.IsActive, &user.CompanyID, &lastLogin, &user.CreatedAt, &user.UpdatedAt,
+		&user.Role, &user.IsActive, &user.CompanyID, &user.IntroViewed, &lastLogin, &user.CreatedAt, &user.UpdatedAt,
 	)
 	
 	if err != nil {
@@ -114,7 +114,7 @@ func (d *Database) GetUserByEmail(email string) (*User, error) {
 
 // GetUsersByCompany retrieves all users for a specific company
 func (d *Database) GetUsersByCompany(companyID int) ([]User, error) {
-	query := `SELECT id, username, email, password, first_name, last_name, role, is_active, company_id, last_login, created_at, updated_at 
+	query := `SELECT id, username, email, password, first_name, last_name, role, is_active, company_id, intro_viewed, last_login, created_at, updated_at 
 			  FROM users WHERE company_id = ? ORDER BY created_at DESC`
 	
 	rows, err := d.db.Query(query, companyID)
@@ -130,7 +130,7 @@ func (d *Database) GetUsersByCompany(companyID int) ([]User, error) {
 		
 		err := rows.Scan(
 			&user.ID, &user.Username, &user.Email, &user.Password, &user.FirstName, &user.LastName,
-			&user.Role, &user.IsActive, &user.CompanyID, &lastLogin, &user.CreatedAt, &user.UpdatedAt,
+			&user.Role, &user.IsActive, &user.CompanyID, &user.IntroViewed, &lastLogin, &user.CreatedAt, &user.UpdatedAt,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("error scanning user: %v", err)

@@ -373,6 +373,7 @@ type User struct {
 	IsActive    bool      `json:"is_active"`
 	CompanyID   int       `json:"company_id"`  // User belongs to a company
 	Company     *Company  `json:"company,omitempty"`
+	IntroViewed bool      `json:"intro_viewed"` // Whether user has viewed the intro
 	LastLogin   *time.Time `json:"last_login,omitempty"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
