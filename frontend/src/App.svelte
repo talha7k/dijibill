@@ -1,7 +1,7 @@
 <script>
   import { onMount } from 'svelte'
   import { wailsReady, wailsError, initializeWailsRuntime } from './stores/wailsStore.js'
-  import { GetSystemSettings, GetAuthContext, Logout } from '../wailsjs/go/main/App'
+  import { GetSystemSettings, GetAuthContext, Logout, GetCurrentUser, MarkIntroAsViewed } from '../wailsjs/go/main/App'
   import Dashboard from './Dashboard.svelte'
   import QRValidation from './QRValidation.svelte'
   import SalesInvoices from './SalesInvoices.svelte'
@@ -16,6 +16,7 @@
   import GeneralSettings from './GeneralSettings.svelte'
   import Administration from './Administration.svelte'
   import Login from './Login.svelte'
+  import IntroSlider from './components/IntroSlider.svelte'
   import {Greet} from '../wailsjs/go/main/App.js'
 
   let currentView = 'dashboard' // Default to dashboard
@@ -28,6 +29,10 @@
   let authContext = null
   let currentUser = null
   let currentCompany = null
+  
+  // Intro slider state
+  let showIntroSlider = false
+  let userHasViewedIntro = false
   
   // Get runtime status for display
   $: runtimeStatus = $wailsReady ? 'Runtime Ready' : $wailsError ? 'Runtime Error' : 'Initializing...'
@@ -89,11 +94,16 @@
         currentCompany = {
           id: context.company_id
         }
+        
+        // Check if user has viewed intro
+        await checkIntroStatus()
       } else {
         isAuthenticated = false
         authContext = null
         currentUser = null
         currentCompany = null
+        showIntroSlider = false
+        userHasViewedIntro = false
       }
     } catch (error) {
       console.error('Error checking auth status:', error)
@@ -101,6 +111,25 @@
       authContext = null
       currentUser = null
       currentCompany = null
+      showIntroSlider = false
+      userHasViewedIntro = false
+    }
+  }
+
+  // Check intro status
+  async function checkIntroStatus() {
+    try {
+      const user = await GetCurrentUser()
+      if (user) {
+        userHasViewedIntro = user.intro_viewed || false
+        // Show intro slider if user hasn't viewed it yet
+        if (!userHasViewedIntro) {
+          showIntroSlider = true
+        }
+      }
+    } catch (error) {
+      console.error('Error checking intro status:', error)
+      userHasViewedIntro = false
     }
   }
 
@@ -117,6 +146,27 @@
     currentCompany = {
       id: context.company_id
     }
+    
+    // Check intro status after login
+    checkIntroStatus()
+  }
+
+  // Handle intro completion
+  async function handleIntroComplete() {
+    try {
+      if (currentUser) {
+        await MarkIntroAsViewed(currentUser.id)
+        userHasViewedIntro = true
+        showIntroSlider = false
+      }
+    } catch (error) {
+      console.error('Error marking intro as viewed:', error)
+    }
+  }
+
+  // Show intro slider manually (for administration page)
+  function showIntro() {
+    showIntroSlider = true
   }
 
   // Handle logout
@@ -653,9 +703,14 @@
         {:else if currentView === 'general-settings'}
           <GeneralSettings />
         {:else if currentView === 'administration'}
-          <Administration />
+          <Administration {showIntro} />
         {/if}
       {/if}
     </main>
   </div>
+  
+  <!-- Intro Slider Overlay -->
+  {#if showIntroSlider && isAuthenticated}
+    <IntroSlider on:complete={handleIntroComplete} />
+  {/if}
 </div>

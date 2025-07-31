@@ -1,6 +1,9 @@
 <script>
   import { PopulateSampleData } from '../wailsjs/go/main/App.js'
   
+  // Props
+  export let showIntro = () => {}
+  
   // Administration functionality will be implemented here
   let systemInfo = {
     version: '1.0.0',
@@ -83,6 +86,13 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                 </svg>
                 {sampleDataLoading ? 'Populating...' : 'Populate Sample Data (5 each)'}
+              </button>
+              
+              <button class="btn btn-outline btn-primary w-full" on:click={showIntro}>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                Show App Introduction
               </button>
               
               <button class="btn btn-outline btn-info w-full">

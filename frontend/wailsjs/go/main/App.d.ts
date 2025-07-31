@@ -86,6 +86,8 @@ export function GetCompany():Promise<database.Company>;
 
 export function GetCompanyByID(arg1:number):Promise<database.Company>;
 
+export function GetCurrentUser():Promise<database.User>;
+
 export function GetCustomerByID(arg1:number):Promise<database.Customer>;
 
 export function GetCustomers():Promise<Array<database.Customer>>;
@@ -148,6 +150,8 @@ export function Login(arg1:string,arg2:string):Promise<main.AuthContext>;
 
 export function Logout():Promise<void>;
 
+export function MarkIntroAsViewed(arg1:number):Promise<void>;
+
 export function MarkPurchaseInvoiceReceived(arg1:number):Promise<void>;
 
 export function OpenPDFInViewer(arg1:string):Promise<void>;
@@ -155,6 +159,8 @@ export function OpenPDFInViewer(arg1:string):Promise<void>;
 export function PopulateSampleData():Promise<void>;
 
 export function PrintInvoiceHTML(arg1:number):Promise<void>;
+
+export function ResetIntroStatus(arg1:number):Promise<void>;
 
 export function SaveInvoiceHTML(arg1:number):Promise<void>;
 

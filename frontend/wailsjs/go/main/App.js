@@ -166,6 +166,10 @@ export function GetCompanyByID(arg1) {
   return window['go']['main']['App']['GetCompanyByID'](arg1);
 }
 
+export function GetCurrentUser() {
+  return window['go']['main']['App']['GetCurrentUser']();
+}
+
 export function GetCustomerByID(arg1) {
   return window['go']['main']['App']['GetCustomerByID'](arg1);
 }
@@ -290,6 +294,10 @@ export function Logout() {
   return window['go']['main']['App']['Logout']();
 }
 
+export function MarkIntroAsViewed(arg1) {
+  return window['go']['main']['App']['MarkIntroAsViewed'](arg1);
+}
+
 export function MarkPurchaseInvoiceReceived(arg1) {
   return window['go']['main']['App']['MarkPurchaseInvoiceReceived'](arg1);
 }
@@ -304,6 +312,10 @@ export function PopulateSampleData() {
 
 export function PrintInvoiceHTML(arg1) {
   return window['go']['main']['App']['PrintInvoiceHTML'](arg1);
+}
+
+export function ResetIntroStatus(arg1) {
+  return window['go']['main']['App']['ResetIntroStatus'](arg1);
 }
 
 export function SaveInvoiceHTML(arg1) {

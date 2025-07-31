@@ -175,6 +175,19 @@ func (d *Database) UpdateUserPassword(userID int, hashedPassword string) error {
 	return nil
 }
 
+// UpdateUserIntroViewed updates a user's intro viewed status
+func (d *Database) UpdateUserIntroViewed(userID int, viewed bool) error {
+	query := `UPDATE users SET intro_viewed = ?, updated_at = ? WHERE id = ?`
+	
+	now := time.Now()
+	_, err := d.db.Exec(query, viewed, now, userID)
+	if err != nil {
+		return fmt.Errorf("error updating user intro viewed status: %v", err)
+	}
+
+	return nil
+}
+
 // UpdateUserLastLogin updates a user's last login time
 func (d *Database) UpdateUserLastLogin(userID int) error {
 	query := `UPDATE users SET last_login = ?, updated_at = ? WHERE id = ?`

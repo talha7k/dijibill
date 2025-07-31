@@ -1466,3 +1466,20 @@ func (a *App) GetCompanyByID(id int) (*database.Company, error) {
 func (a *App) CreateCompany(company database.Company) error {
 	return a.db.CreateCompany(&company)
 }
+
+// Intro Management Methods
+
+func (a *App) MarkIntroAsViewed(userID int) error {
+	return a.db.UpdateUserIntroViewed(userID, true)
+}
+
+func (a *App) ResetIntroStatus(userID int) error {
+	return a.db.UpdateUserIntroViewed(userID, false)
+}
+
+func (a *App) GetCurrentUser() (*database.User, error) {
+	if a.currentSession == nil {
+		return nil, fmt.Errorf("no active session")
+	}
+	return a.db.GetUserByID(a.currentSession.UserID)
+}

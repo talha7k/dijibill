@@ -479,5 +479,21 @@ func (d *Database) runMigrations() error {
 		log.Println("Successfully applied multi-tenant migration")
 	}
 
+	// Check if intro_viewed column exists in users table
+	columnExists = false
+	err = d.db.QueryRow("SELECT COUNT(*) FROM pragma_table_info('users') WHERE name='intro_viewed'").Scan(&columnExists)
+	if err != nil {
+		return err
+	}
+
+	// Add intro_viewed column if it doesn't exist
+	if !columnExists {
+		_, err = d.db.Exec("ALTER TABLE users ADD COLUMN intro_viewed BOOLEAN DEFAULT 0")
+		if err != nil {
+			return fmt.Errorf("error adding intro_viewed column: %v", err)
+		}
+		log.Println("Added intro_viewed column to users table")
+	}
+
 	return nil
 }
