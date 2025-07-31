@@ -21,8 +21,7 @@
     slides.forEach((slide, index) => {
       preloadedData.set(index, {
         ...slide,
-        colorClasses: getColorClasses(slide.color),
-        iconSvg: getIconSvg(slide.icon)
+        colorClasses: getColorClasses(slide.color)
       });
     });
     
@@ -135,8 +134,7 @@
       const slide = slides[index];
       preloadedData.set(index, {
         ...slide,
-        colorClasses: getColorClasses(slide.color),
-        iconSvg: getIconSvg(slide.icon)
+        colorClasses: getColorClasses(slide.color)
       });
     }
   }
@@ -270,27 +268,6 @@
     return colorMap[color] || colorMap.blue;
   }
 
-  // Optimized icon mapping with memoization
-  const iconMap = {
-    'fas fa-rocket': 'M12 2l3.09 6.26L22 9l-5.91 5.74L17.82 21 12 18.27 6.18 21l1.73-6.26L2 9l6.91-1.74L12 2z',
-    'fas fa-chart-line': 'M3 17l6-6 4 4 8-8M21 7l-5 5-4-4-6 6',
-    'fas fa-file-invoice-dollar': 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zM14 8V3l5 5h-5zM8 12h8M8 16h8M8 20h8',
-    'fas fa-cash-register': 'M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2 2zM3 7a2 2 0 012-2h14a2 2 0 012 2v2H3V7z',
-    'fas fa-users': 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75M13 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0z',
-    'fas fa-truck': 'M1 3h15v13H1zM16 8h4l3 3v5h-7V8zM6.5 18a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM17.5 18a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z',
-    'fas fa-boxes': 'M12 2l3.09 6.26L22 9l-5.91 5.74L17.82 21 12 18.27 6.18 21l1.73-6.26L2 9l6.91-1.74L12 2z',
-    'fas fa-shopping-bag': 'M19 7h-3V6a4 4 0 0 0-8 0v1H5a1 1 0 0 0-1 1v11a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V8a1 1 0 0 0-1-1zM10 6a2 2 0 0 1 4 0v1h-4V6z',
-    'fas fa-file-invoice': 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zM14 8V3l5 5h-5z',
-    'fas fa-credit-card': 'M21 4H3a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zM3 10h18v8H3v-8z',
-    'fas fa-user-cog': 'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z',
-    'fas fa-cog': 'M12 15.5A3.5 3.5 0 0 1 8.5 12A3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7.43-2.53c.04-.32.07-.64.07-.97 0-.33-.03-.66-.07-1l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.31-.61-.22l-2.49 1c-.52-.39-1.06-.73-1.69-.98l-.37-2.65A.506.506 0 0 0 14 2h-4c-.25 0-.46.18-.5.42l-.37 2.65c-.63.25-1.17.59-1.69.98l-2.49-1c-.22-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64L4.57 11c-.04.34-.07.67-.07 1 0 .33.03.65.07.97l-2.11 1.66c-.19.15-.25.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1.01c.52.4 1.06.74 1.69.99l.37 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.37-2.65c.63-.26 1.17-.59 1.69-.99l2.49 1.01c.22.08.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.66Z',
-    'fas fa-check-circle': 'M22 11.08V12a10 10 0 1 1-5.93-9.14M22 4L12 14.01l-3-3'
-  };
-
-  function getIconSvg(iconClass) {
-    return iconMap[iconClass] || iconMap['fas fa-rocket'];
-  }
-
   // Use preloaded data for better performance
   $: currentSlideData = preloadedData.get(currentSlide) || slides[currentSlide];
   $: colorClasses = currentSlideData?.colorClasses || getColorClasses(currentSlideData?.color);
@@ -308,27 +285,27 @@
 
 {#if show}
   <div 
-    class="fixed inset-0 bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 z-50 overflow-hidden"
+    class="intro-slider-overlay"
     bind:this={mainContainer}
   >
     <!-- Animated background elements with GSAP -->
-    <div class="absolute inset-0 overflow-hidden">
+    <div class="intro-background">
       <div class="bg-orb bg-orb-1"></div>
       <div class="bg-orb bg-orb-2"></div>
       <div class="bg-orb bg-orb-3"></div>
     </div>
     
-    <!-- Full screen content container -->
-    <div class="relative h-full flex flex-col">
+    <!-- Use PageLayout for proper structure -->
+    <div class="intro-page-layout">
       <!-- Header -->
-      <div class="flex items-center justify-between p-8 border-b border-white/20">
-        <div class="flex items-center space-x-4">
+      <div class="intro-header">
+        <div class="intro-header-content">
           <div class="slide-number-badge {colorClasses.split(' ')[0]} {colorClasses.split(' ')[1]}">
             <span class="text-white font-bold text-lg">{currentSlide + 1}</span>
           </div>
-          <div>
-            <h2 class="text-2xl font-bold text-white">Getting Started</h2>
-            <p class="text-white/70 text-sm">Welcome to DijiBill</p>
+          <div class="intro-title-section">
+            <h2 class="intro-main-title">Getting Started</h2>
+            <p class="intro-subtitle">Welcome to DijiBill</p>
           </div>
         </div>
         <button
@@ -336,69 +313,61 @@
           class="skip-button"
           aria-label="Skip intro"
         >
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-          </svg>
+          <i class="fas fa-times text-xl"></i>
         </button>
       </div>
 
-      <!-- Main content area - takes up remaining space -->
-      <div class="flex-1 flex items-center justify-center p-8">
-        <div class="w-full max-w-7xl mx-auto">
-          <div class="slide-content-wrapper">
-            {#key currentSlide}
-              <div class="slide-content">
-                <!-- Left side - Main content -->
-                <div class="slide-main-content">
-                  <!-- Icon -->
-                  <div class="slide-icon-container">
-                    <div class="slide-icon-wrapper">
-                      <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="{currentSlideData?.iconSvg || getIconSvg(currentSlideData?.icon)}"></path>
-                      </svg>
-                    </div>
+      <!-- Main content area with proper constraints -->
+      <div class="intro-content-container">
+        <div class="intro-content-wrapper">
+          {#key currentSlide}
+            <div class="slide-content">
+              <!-- Left side - Main content -->
+              <div class="slide-main-content">
+                <!-- Icon -->
+                <div class="slide-icon-container">
+                  <div class="slide-icon-wrapper">
+                    <i class="{currentSlideData?.icon || 'fas fa-rocket'} text-white text-5xl"></i>
                   </div>
-
-                  <!-- Title -->
-                  <h3 class="slide-title">
-                    {currentSlideData?.title || ''}
-                  </h3>
-
-                  <!-- Description -->
-                  <p class="slide-description">
-                    {currentSlideData?.description || ''}
-                  </p>
                 </div>
 
-                <!-- Right side - Features -->
-                <div class="slide-features">
-                  <h4 class="slide-features-title">Key Features</h4>
-                  <div class="features-grid">
-                    {#each (currentSlideData?.features || []) as feature, index}
-                      <div class="feature-card" style="--delay: {index * 50}ms">
-                        <div class="feature-content">
-                          <div class="feature-icon">
-                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                            </svg>
-                          </div>
-                          <div class="feature-text">
-                            <h5 class="feature-title">{feature.title}</h5>
-                            <p class="feature-description">{feature.description}</p>
-                          </div>
+                <!-- Title -->
+                <h3 class="slide-title">
+                  {currentSlideData?.title || ''}
+                </h3>
+
+                <!-- Description -->
+                <p class="slide-description">
+                  {currentSlideData?.description || ''}
+                </p>
+              </div>
+
+              <!-- Right side - Features -->
+              <div class="slide-features">
+                <h4 class="slide-features-title">Key Features</h4>
+                <div class="features-grid">
+                  {#each (currentSlideData?.features || []) as feature, index}
+                    <div class="feature-card" style="--delay: {index * 50}ms">
+                      <div class="feature-content">
+                        <div class="feature-icon">
+                          <i class="fas fa-check text-white text-sm"></i>
+                        </div>
+                        <div class="feature-text">
+                          <h5 class="feature-title">{feature.title}</h5>
+                          <p class="feature-description">{feature.description}</p>
                         </div>
                       </div>
-                    {/each}
-                  </div>
+                    </div>
+                  {/each}
                 </div>
               </div>
-            {/key}
-          </div>
+            </div>
+          {/key}
         </div>
       </div>
 
       <!-- Bottom section with progress and navigation -->
-      <div class="bg-white/5 backdrop-blur-xl border-t border-white/20">
+      <div class="intro-footer">
         <!-- Progress Indicators -->
         <div class="progress-container">
           <div class="progress-indicators">
@@ -421,10 +390,8 @@
             class="nav-button nav-button-prev"
             aria-label="Previous slide"
           >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-            </svg>
-            <span class="font-medium">Previous</span>
+            <i class="fas fa-chevron-left"></i>
+            <span class="font-medium hidden sm:inline">Previous</span>
           </button>
 
           <div class="slide-counter">
@@ -437,15 +404,12 @@
             class="nav-button nav-button-next"
             aria-label={currentSlide === slides.length - 1 ? 'Get started' : 'Next slide'}
           >
-            <span>{currentSlide === slides.length - 1 ? 'Get Started' : 'Next'}</span>
+            <span class="hidden sm:inline">{currentSlide === slides.length - 1 ? 'Get Started' : 'Next'}</span>
+            <span class="sm:hidden">{currentSlide === slides.length - 1 ? 'Start' : 'Next'}</span>
             {#if currentSlide === slides.length - 1}
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
+              <i class="fas fa-check-circle"></i>
             {:else}
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-              </svg>
+              <i class="fas fa-chevron-right"></i>
             {/if}
           </button>
         </div>
@@ -455,6 +419,22 @@
 {/if}
 
 <style>
+  /* Main overlay container */
+  .intro-slider-overlay {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(to bottom right, #312e81, #7c3aed, #ec4899);
+    z-index: 50;
+    overflow: hidden;
+  }
+
+  /* Background elements */
+  .intro-background {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+
   /* GSAP-powered background orbs */
   .bg-orb {
     position: absolute;
@@ -485,6 +465,78 @@
     background: #6366f1;
   }
 
+  /* Page layout structure */
+  .intro-page-layout {
+    position: relative;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    max-width: 100vw;
+    overflow: hidden;
+  }
+
+  /* Header section */
+  .intro-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(12px);
+    flex-shrink: 0;
+  }
+
+  .intro-header-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .intro-title-section {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .intro-main-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: white;
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  .intro-subtitle {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.875rem;
+    margin: 0;
+  }
+
+  /* Content container with proper constraints */
+  .intro-content-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    overflow-y: auto;
+    min-height: 0; /* Important for flex child */
+  }
+
+  .intro-content-wrapper {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  /* Footer section */
+  .intro-footer {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    flex-shrink: 0;
+  }
+
   /* Slide components */
   .slide-number-badge {
     width: 3rem;
@@ -496,14 +548,18 @@
     justify-content: center;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
     will-change: transform;
+    flex-shrink: 0;
   }
 
   .skip-button {
     color: rgba(255, 255, 255, 0.6);
     transition: color 0.3s ease;
-    padding: 0.5rem;
-    border-radius: 9999px;
+    padding: 0.75rem;
+    border-radius: 50%;
     will-change: transform;
+    border: none;
+    background: none;
+    cursor: pointer;
   }
 
   .skip-button:hover {
@@ -511,29 +567,28 @@
     background-color: rgba(255, 255, 255, 0.1);
   }
 
-  .slide-content-wrapper {
-    position: relative;
-    min-height: 500px;
-  }
-
   .slide-content {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 3rem;
-    align-items: center;
+    gap: 2rem;
+    align-items: start;
     will-change: transform;
-    height: 100%;
+    min-height: 400px;
   }
 
   @media (min-width: 1024px) {
     .slide-content {
       grid-template-columns: 1fr 1fr;
       gap: 4rem;
+      align-items: center;
     }
   }
 
   .slide-main-content {
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
   }
 
   @media (min-width: 1024px) {
@@ -543,7 +598,6 @@
   }
 
   .slide-icon-container {
-    margin-bottom: 2rem;
     display: flex;
     justify-content: center;
   }
@@ -555,8 +609,8 @@
   }
 
   .slide-icon-wrapper {
-    width: 8rem;
-    height: 8rem;
+    width: 6rem;
+    height: 6rem;
     background-color: rgba(255, 255, 255, 0.2);
     backdrop-filter: blur(4px);
     border-radius: 1.5rem;
@@ -568,25 +622,40 @@
     will-change: transform;
   }
 
+  @media (min-width: 1024px) {
+    .slide-icon-wrapper {
+      width: 8rem;
+      height: 8rem;
+    }
+  }
+
   .slide-title {
-    font-size: 2.5rem;
+    font-size: 2rem;
     font-weight: 700;
     color: white;
-    margin-bottom: 1.5rem;
+    margin: 0;
     line-height: 1.2;
   }
 
   @media (min-width: 1024px) {
     .slide-title {
-      font-size: 3rem;
+      font-size: 2.5rem;
     }
   }
 
   .slide-description {
     color: rgba(255, 255, 255, 0.8);
-    font-size: 1.25rem;
+    font-size: 1.125rem;
     line-height: 1.75;
-    max-width: 600px;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  @media (min-width: 1024px) {
+    .slide-description {
+      margin: 0;
+      font-size: 1.25rem;
+    }
   }
 
   .slide-features {
@@ -596,29 +665,30 @@
   }
 
   .slide-features-title {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     font-weight: 600;
     color: white;
-    margin-bottom: 2rem;
+    margin: 0;
     text-align: center;
   }
 
   @media (min-width: 1024px) {
     .slide-features-title {
       text-align: left;
+      font-size: 1.5rem;
     }
   }
 
   .features-grid {
     display: grid;
-    gap: 1.5rem;
+    gap: 1rem;
   }
 
   .feature-card {
     background-color: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(4px);
-    border-radius: 1rem;
-    padding: 1.5rem;
+    border-radius: 0.75rem;
+    padding: 1rem;
     border: 1px solid rgba(255, 255, 255, 0.2);
     transition: background-color 0.3s ease, transform 0.3s ease;
     will-change: transform;
@@ -632,19 +702,19 @@
   .feature-content {
     display: flex;
     align-items: flex-start;
-    gap: 1rem;
+    gap: 0.75rem;
   }
 
   .feature-icon {
-    width: 2.5rem;
-    height: 2.5rem;
+    width: 2rem;
+    height: 2rem;
     background-color: rgba(255, 255, 255, 0.2);
-    border-radius: 0.75rem;
+    border-radius: 0.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    margin-top: 0.25rem;
+    margin-top: 0.125rem;
   }
 
   .feature-text {
@@ -654,29 +724,30 @@
   .feature-title {
     font-weight: 600;
     color: white;
-    font-size: 1rem;
-    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    margin: 0 0 0.25rem 0;
   }
 
   .feature-description {
     color: rgba(255, 255, 255, 0.7);
-    font-size: 0.875rem;
-    line-height: 1.75;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    margin: 0;
   }
 
   .progress-container {
-    padding: 1.5rem 2rem;
+    padding: 1rem 2rem;
   }
 
   .progress-indicators {
     display: flex;
     justify-content: center;
-    gap: 1rem;
+    gap: 0.75rem;
   }
 
   .progress-dot {
-    width: 1rem;
-    height: 1rem;
+    width: 0.75rem;
+    height: 0.75rem;
     border-radius: 50%;
     background-color: rgba(255, 255, 255, 0.3);
     transition: all 0.3s ease;
@@ -703,24 +774,26 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 2rem;
+    padding: 1.5rem 2rem;
   }
 
   .nav-button {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    padding: 1rem 2rem;
-    border-radius: 1rem;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.75rem;
     transition: all 0.3s ease;
     border: none;
     cursor: pointer;
     font-weight: 500;
     will-change: transform;
+    font-size: 0.875rem;
   }
 
   .nav-button-prev {
     color: rgba(255, 255, 255, 0.7);
+    background: none;
   }
 
   .nav-button-prev:hover:not(:disabled) {
@@ -736,7 +809,7 @@
   .nav-button-next {
     background-color: white;
     color: #374151;
-    padding: 1rem 2.5rem;
+    padding: 0.75rem 2rem;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   }
 
@@ -755,7 +828,44 @@
   .slide-counter {
     color: rgba(255, 255, 255, 0.6);
     font-weight: 500;
-    font-size: 1rem;
+    font-size: 0.875rem;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .intro-header {
+      padding: 1rem;
+    }
+
+    .intro-content-container {
+      padding: 1rem;
+    }
+
+    .navigation-container {
+      padding: 1rem;
+    }
+
+    .slide-content {
+      gap: 1.5rem;
+      min-height: 300px;
+    }
+
+    .slide-title {
+      font-size: 1.75rem;
+    }
+
+    .slide-description {
+      font-size: 1rem;
+    }
+
+    .nav-button {
+      padding: 0.5rem 1rem;
+      font-size: 0.8125rem;
+    }
+
+    .nav-button-next {
+      padding: 0.5rem 1.5rem;
+    }
   }
 
   /* Performance optimizations */

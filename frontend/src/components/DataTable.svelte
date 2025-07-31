@@ -43,25 +43,28 @@
     dispatch('secondary-action', { action })
   }
 
-  // Helper function to convert FontAwesome icon names to SVG icons
-  function getSvgIcon(iconName) {
-    const icons = {
-      'fa-table': 'M3 3h18v18H3V3zm2 2v14h14V5H5zm2 2h10v2H7V7zm0 4h10v2H7v-2zm0 4h10v2H7v-2z',
-      'fa-file-invoice': 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
-      'fa-users': 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z',
-      'fa-credit-card': 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z',
-      'fa-shopping-cart': 'M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17M17 13v4a2 2 0 01-2 2H9a2 2 0 01-2-2v-4m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01',
-      'fa-truck': 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z',
-      'fa-ruler': 'M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM7 3H5v12a2 2 0 104 0V3z',
-      'fa-percentage': 'M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z',
-      'fa-box': 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4',
-      'fa-tags': 'M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z',
-      'fa-plus': 'M12 4v16m8-8H4',
-      'fa-edit': 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z',
-      'fa-trash': 'M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16',
-      'fa-eye': 'M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z'
+  // Helper function to get Font Awesome icon class
+  function getFaIcon(iconName) {
+    // Convert icon names to proper Font Awesome classes
+    const iconMap = {
+      'fa-table': 'fas fa-table',
+      'fa-file-invoice': 'fas fa-file-invoice',
+      'fa-users': 'fas fa-users',
+      'fa-credit-card': 'fas fa-credit-card',
+      'fa-shopping-cart': 'fas fa-shopping-cart',
+      'fa-truck': 'fas fa-truck',
+      'fa-ruler': 'fas fa-ruler',
+      'fa-percentage': 'fas fa-percentage',
+      'fa-box': 'fas fa-box',
+      'fa-tags': 'fas fa-tags',
+      'fa-plus': 'fas fa-plus',
+      'fa-edit': 'fas fa-edit',
+      'fa-trash': 'fas fa-trash',
+      'fa-eye': 'fas fa-eye',
+      'fa-download': 'fas fa-download',
+      'fa-undo': 'fas fa-undo'
     }
-    return icons[iconName] || icons['fa-table'] // fallback to table icon
+    return iconMap[iconName] || 'fas fa-table' // fallback to table icon
   }
 
   function handleRowAction(action, item) {
@@ -133,9 +136,7 @@
       </div>
     {:else if data.length === 0}
       <div class="empty-state">
-        <svg class="w-12 h-12 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={getSvgIcon(emptyStateIcon)}></path>
-        </svg>
+        <i class="{getFaIcon(emptyStateIcon)} text-4xl mb-4 text-gray-400"></i>
         <h3>{emptyStateTitle}</h3>
         <p>
           {searchTerm ? 'No items match your search criteria.' : emptyStateMessage}
@@ -143,9 +144,7 @@
         {#if !searchTerm && primaryAction}
           <button class="btn btn-primary" on:click={handlePrimaryAction}>
             {#if primaryAction.icon}
-              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={getSvgIcon(primaryAction.icon)}></path>
-              </svg>
+              <i class="{getFaIcon(primaryAction.icon)} mr-2"></i>
             {/if}
             {primaryAction.text}
           </button>
@@ -192,9 +191,7 @@
                             disabled={loading}
                           >
                             {#if action.icon}
-                              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={getSvgIcon(action.icon)}></path>
-                              </svg>
+                              <i class="{getFaIcon(action.icon)}"></i>
                             {:else}
                               {action.text}
                             {/if}
@@ -314,7 +311,7 @@
     text-align: center;
   }
 
-  .empty-state svg {
+  .empty-state i {
     color: var(--color-text-muted);
     margin-bottom: 1rem;
   }
