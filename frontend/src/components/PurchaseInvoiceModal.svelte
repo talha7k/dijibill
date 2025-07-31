@@ -106,6 +106,17 @@
         vat_rate: invoice?.vat_rate?.toString() || '15',
         vat_inclusive: invoice?.vat_inclusive || false
       }
+      // TODO: Load invoice items from backend when editing
+      invoiceItems = [
+        {
+          product_id: 0,
+          quantity: 1,
+          unit_price: 0,
+          vat_rate: 15,
+          vat_amount: 0,
+          total_amount: 0
+        }
+      ]
     } else {
       invoiceForm = {
         invoice_number: '',
@@ -123,8 +134,25 @@
         vat_rate: '15',
         vat_inclusive: false
       }
+      // Reset invoice items for new invoice
+      invoiceItems = [
+        {
+          product_id: 0,
+          quantity: 1,
+          unit_price: 0,
+          vat_rate: 15,
+          vat_amount: 0,
+          total_amount: 0
+        }
+      ]
     }
     errors = {}
+    formErrors = {
+      invoice_number: '',
+      supplier_id: '',
+      issue_date: '',
+      items: []
+    }
   }
 
   // Calculate due date based on payment terms
@@ -146,30 +174,6 @@
       const dueDate = new Date(invoiceDate)
       dueDate.setDate(dueDate.getDate() + daysToAdd)
       invoiceForm.due_date = dueDate.toISOString().split('T')[0]
-    }
-  }
-
-  // Calculate VAT and total amount based on amount, VAT rate, and inclusive/exclusive setting
-  $: if (invoiceForm.amount && invoiceForm.vat_rate) {
-    const amount = parseFloat(invoiceForm.amount) || 0
-    const vatRate = parseFloat(invoiceForm.vat_rate) || 0
-    
-    if (invoiceForm.vat_inclusive) {
-      // Amount includes VAT, so we need to extract the VAT
-      const vatAmount = (amount * vatRate) / (100 + vatRate)
-      invoiceForm = {
-        ...invoiceForm,
-        vat_amount: vatAmount.toFixed(2),
-        total_amount: amount.toFixed(2)
-      }
-    } else {
-      // Amount excludes VAT, so we add VAT on top
-      const vatAmount = (amount * vatRate) / 100
-      invoiceForm = {
-        ...invoiceForm,
-        vat_amount: vatAmount.toFixed(2),
-        total_amount: (amount + vatAmount).toFixed(2)
-      }
     }
   }
 
@@ -565,38 +569,18 @@
 
     <!-- Amount Information -->
     <div class="glass-card p-6">
-      <h3 class="heading-4 mb-4">Amount Information</h3>
+      <h3 class="heading-4 mb-4">Amount Summary (Calculated from Items)</h3>
       
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- VAT Type Selection -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <FormField
-          label="VAT Type"
-          labelArabic="نوع ضريبة القيمة المضافة"
-          type="select"
-          bind:value={invoiceForm.vat_rate}
-          options={taxRateOptions}
-          placeholder="Select VAT rate"
-          error={errors.vat_rate}
-        />
-
-        <!-- VAT Inclusive Checkbox -->
-        <FormField
-          label="Amount includes VAT"
-          labelArabic="المبلغ يشمل ضريبة القيمة المضافة"
-          type="checkbox"
-          bind:checked={invoiceForm.vat_inclusive}
-          error={errors.vat_inclusive}
-        />
-
-        <FormField
-          label={invoiceForm.vat_inclusive ? "Total Amount (Including VAT)" : "Amount (Excluding VAT)"}
-          labelArabic={invoiceForm.vat_inclusive ? "المبلغ الإجمالي (شامل الضريبة)" : "المبلغ (بدون ضريبة)"}
+          label="Subtotal (Excluding VAT)"
+          labelArabic="المبلغ الفرعي (بدون ضريبة)"
           type="number"
           bind:value={invoiceForm.amount}
           placeholder="0.00"
           step="0.01"
           min="0"
-          required={true}
+          readonly={true}
           error={errors.amount}
         />
 
