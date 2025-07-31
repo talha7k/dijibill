@@ -18,6 +18,8 @@
   import Login from './Login.svelte'
   import Signup from './Signup.svelte'
   import IntroSlider from './components/IntroSlider.svelte'
+  import UserProfile from './components/UserProfile.svelte'
+  import AccessControl from './components/AccessControl.svelte'
   import {Greet} from '../wailsjs/go/main/App.js'
 
   let currentView = 'dashboard' // Default to dashboard
@@ -35,6 +37,10 @@
   // Intro slider state
   let showIntroSlider = false
   let userHasViewedIntro = false
+  
+  // Modal states
+  let showUserProfile = false
+  let showAccessControl = false
   
   // Get runtime status for display
   $: runtimeStatus = $wailsReady ? 'Runtime Ready' : $wailsError ? 'Runtime Error' : 'Initializing...'
@@ -215,6 +221,78 @@
       currentCompany = null
     } catch (error) {
       console.error('Error during logout:', error)
+    }
+  }
+
+  // Handle profile update
+  async function handleProfileUpdate(event) {
+    try {
+      const { UpdateUser } = await import('../wailsjs/go/main/App')
+      const { database } = await import('../wailsjs/go/models')
+      const updatedData = event.detail
+      
+      // Create updated user object using the User constructor
+      const updatedUser = new database.User({
+        id: currentUser.id,
+        username: updatedData.username,
+        email: updatedData.email,
+        first_name: updatedData.first_name,
+        last_name: updatedData.last_name,
+        role: currentUser.role,
+        company_id: currentCompany.id,
+        password: currentUser.password || '',
+        is_active: currentUser.is_active !== undefined ? currentUser.is_active : true,
+        intro_viewed: currentUser.intro_viewed || false,
+        created_at: currentUser.created_at || new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      
+      await UpdateUser(updatedUser)
+      
+      // Update current user state
+      currentUser = {
+        ...currentUser,
+        username: updatedData.username,
+        email: updatedData.email,
+        first_name: updatedData.first_name,
+        last_name: updatedData.last_name
+      }
+      
+      showUserProfile = false
+      console.log('Profile updated successfully')
+    } catch (error) {
+      console.error('Error updating profile:', error)
+    }
+  }
+
+  // Handle password change
+  async function handlePasswordChange(event) {
+    try {
+      const { UpdateUser } = await import('../wailsjs/go/main/App')
+      const { database } = await import('../wailsjs/go/models')
+      const { newPassword } = event.detail
+      
+      // Create updated user object using the User constructor
+      const updatedUser = new database.User({
+        id: currentUser.id,
+        username: currentUser.username,
+        email: currentUser.email,
+        first_name: currentUser.first_name,
+        last_name: currentUser.last_name,
+        role: currentUser.role,
+        company_id: currentCompany.id,
+        password: newPassword,
+        is_active: currentUser.is_active !== undefined ? currentUser.is_active : true,
+        intro_viewed: currentUser.intro_viewed || false,
+        created_at: currentUser.created_at || new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      
+      await UpdateUser(updatedUser)
+      showUserProfile = false
+      console.log('Password changed successfully')
+    } catch (error) {
+      console.error('Error changing password:', error)
     }
   }
 
@@ -575,22 +653,52 @@
           <!-- User Menu -->
           {#if isAuthenticated && currentUser}
             <div class="dropdown dropdown-end">
-              <div role="button" class="btn btn-ghost btn-circle text-white">
+              <div tabindex="0" role="button" class="btn btn-ghost btn-circle text-white">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                 </svg>
               </div>
-              <ul class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
+              <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[9999] p-2 shadow bg-base-100 rounded-box w-52">
                 <li class="menu-title">
                   <span class="text-xs text-gray-500">Signed in as</span>
                   <span class="font-semibold">{currentUser.username}</span>
                   <span class="text-xs text-gray-500 capitalize">{currentUser.role}</span>
                 </li>
                 <div class="divider my-1"></div>
-                <li><button class="btn btn-ghost justify-start">Profile</button></li>
-                <li><button class="btn btn-ghost justify-start">Settings</button></li>
+                <li>
+                  <button class="btn btn-ghost justify-start" on:click={() => showUserProfile = true}>
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                    Profile
+                  </button>
+                </li>
+                <li>
+                  <button class="btn btn-ghost justify-start" on:click={() => showAccessControl = true}>
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                    </svg>
+                    Access Control
+                  </button>
+                </li>
+                <li>
+                  <button class="btn btn-ghost justify-start" on:click={() => currentView = 'general-settings'}>
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    Settings
+                  </button>
+                </li>
                 <div class="divider my-1"></div>
-                <li><button class="btn btn-ghost justify-start text-error" on:click={handleLogout}>Logout</button></li>
+                <li>
+                  <button class="btn btn-ghost justify-start text-error" on:click={handleLogout}>
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                    </svg>
+                    Logout
+                  </button>
+                </li>
               </ul>
             </div>
           {/if}
@@ -681,5 +789,25 @@
   <!-- Intro Slider Overlay -->
   {#if showIntroSlider}
     <IntroSlider show={showIntroSlider} on:complete={handleIntroComplete} />
+  {/if}
+  
+  <!-- User Profile Modal -->
+  {#if showUserProfile && currentUser}
+    <UserProfile 
+      currentUser={currentUser}
+      show={showUserProfile}
+      on:close={() => showUserProfile = false}
+      on:update-profile={handleProfileUpdate}
+      on:change-password={handlePasswordChange}
+    />
+  {/if}
+  
+  <!-- Access Control Modal -->
+  {#if showAccessControl && currentUser}
+    <AccessControl 
+      currentUser={currentUser}
+      show={showAccessControl}
+      on:close={() => showAccessControl = false}
+    />
   {/if}
 </div>
