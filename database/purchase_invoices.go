@@ -2,6 +2,7 @@ package database
 
 import (
 	"fmt"
+	"time"
 )
 
 // PurchaseInvoice operations
@@ -22,7 +23,7 @@ func (d *Database) CreatePurchaseInvoice(invoice *PurchaseInvoice) error {
 		INSERT INTO purchase_invoices (invoice_number, supplier_id, issue_date, due_date, sub_total, vat_amount, total_amount, status, notes, notes_arabic)
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
-	result, err := tx.Exec(query, invoice.InvoiceNumber, invoice.SupplierID, invoice.IssueDate, invoice.DueDate,
+	result, err := tx.Exec(query, invoice.InvoiceNumber, invoice.SupplierID, invoice.IssueDate.Time, invoice.DueDate.Time,
 		invoice.SubTotal, invoice.VATAmount, invoice.TotalAmount, invoice.Status, invoice.Notes, invoice.NotesArabic)
 	if err != nil {
 		return err
@@ -70,21 +71,30 @@ func (d *Database) GetPurchaseInvoices() ([]PurchaseInvoice, error) {
 	for rows.Next() {
 		var inv PurchaseInvoice
 		var supplier Supplier
-		var supplierID *int
+		var supplierID interface{}
+		var issueDate, dueDate time.Time
+		var vatAmount float64
 		
 		scanErr := rows.Scan(
-			&inv.ID, &inv.InvoiceNumber, &inv.SupplierID, &inv.IssueDate, &inv.DueDate,
-			&inv.SubTotal, &inv.VATAmount, &inv.TotalAmount, &inv.Status, &inv.Notes, &inv.NotesArabic,
-			&inv.CreatedAt, &inv.UpdatedAt,
-			&supplierID, &supplier.CompanyName, &supplier.ContactPerson, &supplier.Email, 
-			&supplier.Phone, &supplier.Address, &supplier.VATNumber)
+			&inv.ID, &inv.InvoiceNumber, &inv.SupplierID, 
+			&issueDate, &dueDate, &inv.SubTotal, &vatAmount, &inv.TotalAmount, 
+			&inv.Status, &inv.Notes, &inv.NotesArabic, &inv.CreatedAt, &inv.UpdatedAt,
+			&supplierID, &supplier.CompanyName, &supplier.ContactPerson, &supplier.Email, &supplier.Phone, 
+			&supplier.Address, &supplier.VATNumber)
 		if scanErr != nil {
 			return nil, scanErr
 		}
 		
+		// Convert time.Time to custom Date type
+		inv.IssueDate = Date{Time: issueDate}
+		inv.DueDate = Date{Time: dueDate}
+		
+		// Assign float64 directly
+		inv.VATAmount = vatAmount
+		
 		// Only assign supplier if it exists
 		if supplierID != nil {
-			supplier.ID = *supplierID
+			supplier.ID = int(supplierID.(int64))
 			inv.Supplier = &supplier
 		}
 		
@@ -97,12 +107,21 @@ func (d *Database) GetPurchaseInvoiceByID(id int) (*PurchaseInvoice, error) {
 	query := `SELECT id, invoice_number, supplier_id, issue_date, due_date, sub_total, vat_amount, total_amount, status, notes, notes_arabic, created_at, updated_at FROM purchase_invoices WHERE id = ?`
 
 	var inv PurchaseInvoice
-	err := d.db.QueryRow(query, id).Scan(&inv.ID, &inv.InvoiceNumber, &inv.SupplierID, &inv.IssueDate, &inv.DueDate,
-		&inv.SubTotal, &inv.VATAmount, &inv.TotalAmount, &inv.Status, &inv.Notes, &inv.NotesArabic,
+	var issueDate, dueDate time.Time
+	var vatAmount float64
+	err := d.db.QueryRow(query, id).Scan(&inv.ID, &inv.InvoiceNumber, &inv.SupplierID, &issueDate, &dueDate,
+		&inv.SubTotal, &vatAmount, &inv.TotalAmount, &inv.Status, &inv.Notes, &inv.NotesArabic,
 		&inv.CreatedAt, &inv.UpdatedAt)
 	if err != nil {
 		return nil, err
 	}
+
+	// Convert time.Time to custom Date type
+	inv.IssueDate = Date{Time: issueDate}
+	inv.DueDate = Date{Time: dueDate}
+	
+	// Assign float64 directly
+	inv.VATAmount = vatAmount
 
 	// Get supplier only if SupplierID is not 0
 	if inv.SupplierID > 0 {
@@ -136,7 +155,7 @@ func (d *Database) UpdatePurchaseInvoice(invoice *PurchaseInvoice) error {
 		    sub_total = ?, vat_amount = ?, total_amount = ?, status = ?, notes = ?, notes_arabic = ?, updated_at = CURRENT_TIMESTAMP
 		WHERE id = ?`
 
-	_, err = tx.Exec(query, invoice.InvoiceNumber, invoice.SupplierID, invoice.IssueDate, invoice.DueDate,
+	_, err = tx.Exec(query, invoice.InvoiceNumber, invoice.SupplierID, invoice.IssueDate.Time, invoice.DueDate.Time,
 		invoice.SubTotal, invoice.VATAmount, invoice.TotalAmount, invoice.Status, invoice.Notes, invoice.NotesArabic, invoice.ID)
 	if err != nil {
 		return err

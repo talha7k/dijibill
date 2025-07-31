@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "postbuild": "../fix-models.sh",
     "preview": "vite preview"
   },
   "devDependencies": {

@@ -1,8 +1,55 @@
 package database
 
 import (
+	"encoding/json"
+	"fmt"
+	"strings"
 	"time"
 )
+
+// Date is a custom type that can handle both "YYYY-MM-DD" and RFC3339 formats
+type Date struct {
+	time.Time
+}
+
+// UnmarshalJSON implements json.Unmarshaler interface to handle date parsing
+func (d *Date) UnmarshalJSON(data []byte) error {
+	// Remove quotes from JSON string
+	str := strings.Trim(string(data), `"`)
+	
+	if str == "null" || str == "" {
+		d.Time = time.Time{}
+		return nil
+	}
+	
+	// Try parsing as "YYYY-MM-DD" format first (from frontend)
+	if t, err := time.Parse("2006-01-02", str); err == nil {
+		d.Time = t
+		return nil
+	}
+	
+	// Try parsing as RFC3339 format (standard Go format)
+	if t, err := time.Parse(time.RFC3339, str); err == nil {
+		d.Time = t
+		return nil
+	}
+	
+	// Try parsing as "YYYY-MM-DD HH:MM:SS" format
+	if t, err := time.Parse("2006-01-02 15:04:05", str); err == nil {
+		d.Time = t
+		return nil
+	}
+	
+	return fmt.Errorf("cannot parse date: %s", str)
+}
+
+// MarshalJSON implements json.Marshaler interface
+func (d Date) MarshalJSON() ([]byte, error) {
+	if d.Time.IsZero() {
+		return []byte("null"), nil
+	}
+	return json.Marshal(d.Time.Format("2006-01-02"))
+}
 
 // Customer represents a customer in the system
 type Customer struct {
@@ -95,8 +142,8 @@ type SalesInvoice struct {
 	Customer         *Customer          `json:"customer,omitempty"`
 	SalesCategoryID  int                `json:"sales_category_id"`
 	SalesCategory    *SalesCategory     `json:"sales_category,omitempty"`
-	IssueDate        time.Time          `json:"issue_date"`
-	DueDate          time.Time          `json:"due_date"`
+	IssueDate        Date               `json:"issue_date"`
+	DueDate          Date               `json:"due_date"`
 	SubTotal         float64            `json:"sub_total"`
 	VATAmount        float64            `json:"vat_amount"`
 	TotalAmount      float64            `json:"total_amount"`
@@ -129,10 +176,10 @@ type PurchaseInvoice struct {
 	InvoiceNumber    string                `json:"invoice_number"`
 	SupplierID       int                   `json:"supplier_id"`
 	Supplier         *Supplier             `json:"supplier,omitempty"`
-	IssueDate        time.Time             `json:"issue_date"`
-	DueDate          time.Time             `json:"due_date"`
+	IssueDate        Date                  `json:"issue_date"`
+	DueDate          Date                  `json:"due_date"`
 	SubTotal         float64               `json:"sub_total"`
-	VATAmount        float64               `json:"vat_amount"`
+	VATAmount        float64               `json:"vat_amount,string"`
 	TotalAmount      float64               `json:"total_amount"`
 	Status           string                `json:"status"` // draft, received, paid, cancelled
 	Notes            string                `json:"notes"`

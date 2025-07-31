@@ -35,7 +35,7 @@ func (q *ZATCAQRService) GenerateZATCAQRCodeOnDemand(invoice *database.Invoice, 
 	qrData := ZATCAQRData{
 		SellerName:  company.Name,
 		VATNumber:   company.VATNumber,
-		Timestamp:   invoice.IssueDate,
+		Timestamp:   invoice.IssueDate.Time,
 		TotalAmount: invoice.TotalAmount,
 		VATAmount:   invoice.VATAmount,
 	}

@@ -138,7 +138,7 @@ func (a *App) DeleteProduct(id int) error {
 	return a.db.DeleteProduct(id)
 }
 
-// Invoice Management Methods
+// Sales Invoice Management Methods
 
 func (a *App) CreateInvoice(invoice database.Invoice) error {
 	// Calculate totals
@@ -592,7 +592,7 @@ func (a *App) GenerateSampleQRCode() (string, error) {
 
 	// Create sample invoice data
 	sampleInvoice := &database.Invoice{
-		IssueDate:   time.Now(),
+		IssueDate:   database.Date{Time: time.Now()},
 		TotalAmount: 115.0,
 		VATAmount:   15.0,
 	}
@@ -608,7 +608,7 @@ func (a *App) GenerateSampleQRCode() (string, error) {
 	qrData := ZATCAQRData{
 		SellerName:  sampleCompany.Name,
 		VATNumber:   sampleCompany.VATNumber,
-		Timestamp:   sampleInvoice.IssueDate,
+		Timestamp:   sampleInvoice.IssueDate.Time,
 		TotalAmount: sampleInvoice.TotalAmount,
 		VATAmount:   sampleInvoice.VATAmount,
 	}
@@ -622,8 +622,6 @@ func (a *App) GenerateSampleQRCode() (string, error) {
 	// Return the TLV Base64 content (this is what should be in the QR code)
 	return base64.StdEncoding.EncodeToString(tlvBytes), nil
 }
-
-
 
 // Utility Methods
 
@@ -742,8 +740,8 @@ func (a *App) CreateSampleData() error {
 		InvoiceNumber:   "INV-2024-001",
 		CustomerID:      customers[0].ID,
 		SalesCategoryID: salesCategories[0].ID,
-		IssueDate:       time.Now(),
-		DueDate:         time.Now().AddDate(0, 0, 30), // 30 days from now
+		IssueDate:       database.Date{Time: time.Now()},
+		DueDate:         database.Date{Time: time.Now().AddDate(0, 0, 30)}, // 30 days from now
 		Status:          "draft",
 		Notes:           "This is a sample invoice for testing",
 		NotesArabic:     "هذه فاتورة تجريبية للاختبار",
@@ -973,8 +971,8 @@ func (a *App) PopulateSampleData() error {
 			InvoiceNumber:   "INV-2024-001",
 			CustomerID:      createdCustomers[0].ID,
 			SalesCategoryID: salesCategories[0].ID,
-			IssueDate:       time.Now().AddDate(0, 0, -10),
-			DueDate:         time.Now().AddDate(0, 0, 20),
+			IssueDate:       database.Date{Time: time.Now().AddDate(0, 0, -10)},
+			DueDate:         database.Date{Time: time.Now().AddDate(0, 0, 20)},
 			Status:          "paid",
 			Notes:           "Laptop purchase for office setup",
 			NotesArabic:     "شراء جهاز كمبيوتر محمول لإعداد المكتب",
@@ -997,8 +995,8 @@ func (a *App) PopulateSampleData() error {
 			InvoiceNumber:   "INV-2024-002",
 			CustomerID:      createdCustomers[1].ID,
 			SalesCategoryID: salesCategories[0].ID,
-			IssueDate:       time.Now().AddDate(0, 0, -5),
-			DueDate:         time.Now().AddDate(0, 0, 25),
+			IssueDate:       database.Date{Time: time.Now().AddDate(0, 0, -5)},
+			DueDate:         database.Date{Time: time.Now().AddDate(0, 0, 25)},
 			Status:          "pending",
 			Notes:           "Office furniture order",
 			NotesArabic:     "طلب أثاث مكتبي",
@@ -1021,8 +1019,8 @@ func (a *App) PopulateSampleData() error {
 			InvoiceNumber:   "INV-2024-003",
 			CustomerID:      createdCustomers[2].ID,
 			SalesCategoryID: salesCategories[0].ID,
-			IssueDate:       time.Now().AddDate(0, 0, -3),
-			DueDate:         time.Now().AddDate(0, 0, 27),
+			IssueDate:       database.Date{Time: time.Now().AddDate(0, 0, -3)},
+			DueDate:         database.Date{Time: time.Now().AddDate(0, 0, 27)},
 			Status:          "draft",
 			Notes:           "Monitor and accessories",
 			NotesArabic:     "شاشة وملحقات",
@@ -1039,8 +1037,8 @@ func (a *App) PopulateSampleData() error {
 			InvoiceNumber:   "INV-2024-004",
 			CustomerID:      createdCustomers[3].ID,
 			SalesCategoryID: salesCategories[0].ID,
-			IssueDate:       time.Now().AddDate(0, 0, -1),
-			DueDate:         time.Now().AddDate(0, 0, 29),
+			IssueDate:       database.Date{Time: time.Now().AddDate(0, 0, -1)},
+			DueDate:         database.Date{Time: time.Now().AddDate(0, 0, 29)},
 			Status:          "sent",
 			Notes:           "Complete workstation setup",
 			NotesArabic:     "إعداد محطة عمل كاملة",
@@ -1069,8 +1067,8 @@ func (a *App) PopulateSampleData() error {
 			InvoiceNumber:   "INV-2024-005",
 			CustomerID:      createdCustomers[4].ID,
 			SalesCategoryID: salesCategories[0].ID,
-			IssueDate:       time.Now(),
-			DueDate:         time.Now().AddDate(0, 0, 30),
+			IssueDate:       database.Date{Time: time.Now()},
+			DueDate:         database.Date{Time: time.Now().AddDate(0, 0, 30)},
 			Status:          "draft",
 			Notes:           "Accessories bundle",
 			NotesArabic:     "حزمة ملحقات",
@@ -1164,8 +1162,8 @@ func (a *App) TestCustomerNAHandling() error {
 		InvoiceNumber:   "TEST-NA-001",
 		CustomerID:      testCustomer.ID,
 		SalesCategoryID: salesCategories[0].ID,
-		IssueDate:       time.Now(),
-		DueDate:         time.Now().AddDate(0, 0, 30),
+		IssueDate:       database.Date{Time: time.Now()},
+		DueDate:         database.Date{Time: time.Now().AddDate(0, 0, 30)},
 		Status:          "draft",
 		Notes:           "Test invoice for N/A handling verification",
 		NotesArabic:     "فاتورة اختبار للتحقق من معالجة غير متوفر",

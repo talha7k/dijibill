@@ -373,8 +373,8 @@
         invoice_number: editingInvoice ? editingInvoice.invoice_number : '',
         customer_id: invoiceData.customer_id ? parseInt(invoiceData.customer_id.toString()) : 0,
         sales_category_id: invoiceData.sales_category_id ? parseInt(invoiceData.sales_category_id.toString()) : 0,
-        issue_date: new Date(invoiceData.issue_date),
-        due_date: invoiceData.due_date ? new Date(invoiceData.due_date) : new Date(),
+        issue_date: invoiceData.issue_date,
+        due_date: invoiceData.due_date || new Date().toISOString().split('T')[0],
         sub_total: 0,
         vat_amount: 0,
         total_amount: 0,
@@ -382,8 +382,6 @@
         notes: invoiceData.notes || '',
         notes_arabic: '',
         qr_code: editingInvoice ? editingInvoice.qr_code || '' : '',
-        created_at: editingInvoice ? editingInvoice.created_at : new Date(),
-        updated_at: new Date(),
         items: validItems.map(item => ({
           id: 0,
           invoice_id: editingInvoice ? editingInvoice.id : 0,
@@ -392,8 +390,7 @@
           unit_price: parseFloat(item.unit_price.toString()),
           vat_rate: parseFloat(item.vat_rate.toString()),
           vat_amount: 0,
-          total_amount: 0,
-          created_at: new Date()
+          total_amount: 0
         }))
       }
       

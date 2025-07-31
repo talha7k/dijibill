@@ -23,7 +23,7 @@ func (d *Database) CreateSalesInvoice(invoice *SalesInvoice) error {
 		INSERT INTO sales_invoices (invoice_number, customer_id, sales_category_id, issue_date, due_date, sub_total, vat_amount, total_amount, status, notes, notes_arabic, qr_code)
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
-	result, err := tx.Exec(query, invoice.InvoiceNumber, invoice.CustomerID, invoice.SalesCategoryID, invoice.IssueDate, invoice.DueDate,
+	result, err := tx.Exec(query, invoice.InvoiceNumber, invoice.CustomerID, invoice.SalesCategoryID, invoice.IssueDate.Time, invoice.DueDate.Time,
 		invoice.SubTotal, invoice.VATAmount, invoice.TotalAmount, invoice.Status, invoice.Notes, invoice.NotesArabic, invoice.QRCode)
 	if err != nil {
 		return err
@@ -75,10 +75,11 @@ func (d *Database) GetSalesInvoices() ([]SalesInvoice, error) {
 		var inv SalesInvoice
 		var customer Customer
 		var customerID, customerCreatedAt, customerUpdatedAt interface{}
+		var issueDate, dueDate time.Time
 		
 		scanErr := rows.Scan(
 			&inv.ID, &inv.InvoiceNumber, &inv.CustomerID, &inv.SalesCategoryID, 
-			&inv.IssueDate, &inv.DueDate, &inv.SubTotal, &inv.VATAmount, &inv.TotalAmount, 
+			&issueDate, &dueDate, &inv.SubTotal, &inv.VATAmount, &inv.TotalAmount, 
 			&inv.Status, &inv.Notes, &inv.NotesArabic, &inv.QRCode, &inv.CreatedAt, &inv.UpdatedAt,
 			&customerID, &customer.Name, &customer.Email, &customer.Phone, &customer.Address, 
 			&customer.City, &customer.Country, &customer.VATNumber, 
@@ -86,6 +87,10 @@ func (d *Database) GetSalesInvoices() ([]SalesInvoice, error) {
 		if scanErr != nil {
 			return nil, scanErr
 		}
+		
+		// Convert time.Time to custom Date type
+		inv.IssueDate = Date{Time: issueDate}
+		inv.DueDate = Date{Time: dueDate}
 		
 		// Only set customer if customer data exists
 		if customerID != nil {
@@ -108,12 +113,17 @@ func (d *Database) GetSalesInvoiceByID(id int) (*SalesInvoice, error) {
 	query := `SELECT id, invoice_number, customer_id, sales_category_id, issue_date, due_date, sub_total, vat_amount, total_amount, status, notes, notes_arabic, qr_code, created_at, updated_at FROM sales_invoices WHERE id = ?`
 
 	var inv SalesInvoice
-	err := d.db.QueryRow(query, id).Scan(&inv.ID, &inv.InvoiceNumber, &inv.CustomerID, &inv.SalesCategoryID, &inv.IssueDate, &inv.DueDate,
+	var issueDate, dueDate time.Time
+	err := d.db.QueryRow(query, id).Scan(&inv.ID, &inv.InvoiceNumber, &inv.CustomerID, &inv.SalesCategoryID, &issueDate, &dueDate,
 		&inv.SubTotal, &inv.VATAmount, &inv.TotalAmount, &inv.Status, &inv.Notes, &inv.NotesArabic,
 		&inv.QRCode, &inv.CreatedAt, &inv.UpdatedAt)
 	if err != nil {
 		return nil, err
 	}
+
+	// Convert time.Time to custom Date type
+	inv.IssueDate = Date{Time: issueDate}
+	inv.DueDate = Date{Time: dueDate}
 
 	// Get customer only if CustomerID is not 0
 	if inv.CustomerID > 0 {
@@ -155,7 +165,7 @@ func (d *Database) UpdateSalesInvoice(invoice *SalesInvoice) error {
 		    sub_total = ?, vat_amount = ?, total_amount = ?, status = ?, notes = ?, notes_arabic = ?, qr_code = ?, updated_at = CURRENT_TIMESTAMP
 		WHERE id = ?`
 
-	_, err = tx.Exec(query, invoice.InvoiceNumber, invoice.CustomerID, invoice.SalesCategoryID, invoice.IssueDate, invoice.DueDate,
+	_, err = tx.Exec(query, invoice.InvoiceNumber, invoice.CustomerID, invoice.SalesCategoryID, invoice.IssueDate.Time, invoice.DueDate.Time,
 		invoice.SubTotal, invoice.VATAmount, invoice.TotalAmount, invoice.Status, invoice.Notes, invoice.NotesArabic, invoice.QRCode, invoice.ID)
 	if err != nil {
 		return err
