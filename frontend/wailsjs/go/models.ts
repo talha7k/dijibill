@@ -870,10 +870,12 @@ export namespace database {
 	    backup_frequency: string;
 	    last_backup_time?: time.Time;
 	    storage_type: string;
-	    storage_local_path: string;
-	    storage_s3_bucket: string;
-	    storage_s3_region: string;
-	    storage_s3_prefix: string;
+	    storage_base_path: string;
+	    file_db_path: string;
+	    file_db_sync_url: string;
+	    file_db_sync_token: string;
+	    file_db_auto_sync: boolean;
+	    file_db_sync_interval: number;
 	    created_at: time.Time;
 	    updated_at: time.Time;
 	
@@ -895,10 +897,12 @@ export namespace database {
 	        this.backup_frequency = source["backup_frequency"];
 	        this.last_backup_time = this.convertValues(source["last_backup_time"], time.Time);
 	        this.storage_type = source["storage_type"];
-	        this.storage_local_path = source["storage_local_path"];
-	        this.storage_s3_bucket = source["storage_s3_bucket"];
-	        this.storage_s3_region = source["storage_s3_region"];
-	        this.storage_s3_prefix = source["storage_s3_prefix"];
+	        this.storage_base_path = source["storage_base_path"];
+	        this.file_db_path = source["file_db_path"];
+	        this.file_db_sync_url = source["file_db_sync_url"];
+	        this.file_db_sync_token = source["file_db_sync_token"];
+	        this.file_db_auto_sync = source["file_db_auto_sync"];
+	        this.file_db_sync_interval = source["file_db_sync_interval"];
 	        this.created_at = this.convertValues(source["created_at"], time.Time);
 	        this.updated_at = this.convertValues(source["updated_at"], time.Time);
 	    }
