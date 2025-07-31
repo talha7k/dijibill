@@ -110,6 +110,7 @@ export namespace database {
 	}
 	export class DefaultProductSettings {
 	    id: number;
+	    company_id: number;
 	    default_stock: number;
 	    default_tax_rate_id: number;
 	    default_unit_id: number;
@@ -128,6 +129,7 @@ export namespace database {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.id = source["id"];
+	        this.company_id = source["company_id"];
 	        this.default_stock = source["default_stock"];
 	        this.default_tax_rate_id = source["default_tax_rate_id"];
 	        this.default_unit_id = source["default_unit_id"];
@@ -160,6 +162,7 @@ export namespace database {
 	}
 	export class PaymentType {
 	    id: number;
+	    company_id: number;
 	    name: string;
 	    name_arabic: string;
 	    code: string;
@@ -176,6 +179,7 @@ export namespace database {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.id = source["id"];
+	        this.company_id = source["company_id"];
 	        this.name = source["name"];
 	        this.name_arabic = source["name_arabic"];
 	        this.code = source["code"];
@@ -206,6 +210,7 @@ export namespace database {
 	}
 	export class ProductCategory {
 	    id: number;
+	    company_id: number;
 	    name: string;
 	    name_arabic: string;
 	    description: string;
@@ -220,6 +225,7 @@ export namespace database {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.id = source["id"];
+	        this.company_id = source["company_id"];
 	        this.name = source["name"];
 	        this.name_arabic = source["name_arabic"];
 	        this.description = source["description"];
@@ -248,6 +254,7 @@ export namespace database {
 	}
 	export class Product {
 	    id: number;
+	    company_id: number;
 	    name: string;
 	    name_arabic: string;
 	    description: string;
@@ -277,6 +284,7 @@ export namespace database {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.id = source["id"];
+	        this.company_id = source["company_id"];
 	        this.name = source["name"];
 	        this.name_arabic = source["name_arabic"];
 	        this.description = source["description"];
@@ -368,6 +376,7 @@ export namespace database {
 	}
 	export class SalesCategory {
 	    id: number;
+	    company_id: number;
 	    name: string;
 	    name_arabic: string;
 	    code: string;
@@ -385,6 +394,7 @@ export namespace database {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.id = source["id"];
+	        this.company_id = source["company_id"];
 	        this.name = source["name"];
 	        this.name_arabic = source["name_arabic"];
 	        this.code = source["code"];
@@ -416,6 +426,7 @@ export namespace database {
 	}
 	export class SalesInvoice {
 	    id: number;
+	    company_id: number;
 	    invoice_number: string;
 	    customer_id: number;
 	    customer?: Customer;
@@ -442,6 +453,7 @@ export namespace database {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.id = source["id"];
+	        this.company_id = source["company_id"];
 	        this.invoice_number = source["invoice_number"];
 	        this.customer_id = source["customer_id"];
 	        this.customer = this.convertValues(source["customer"], Customer);
@@ -482,6 +494,7 @@ export namespace database {
 	}
 	export class Payment {
 	    id: number;
+	    company_id: number;
 	    invoice_id: number;
 	    invoice?: SalesInvoice;
 	    payment_type_id: number;
@@ -502,6 +515,7 @@ export namespace database {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.id = source["id"];
+	        this.company_id = source["company_id"];
 	        this.invoice_id = source["invoice_id"];
 	        this.invoice = this.convertValues(source["invoice"], SalesInvoice);
 	        this.payment_type_id = source["payment_type_id"];
@@ -653,6 +667,7 @@ export namespace database {
 	}
 	export class PurchaseInvoice {
 	    id: number;
+	    company_id: number;
 	    invoice_number: string;
 	    supplier_id: number;
 	    supplier?: Supplier;
@@ -677,6 +692,7 @@ export namespace database {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.id = source["id"];
+	        this.company_id = source["company_id"];
 	        this.invoice_number = source["invoice_number"];
 	        this.supplier_id = source["supplier_id"];
 	        this.supplier = this.convertValues(source["supplier"], Supplier);
@@ -716,6 +732,7 @@ export namespace database {
 	
 	export class PurchaseProductCategory {
 	    id: number;
+	    company_id: number;
 	    name: string;
 	    name_arabic: string;
 	    description: string;
@@ -731,6 +748,7 @@ export namespace database {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.id = source["id"];
+	        this.company_id = source["company_id"];
 	        this.name = source["name"];
 	        this.name_arabic = source["name_arabic"];
 	        this.description = source["description"];
@@ -760,6 +778,7 @@ export namespace database {
 	}
 	export class PurchaseProduct {
 	    id: number;
+	    company_id: number;
 	    name: string;
 	    name_arabic: string;
 	    description: string;
@@ -786,6 +805,7 @@ export namespace database {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.id = source["id"];
+	        this.company_id = source["company_id"];
 	        this.name = source["name"];
 	        this.name_arabic = source["name_arabic"];
 	        this.description = source["description"];
@@ -885,6 +905,7 @@ export namespace database {
 	}
 	export class TaxRate {
 	    id: number;
+	    company_id: number;
 	    name: string;
 	    name_arabic: string;
 	    rate: number;
@@ -901,6 +922,7 @@ export namespace database {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.id = source["id"];
+	        this.company_id = source["company_id"];
 	        this.name = source["name"];
 	        this.name_arabic = source["name_arabic"];
 	        this.rate = source["rate"];
@@ -931,6 +953,7 @@ export namespace database {
 	}
 	export class UnitOfMeasurement {
 	    id: number;
+	    company_id: number;
 	    value: string;
 	    label: string;
 	    arabic: string;
@@ -946,6 +969,7 @@ export namespace database {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.id = source["id"];
+	        this.company_id = source["company_id"];
 	        this.value = source["value"];
 	        this.label = source["label"];
 	        this.arabic = source["arabic"];
@@ -972,6 +996,85 @@ export namespace database {
 		    }
 		    return a;
 		}
+	}
+	export class User {
+	    id: number;
+	    username: string;
+	    email: string;
+	    password: string;
+	    first_name: string;
+	    last_name: string;
+	    role: string;
+	    is_active: boolean;
+	    company_id: number;
+	    company?: Company;
+	    last_login?: time.Time;
+	    created_at: time.Time;
+	    updated_at: time.Time;
+	
+	    static createFrom(source: any = {}) {
+	        return new User(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.username = source["username"];
+	        this.email = source["email"];
+	        this.password = source["password"];
+	        this.first_name = source["first_name"];
+	        this.last_name = source["last_name"];
+	        this.role = source["role"];
+	        this.is_active = source["is_active"];
+	        this.company_id = source["company_id"];
+	        this.company = this.convertValues(source["company"], Company);
+	        this.last_login = this.convertValues(source["last_login"], time.Time);
+	        this.created_at = this.convertValues(source["created_at"], time.Time);
+	        this.updated_at = this.convertValues(source["updated_at"], time.Time);
+	    }
+	
+		convertValues(a: any, clazz: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, clazz));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = clazz && typeof clazz === 'function' ? new clazz(a[key]) : a[key];
+		            }
+		            return a;
+		        }
+		        return clazz && typeof clazz === 'function' ? new clazz(a) : a;
+		    }
+		    return a;
+		}
+	}
+
+}
+
+export namespace main {
+	
+	export class AuthContext {
+	    session_id: string;
+	    user_id: number;
+	    company_id: number;
+	    username: string;
+	    role: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new AuthContext(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.session_id = source["session_id"];
+	        this.user_id = source["user_id"];
+	        this.company_id = source["company_id"];
+	        this.username = source["username"];
+	        this.role = source["role"];
+	    }
 	}
 
 }

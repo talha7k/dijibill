@@ -1,7 +1,7 @@
 <script>
   import { onMount } from 'svelte'
   import { wailsReady, wailsError, initializeWailsRuntime } from './stores/wailsStore.js'
-  import { GetSystemSettings } from '../wailsjs/go/main/App'
+  import { GetSystemSettings, GetAuthContext, Logout } from '../wailsjs/go/main/App'
   import Dashboard from './Dashboard.svelte'
   import QRValidation from './QRValidation.svelte'
   import SalesInvoices from './SalesInvoices.svelte'
@@ -15,12 +15,19 @@
   import Users from './Users.svelte'
   import GeneralSettings from './GeneralSettings.svelte'
   import Administration from './Administration.svelte'
+  import Login from './Login.svelte'
   import {Greet} from '../wailsjs/go/main/App.js'
 
   let currentView = 'dashboard' // Default to dashboard
   let resultText = "Welcome to DijiBill - ZATCA Compliant Invoicing"
   let sidebarVisible = true // Sidebar visibility state
   let sidebarAsOverlay = false // Whether sidebar should appear as overlay
+  
+  // Authentication state
+  let isAuthenticated = false
+  let authContext = null
+  let currentUser = null
+  let currentCompany = null
   
   // Get runtime status for display
   $: runtimeStatus = $wailsReady ? 'Runtime Ready' : $wailsError ? 'Runtime Error' : 'Initializing...'
@@ -67,6 +74,64 @@
     }
   }
 
+  // Check authentication status
+  async function checkAuthStatus() {
+    try {
+      const context = await GetAuthContext()
+      if (context && context.user_id && context.company_id) {
+        isAuthenticated = true
+        authContext = context
+        currentUser = {
+          id: context.user_id,
+          username: context.username,
+          role: context.role
+        }
+        currentCompany = {
+          id: context.company_id
+        }
+      } else {
+        isAuthenticated = false
+        authContext = null
+        currentUser = null
+        currentCompany = null
+      }
+    } catch (error) {
+      console.error('Error checking auth status:', error)
+      isAuthenticated = false
+      authContext = null
+      currentUser = null
+      currentCompany = null
+    }
+  }
+
+  // Handle login success
+  function handleLoginSuccess(event) {
+    const context = event.detail
+    isAuthenticated = true
+    authContext = context
+    currentUser = {
+      id: context.user_id,
+      username: context.username,
+      role: context.role
+    }
+    currentCompany = {
+      id: context.company_id
+    }
+  }
+
+  // Handle logout
+  async function handleLogout() {
+    try {
+      await Logout()
+      isAuthenticated = false
+      authContext = null
+      currentUser = null
+      currentCompany = null
+    } catch (error) {
+      console.error('Error during logout:', error)
+    }
+  }
+
   // Auto-hide sidebar when switching to POS only
   $: {
     if (currentView === 'pos' && sidebarVisible && !sidebarAsOverlay) {
@@ -91,6 +156,9 @@
   onMount(async () => {
     console.log('🎯 App component mounted, initializing Wails runtime...');
     await initializeWailsRuntime();
+    
+    // Check authentication status when app loads
+    await checkAuthStatus();
     
     // Check backup status when app loads
     checkBackupStatus();
@@ -245,7 +313,7 @@
 
 <div class="min-h-screen bg-gradient-to-br from-primary to-secondary flex relative" data-theme="dijibill">
   <!-- Sidebar Overlay (when toggled to show as overlay) -->
-  {#if sidebarVisible && sidebarAsOverlay}
+  {#if isAuthenticated && sidebarVisible && sidebarAsOverlay}
     <!-- Backdrop -->
     <div 
       class="fixed inset-0 bg-black/50 z-40 transition-opacity duration-300"
@@ -324,7 +392,7 @@
         </ul>
       </nav>
     </div>
-  {:else if sidebarVisible && !sidebarAsOverlay}
+  {:else if isAuthenticated && sidebarVisible && !sidebarAsOverlay}
     <!-- Regular sidebar for when not in overlay mode -->
     <div class="w-64 flex-shrink-0 bg-base-100/10 backdrop-blur-lg border-r border-white/20 flex flex-col transition-all duration-300">
       <!-- Logo/Header -->
@@ -401,16 +469,18 @@
     <header class="bg-base-100/10 backdrop-blur-lg border-b border-white/20 p-4">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-4">
-          <!-- Sidebar Toggle Button - Always visible -->
-          <button
-            class="btn btn-ghost btn-circle text-white hover:bg-white/10"
-            on:click={toggleSidebar}
-            title="Toggle Menu"
-          >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-            </svg>
-          </button>
+          <!-- Sidebar Toggle Button - Only visible when authenticated -->
+          {#if isAuthenticated}
+            <button
+              class="btn btn-ghost btn-circle text-white hover:bg-white/10"
+              on:click={toggleSidebar}
+              title="Toggle Menu"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+              </svg>
+            </button>
+          {/if}
           
           <div class="flex items-center gap-3">
             <!-- Page Icon -->
@@ -494,18 +564,27 @@
           </div>
           
           <!-- User Menu -->
-          <div class="dropdown dropdown-end">
-            <div role="button" class="btn btn-ghost btn-circle text-white">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-              </svg>
+          {#if isAuthenticated && currentUser}
+            <div class="dropdown dropdown-end">
+              <div role="button" class="btn btn-ghost btn-circle text-white">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+              </div>
+              <ul class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
+                <li class="menu-title">
+                  <span class="text-xs text-gray-500">Signed in as</span>
+                  <span class="font-semibold">{currentUser.username}</span>
+                  <span class="text-xs text-gray-500 capitalize">{currentUser.role}</span>
+                </li>
+                <div class="divider my-1"></div>
+                <li><button class="btn btn-ghost justify-start">Profile</button></li>
+                <li><button class="btn btn-ghost justify-start">Settings</button></li>
+                <div class="divider my-1"></div>
+                <li><button class="btn btn-ghost justify-start text-error" on:click={handleLogout}>Logout</button></li>
+              </ul>
             </div>
-            <ul class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
-              <li><button class="btn btn-ghost">Profile</button></li>
-              <li><button class="btn btn-ghost">Settings</button></li>
-              <li><button class="btn btn-ghost">Logout</button></li>
-            </ul>
-          </div>
+          {/if}
         </div>
       </div>
     </header>
@@ -542,6 +621,9 @@
             {/if}
           </div>
         </div>
+      {:else if !isAuthenticated}
+        <!-- Login Screen -->
+        <Login on:login-success={handleLoginSuccess} />
       {:else}
         <!-- Application Content -->
         {#if currentView === 'dashboard'}

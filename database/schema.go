@@ -298,6 +298,122 @@ func (d *Database) createTables() error {
 	return nil
 }
 
+// runMultiTenantMigration applies the multi-tenant migration
+func (d *Database) runMultiTenantMigration() error {
+	// Create users table
+	createUsersTable := `CREATE TABLE IF NOT EXISTS users (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		username TEXT NOT NULL UNIQUE,
+		email TEXT NOT NULL UNIQUE,
+		password TEXT NOT NULL,
+		first_name TEXT NOT NULL,
+		last_name TEXT NOT NULL,
+		role TEXT NOT NULL DEFAULT 'user',
+		is_active BOOLEAN NOT NULL DEFAULT 1,
+		company_id INTEGER NOT NULL,
+		last_login DATETIME,
+		created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+		updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+		FOREIGN KEY (company_id) REFERENCES companies (id) ON DELETE CASCADE
+	)`
+
+	if _, err := d.db.Exec(createUsersTable); err != nil {
+		return fmt.Errorf("error creating users table: %v", err)
+	}
+
+	// Add company_id columns to existing tables
+	tables := []string{
+		"customers", "suppliers", "product_categories", "products", 
+		"sales_invoices", "purchase_invoices", "payment_types", "payments",
+		"sales_categories", "tax_rates", "units_of_measurement", 
+		"default_product_settings", "purchase_product_categories", 
+		"purchase_products", "system_settings",
+	}
+
+	for _, table := range tables {
+		// Check if company_id column already exists
+		var columnExists bool
+		err := d.db.QueryRow("SELECT COUNT(*) FROM pragma_table_info(?) WHERE name='company_id'", table).Scan(&columnExists)
+		if err != nil {
+			return fmt.Errorf("error checking company_id column in %s: %v", table, err)
+		}
+
+		if !columnExists {
+			query := fmt.Sprintf("ALTER TABLE %s ADD COLUMN company_id INTEGER DEFAULT 1", table)
+			if _, err := d.db.Exec(query); err != nil {
+				return fmt.Errorf("error adding company_id to %s: %v", table, err)
+			}
+		}
+	}
+
+	// Create indexes for better performance
+	indexes := []string{
+		"CREATE INDEX IF NOT EXISTS idx_users_company_id ON users(company_id)",
+		"CREATE INDEX IF NOT EXISTS idx_users_username ON users(username)",
+		"CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)",
+		"CREATE INDEX IF NOT EXISTS idx_customers_company_id ON customers(company_id)",
+		"CREATE INDEX IF NOT EXISTS idx_suppliers_company_id ON suppliers(company_id)",
+		"CREATE INDEX IF NOT EXISTS idx_product_categories_company_id ON product_categories(company_id)",
+		"CREATE INDEX IF NOT EXISTS idx_products_company_id ON products(company_id)",
+		"CREATE INDEX IF NOT EXISTS idx_sales_invoices_company_id ON sales_invoices(company_id)",
+		"CREATE INDEX IF NOT EXISTS idx_purchase_invoices_company_id ON purchase_invoices(company_id)",
+		"CREATE INDEX IF NOT EXISTS idx_payment_types_company_id ON payment_types(company_id)",
+		"CREATE INDEX IF NOT EXISTS idx_payments_company_id ON payments(company_id)",
+		"CREATE INDEX IF NOT EXISTS idx_sales_categories_company_id ON sales_categories(company_id)",
+		"CREATE INDEX IF NOT EXISTS idx_tax_rates_company_id ON tax_rates(company_id)",
+		"CREATE INDEX IF NOT EXISTS idx_units_of_measurement_company_id ON units_of_measurement(company_id)",
+		"CREATE INDEX IF NOT EXISTS idx_default_product_settings_company_id ON default_product_settings(company_id)",
+		"CREATE INDEX IF NOT EXISTS idx_purchase_product_categories_company_id ON purchase_product_categories(company_id)",
+		"CREATE INDEX IF NOT EXISTS idx_purchase_products_company_id ON purchase_products(company_id)",
+		"CREATE INDEX IF NOT EXISTS idx_system_settings_company_id ON system_settings(company_id)",
+	}
+
+	for _, indexQuery := range indexes {
+		if _, err := d.db.Exec(indexQuery); err != nil {
+			return fmt.Errorf("error creating index: %v", err)
+		}
+	}
+
+	// Create a default admin user for the first company
+	createAdminUser := `INSERT OR IGNORE INTO users (
+		username, email, password, first_name, last_name, role, is_active, company_id
+	) VALUES (
+		'admin', 'admin@company.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 
+		'Admin', 'User', 'admin', 1, 1
+	)`
+
+	if _, err := d.db.Exec(createAdminUser); err != nil {
+		return fmt.Errorf("error creating default admin user: %v", err)
+	}
+
+	// Update existing data to belong to company 1
+	updateQueries := []string{
+		"UPDATE customers SET company_id = 1 WHERE company_id IS NULL",
+		"UPDATE suppliers SET company_id = 1 WHERE company_id IS NULL",
+		"UPDATE product_categories SET company_id = 1 WHERE company_id IS NULL",
+		"UPDATE products SET company_id = 1 WHERE company_id IS NULL",
+		"UPDATE sales_invoices SET company_id = 1 WHERE company_id IS NULL",
+		"UPDATE purchase_invoices SET company_id = 1 WHERE company_id IS NULL",
+		"UPDATE payment_types SET company_id = 1 WHERE company_id IS NULL",
+		"UPDATE payments SET company_id = 1 WHERE company_id IS NULL",
+		"UPDATE sales_categories SET company_id = 1 WHERE company_id IS NULL",
+		"UPDATE tax_rates SET company_id = 1 WHERE company_id IS NULL",
+		"UPDATE units_of_measurement SET company_id = 1 WHERE company_id IS NULL",
+		"UPDATE default_product_settings SET company_id = 1 WHERE company_id IS NULL",
+		"UPDATE purchase_product_categories SET company_id = 1 WHERE company_id IS NULL",
+		"UPDATE purchase_products SET company_id = 1 WHERE company_id IS NULL",
+		"UPDATE system_settings SET company_id = 1 WHERE company_id IS NULL",
+	}
+
+	for _, updateQuery := range updateQueries {
+		if _, err := d.db.Exec(updateQuery); err != nil {
+			return fmt.Errorf("error updating existing data: %v", err)
+		}
+	}
+
+	return nil
+}
+
 // runMigrations handles database schema migrations for existing databases
 func (d *Database) runMigrations() error {
 	// Check if vat_rate column exists in purchase_invoices table
@@ -346,6 +462,21 @@ func (d *Database) runMigrations() error {
 			return fmt.Errorf("error adding table_number column: %v", err)
 		}
 		log.Println("Added table_number column to sales_invoices table")
+	}
+
+	// Multi-tenant migration: Check if users table exists
+	var tableExists bool
+	err = d.db.QueryRow("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='users'").Scan(&tableExists)
+	if err != nil {
+		return err
+	}
+
+	// Run multi-tenant migration if users table doesn't exist
+	if !tableExists {
+		if err := d.runMultiTenantMigration(); err != nil {
+			return fmt.Errorf("error running multi-tenant migration: %v", err)
+		}
+		log.Println("Successfully applied multi-tenant migration")
 	}
 
 	return nil

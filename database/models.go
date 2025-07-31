@@ -96,6 +96,7 @@ type Supplier struct {
 // ProductCategory represents a category for products
 type ProductCategory struct {
 	ID                int       `json:"id"`
+	CompanyID         int       `json:"company_id"`  // Category belongs to a company
 	Name              string    `json:"name"`
 	NameArabic        string    `json:"name_arabic"`
 	Description       string    `json:"description"`
@@ -113,6 +114,7 @@ type ProductCategoryWithCount struct {
 // Product represents a product that can be sold
 type Product struct {
 	ID                     int       `json:"id"`
+	CompanyID              int       `json:"company_id"`              // Product belongs to a company
 	Name                   string    `json:"name"`
 	NameArabic             string    `json:"name_arabic"`
 	Description            string    `json:"description"`
@@ -139,6 +141,7 @@ type Product struct {
 // SalesInvoice represents a sales invoice (to customers)
 type SalesInvoice struct {
 	ID               int                `json:"id"`
+	CompanyID        int                `json:"company_id"`  // Invoice belongs to a company
 	InvoiceNumber    string             `json:"invoice_number"`
 	CustomerID       int                `json:"customer_id"`
 	Customer         *Customer          `json:"customer,omitempty"`
@@ -176,6 +179,7 @@ type SalesInvoiceItem struct {
 // PurchaseInvoice represents a purchase invoice (from suppliers)
 type PurchaseInvoice struct {
 	ID               int                   `json:"id"`
+	CompanyID        int                   `json:"company_id"`  // Invoice belongs to a company
 	InvoiceNumber    string                `json:"invoice_number"`
 	SupplierID       int                   `json:"supplier_id"`
 	Supplier         *Supplier             `json:"supplier,omitempty"`
@@ -233,6 +237,7 @@ type Company struct {
 // PaymentType represents different payment methods
 type PaymentType struct {
 	ID          int       `json:"id"`
+	CompanyID   int       `json:"company_id"`  // Payment type belongs to a company
 	Name        string    `json:"name"`
 	NameArabic  string    `json:"name_arabic"`
 	Code        string    `json:"code"` // cash, card, bank_transfer, etc.
@@ -246,6 +251,7 @@ type PaymentType struct {
 // Payment represents a payment made against an invoice
 type Payment struct {
 	ID            int          `json:"id"`
+	CompanyID     int          `json:"company_id"`  // Payment belongs to a company
 	InvoiceID     int          `json:"invoice_id"`
 	Invoice       *Invoice     `json:"invoice,omitempty"`
 	PaymentTypeID int          `json:"payment_type_id"`
@@ -263,6 +269,7 @@ type Payment struct {
 // SalesCategory represents categories for sales/invoices
 type SalesCategory struct {
 	ID                int       `json:"id"`
+	CompanyID         int       `json:"company_id"`  // Sales category belongs to a company
 	Name              string    `json:"name"`
 	NameArabic        string    `json:"name_arabic"`
 	Code              string    `json:"code"` // retail, wholesale, service, etc.
@@ -277,6 +284,7 @@ type SalesCategory struct {
 // TaxRate represents different tax rates
 type TaxRate struct {
 	ID          int       `json:"id"`
+	CompanyID   int       `json:"company_id"`  // Tax rate belongs to a company
 	Name        string    `json:"name"`
 	NameArabic  string    `json:"name_arabic"`
 	Rate        float64   `json:"rate"`
@@ -290,6 +298,7 @@ type TaxRate struct {
 // UnitOfMeasurement represents units for products
 type UnitOfMeasurement struct {
 	ID         int       `json:"id"`
+	CompanyID  int       `json:"company_id"`  // Unit belongs to a company
 	Value      string    `json:"value"`      // kg, pcs, m, etc.
 	Label      string    `json:"label"`      // Kilograms, Pieces, Meters
 	Arabic     string    `json:"arabic"`     // Arabic translation
@@ -302,6 +311,7 @@ type UnitOfMeasurement struct {
 // DefaultProductSettings represents default settings for creating new products
 type DefaultProductSettings struct {
 	ID                        int     `json:"id"`
+	CompanyID                 int     `json:"company_id"`  // Settings belong to a company
 	DefaultStock              int     `json:"default_stock"`               // Default stock quantity
 	DefaultTaxRateID          int     `json:"default_tax_rate_id"`         // Default tax rate ID
 	DefaultUnitID             int     `json:"default_unit_id"`             // Default unit of measurement ID
@@ -317,6 +327,7 @@ type DefaultProductSettings struct {
 // PurchaseProductCategory represents categories for purchase products
 type PurchaseProductCategory struct {
 	ID                int       `json:"id"`
+	CompanyID         int       `json:"company_id"`  // Category belongs to a company
 	Name              string    `json:"name"`
 	NameArabic        string    `json:"name_arabic"`
 	Description       string    `json:"description"`
@@ -329,6 +340,7 @@ type PurchaseProductCategory struct {
 // PurchaseProduct represents products that can be purchased from suppliers
 type PurchaseProduct struct {
 	ID                int                       `json:"id"`
+	CompanyID         int                       `json:"company_id"`  // Product belongs to a company
 	Name              string                    `json:"name"`
 	NameArabic        string                    `json:"name_arabic"`
 	Description       string                    `json:"description"`

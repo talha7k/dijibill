@@ -20,11 +20,15 @@ type App struct {
 	ctx                context.Context
 	db                 *database.Database
 	htmlInvoiceService *HTMLInvoiceService
+	sessionManager     *SessionManager
+	currentSession     *Session
 }
 
 // NewApp creates a new App application struct
 func NewApp() *App {
-	return &App{}
+	return &App{
+		sessionManager: NewSessionManager(),
+	}
 }
 
 // startup is called when the app starts. The context is saved
@@ -57,14 +61,23 @@ func (a *App) startup(ctx context.Context) {
 
 // Customer Management Methods
 
+// getCurrentCompanyID returns the current company ID from the session
+func (a *App) getCurrentCompanyID() int {
+	if a.currentSession != nil {
+		return a.currentSession.CompanyID
+	}
+	return 1 // Default to company 1 if no session (for backward compatibility)
+}
+
 func (a *App) CreateCustomer(customer database.Customer) error {
+	customer.CompanyID = a.getCurrentCompanyID()
 	customer.CreatedAt = time.Now()
 	customer.UpdatedAt = time.Now()
 	return a.db.CreateCustomer(&customer)
 }
 
 func (a *App) GetCustomers() ([]database.Customer, error) {
-	return a.db.GetCustomers()
+	return a.db.GetCustomersByCompany(a.getCurrentCompanyID())
 }
 
 func (a *App) GetCustomerByID(id int) (*database.Customer, error) {
@@ -72,6 +85,7 @@ func (a *App) GetCustomerByID(id int) (*database.Customer, error) {
 }
 
 func (a *App) UpdateCustomer(customer database.Customer) error {
+	customer.CompanyID = a.getCurrentCompanyID()
 	customer.UpdatedAt = time.Now()
 	return a.db.UpdateCustomer(&customer)
 }
@@ -1352,4 +1366,103 @@ func (a *App) UpdateSystemSettings(settings database.SystemSettings) error {
 
 func (a *App) UpdateLastBackupTime(backupTime time.Time) error {
 	return a.db.UpdateLastBackupTime(backupTime)
+}
+
+// Authentication Methods
+
+func (a *App) Login(username, password string) (*AuthContext, error) {
+	// Get user by username
+	user, err := a.db.GetUserByUsername(username)
+	if err != nil {
+		return nil, fmt.Errorf("invalid credentials")
+	}
+
+	// Verify password (in production, use proper password hashing)
+	if user.Password != password {
+		return nil, fmt.Errorf("invalid credentials")
+	}
+
+	// Check if user is active
+	if !user.IsActive {
+		return nil, fmt.Errorf("user account is disabled")
+	}
+
+	// Create session
+	session, err := a.sessionManager.CreateSession(user)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create session: %v", err)
+	}
+
+	// Update current session
+	a.currentSession = session
+
+	// Update last login
+	if err := a.db.UpdateUserLastLogin(user.ID); err != nil {
+		log.Printf("Warning: Failed to update last login: %v", err)
+	}
+
+	return &AuthContext{
+		SessionID: session.ID,
+		UserID:    session.UserID,
+		CompanyID: session.CompanyID,
+		Username:  session.Username,
+		Role:      session.Role,
+	}, nil
+}
+
+func (a *App) Logout() error {
+	if a.currentSession != nil {
+		a.sessionManager.DeleteSession(a.currentSession.ID)
+		a.currentSession = nil
+	}
+	return nil
+}
+
+func (a *App) SwitchCompany(companyID int) error {
+	if a.currentSession == nil {
+		return fmt.Errorf("no active session")
+	}
+
+	// For now, allow switching to any company (in production, add proper access control)
+	if err := a.sessionManager.UpdateSessionCompany(a.currentSession.ID, companyID); err != nil {
+		return fmt.Errorf("failed to switch company: %v", err)
+	}
+
+	a.currentSession.CompanyID = companyID
+	return nil
+}
+
+// User Management Methods
+
+func (a *App) CreateUser(user database.User) error {
+	user.CreatedAt = time.Now()
+	user.UpdatedAt = time.Now()
+	return a.db.CreateUser(&user)
+}
+
+func (a *App) GetUsersByCompany(companyID int) ([]database.User, error) {
+	return a.db.GetUsersByCompany(companyID)
+}
+
+func (a *App) UpdateUser(user database.User) error {
+	user.UpdatedAt = time.Now()
+	return a.db.UpdateUser(&user)
+}
+
+func (a *App) DeleteUser(id int) error {
+	return a.db.DeleteUser(id)
+}
+
+// Company Management Methods
+
+func (a *App) GetCompanies() ([]database.Company, error) {
+	return a.db.GetCompanies()
+}
+
+func (a *App) GetCompanyByID(id int) (*database.Company, error) {
+	return a.db.GetCompanyByID(id)
+}
+
+func (a *App) CreateCompany(company database.Company) error {
+	return a.db.CreateCompany(&company)
 }
