@@ -17,6 +17,7 @@
   export let rows = 3 // For textarea
   export let error = ''
   export let checked = false // For checkbox fields
+  export let customClass = '' // Custom CSS class for input styling
   
   // Touch-friendly dropdown options
   export let touchFriendly = false // Enable touch-friendly dropdown mode
@@ -319,7 +320,7 @@
       id={fieldId}
       {name}
       type="text"
-      class="input-glass {error ? 'border-error' : ''}"
+      class="input-glass {customClass} {error ? 'border-error' : ''}"
       bind:value
       {placeholder}
       {required}

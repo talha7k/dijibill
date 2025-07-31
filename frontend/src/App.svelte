@@ -19,11 +19,33 @@
 
   let currentView = 'dashboard' // Default to dashboard
   let resultText = "Welcome to DijiBill - ZATCA Compliant Invoicing"
+  let sidebarVisible = true // Sidebar visibility state
+  let sidebarAsOverlay = false // Whether sidebar should appear as overlay
   
   // Get runtime status for display
   $: runtimeStatus = $wailsReady ? 'Runtime Ready' : $wailsError ? 'Runtime Error' : 'Initializing...'
   let name = ''
   let searchTerm = ''
+
+  // Auto-hide sidebar when switching to POS only
+  $: {
+    if (currentView === 'pos' && sidebarVisible && !sidebarAsOverlay) {
+      sidebarVisible = false
+      sidebarAsOverlay = false
+    }
+  }
+
+  function toggleSidebar() {
+    if (sidebarVisible) {
+      // If sidebar is visible, hide it
+      sidebarVisible = false
+      sidebarAsOverlay = false
+    } else {
+      // If sidebar is hidden, show it as overlay
+      sidebarVisible = true
+      sidebarAsOverlay = true
+    }
+  }
 
   // Initialize Wails runtime on mount
   onMount(async () => {
@@ -43,7 +65,48 @@
 
   function switchView(view) {
     currentView = view
+    // Close overlay sidebar when navigating
+    if (sidebarAsOverlay) {
+      sidebarVisible = false
+      sidebarAsOverlay = false
+    }
   }
+
+  // Reactive functions to get the current page icon and title
+  $: currentPageIcon = (() => {
+    // Dashboard icon
+    if (currentView === 'dashboard') {
+      return menuItems[0].icon
+    }
+    
+    // Search through categories for the current view
+    for (const category of menuItems.slice(1)) {
+      const item = category.items.find(item => item.id === currentView)
+      if (item) {
+        return item.icon
+      }
+    }
+    
+    // Default icon if not found
+    return 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'
+  })()
+
+  $: currentPageTitle = (() => {
+    if (currentView === 'dashboard') return 'Dashboard'
+    if (currentView === 'pos') return 'Point of Sale'
+    if (currentView === 'sales-invoices') return 'Sales Invoices'
+    if (currentView === 'customer') return 'Customer'
+    if (currentView === 'payments') return 'Payments'
+    if (currentView === 'purchase-invoices') return 'Purchase Invoices'
+    if (currentView === 'purchase-products') return 'Purchase Products'
+    if (currentView === 'suppliers') return 'Suppliers'
+    if (currentView === 'products') return 'Products'
+    if (currentView === 'users') return 'Users'
+    if (currentView === 'general-settings') return 'General Settings'
+    if (currentView === 'administration') return 'Administration'
+    if (currentView === 'qr-validation') return 'QR Validation'
+    return 'Page'
+  })()
 
   const menuItems = [
     {
@@ -130,111 +193,188 @@
   ]
 </script>
 
-<div class="min-h-screen bg-gradient-to-br from-primary to-secondary flex" data-theme="dijibill">
-  <!-- Sidebar -->
-  <div class="w-64 flex-shrink-0 bg-base-100/10 backdrop-blur-lg border-r border-white/20 flex flex-col">
-    <!-- Logo/Header -->
-    <div class="p-4 border-b border-white/20">
-      <div class="flex items-center gap-3">
-        <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-          <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-          </svg>
-        </div>
-        <div>
-          <h1 class="text-lg font-bold text-white">E-Invoice</h1>
-          <p class="text-xs text-white/60">الفاتورة الإلكترونية</p>
+<div class="min-h-screen bg-gradient-to-br from-primary to-secondary flex relative" data-theme="dijibill">
+  <!-- Sidebar Overlay (when toggled to show as overlay) -->
+  {#if sidebarVisible && sidebarAsOverlay}
+    <!-- Backdrop -->
+    <div 
+      class="fixed inset-0 bg-black/50 z-40 transition-opacity duration-300"
+      on:click={toggleSidebar}
+      on:keydown={(e) => e.key === 'Escape' && toggleSidebar()}
+      role="button"
+      tabindex="0"
+      aria-label="Close sidebar"
+    ></div>
+    
+    <!-- Sidebar as overlay -->
+    <div class="fixed left-0 top-0 h-full w-64 bg-base-100/10 backdrop-blur-lg border-r border-white/20 flex flex-col z-50 transition-transform duration-300">
+      <!-- Logo/Header -->
+      <div class="p-4 border-b border-white/20">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+            <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+          </div>
+          <div>
+            <h1 class="text-lg font-bold text-white">E-Invoice</h1>
+            <p class="text-xs text-white/60">الفاتورة الإلكترونية</p>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- Navigation Menu -->
-    <nav class="flex-1 p-4 overflow-y-auto">
-      <ul class="space-y-2">
-        <!-- Dashboard (standalone) -->
-        <li>
-          <button
-            class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors {currentView === 'dashboard' ? 'bg-primary text-white' : 'text-white/80 hover:bg-white/10'}"
-            on:click={() => switchView('dashboard')}
-          >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{menuItems[0].icon}"></path>
-            </svg>
-            <span class="text-sm font-medium">{menuItems[0].label}</span>
-          </button>
-        </li>
-
-        <!-- Categories -->
-        {#each menuItems.slice(1) as category}
-          <li class="mt-6">
-            <div class="text-xs font-semibold text-white/60 uppercase tracking-wider mb-2 px-3">
-              {category.category}
-            </div>
-            <ul class="space-y-1">
-              {#each category.items as item}
-                <li>
-                  <button
-                    class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors {currentView === item.id ? 'bg-primary text-white' : 'text-white/80 hover:bg-white/10'}"
-                    on:click={() => switchView(item.id)}
-                  >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{item.icon}"></path>
-                    </svg>
-                    <span class="text-sm">{item.label}</span>
-                    {#if item.id === 'payments'}
-                      <div class="ml-auto">
-                        <div class="w-4 h-4 bg-accent rounded-full flex items-center justify-center">
-                          <svg class="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 8 8">
-                            <circle cx="4" cy="4" r="3"/>
-                          </svg>
-                        </div>
-                      </div>
-                    {/if}
-                  </button>
-                </li>
-              {/each}
-            </ul>
+      <!-- Navigation Menu -->
+      <nav class="flex-1 p-4 overflow-y-auto">
+        <ul class="space-y-2">
+          <!-- Dashboard (standalone) -->
+          <li>
+            <button
+              class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors {currentView === 'dashboard' ? 'bg-primary text-white' : 'text-white/80 hover:bg-white/10'}"
+              on:click={() => switchView('dashboard')}
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{menuItems[0].icon}"></path>
+              </svg>
+              <span class="text-sm font-medium">{menuItems[0].label}</span>
+            </button>
           </li>
-        {/each}
-      </ul>
-    </nav>
-  </div>
+
+          <!-- Categories -->
+          {#each menuItems.slice(1) as category}
+            <li class="mt-6">
+              <div class="text-xs font-semibold text-white/60 uppercase tracking-wider mb-2 px-3">
+                {category.category}
+              </div>
+              <ul class="space-y-1">
+                {#each category.items as item}
+                  <li>
+                    <button
+                      class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors {currentView === item.id ? 'bg-primary text-white' : 'text-white/80 hover:bg-white/10'}"
+                      on:click={() => switchView(item.id)}
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{item.icon}"></path>
+                      </svg>
+                      <span class="text-sm">{item.label}</span>
+                      {#if item.id === 'payments'}
+                        <div class="ml-auto">
+                          <div class="w-4 h-4 bg-accent rounded-full flex items-center justify-center">
+                            <svg class="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 8 8">
+                              <circle cx="4" cy="4" r="3"/>
+                            </svg>
+                          </div>
+                        </div>
+                      {/if}
+                    </button>
+                  </li>
+                {/each}
+              </ul>
+            </li>
+          {/each}
+        </ul>
+      </nav>
+    </div>
+  {:else if sidebarVisible && !sidebarAsOverlay}
+    <!-- Regular sidebar for when not in overlay mode -->
+    <div class="w-64 flex-shrink-0 bg-base-100/10 backdrop-blur-lg border-r border-white/20 flex flex-col transition-all duration-300">
+      <!-- Logo/Header -->
+      <div class="p-4 border-b border-white/20">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+            <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+          </div>
+          <div>
+            <h1 class="text-lg font-bold text-white">E-Invoice</h1>
+            <p class="text-xs text-white/60">الفاتورة الإلكترونية</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation Menu -->
+      <nav class="flex-1 p-4 overflow-y-auto">
+        <ul class="space-y-2">
+          <!-- Dashboard (standalone) -->
+          <li>
+            <button
+              class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors {currentView === 'dashboard' ? 'bg-primary text-white' : 'text-white/80 hover:bg-white/10'}"
+              on:click={() => switchView('dashboard')}
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{menuItems[0].icon}"></path>
+              </svg>
+              <span class="text-sm font-medium">{menuItems[0].label}</span>
+            </button>
+          </li>
+
+          <!-- Categories -->
+          {#each menuItems.slice(1) as category}
+            <li class="mt-6">
+              <div class="text-xs font-semibold text-white/60 uppercase tracking-wider mb-2 px-3">
+                {category.category}
+              </div>
+              <ul class="space-y-1">
+                {#each category.items as item}
+                  <li>
+                    <button
+                      class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors {currentView === item.id ? 'bg-primary text-white' : 'text-white/80 hover:bg-white/10'}"
+                      on:click={() => switchView(item.id)}
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{item.icon}"></path>
+                      </svg>
+                      <span class="text-sm">{item.label}</span>
+                      {#if item.id === 'payments'}
+                        <div class="ml-auto">
+                          <div class="w-4 h-4 bg-accent rounded-full flex items-center justify-center">
+                            <svg class="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 8 8">
+                              <circle cx="4" cy="4" r="3"/>
+                            </svg>
+                          </div>
+                        </div>
+                      {/if}
+                    </button>
+                  </li>
+                {/each}
+              </ul>
+            </li>
+          {/each}
+        </ul>
+      </nav>
+    </div>
+  {/if}
 
   <!-- Main Content Area -->
   <div class="flex-1 min-w-0 flex flex-col">
     <!-- Top Header -->
     <header class="bg-base-100/10 backdrop-blur-lg border-b border-white/20 p-4">
       <div class="flex items-center justify-between">
-        <div>
-          <h2 class="text-2xl font-bold text-white capitalize">
-            {#if currentView === 'dashboard'}
-              Dashboard
-            {:else if currentView === 'pos'}
-              Point of Sale
-            {:else if currentView === 'sales-invoices'}
-              Sales Invoices
-            {:else if currentView === 'customer'}
-              Customer
-            {:else if currentView === 'payments'}
-              Payments
-            {:else if currentView === 'purchase-invoices'}
-              Purchase Invoices
-            {:else if currentView === 'purchase-products'}
-              Purchase Products
-            {:else if currentView === 'suppliers'}
-              Suppliers
-            {:else if currentView === 'products'}
-              Products
-            {:else if currentView === 'users'}
-              Users
-            {:else if currentView === 'general-settings'}
-              General Settings
-            {:else if currentView === 'administration'}
-              Administration
-            {:else if currentView === 'qr-validation'}
-              QR Validation
-            {/if}
-          </h2>
+        <div class="flex items-center gap-4">
+          <!-- Sidebar Toggle Button - Always visible -->
+          <button
+            class="btn btn-ghost btn-circle text-white hover:bg-white/10"
+            on:click={toggleSidebar}
+            title="Toggle Menu"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+          </button>
+          
+          <div class="flex items-center gap-3">
+            <!-- Page Icon -->
+            <div class="w-10 h-10 bg-primary/20 rounded-lg flex items-center justify-center">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{currentPageIcon}"></path>
+              </svg>
+            </div>
+            
+            <!-- Page Title -->
+            <h2 class="text-2xl font-bold text-white">
+              {currentPageTitle}
+            </h2>
+          </div>
         </div>
         
         <div class="flex items-center gap-4">
