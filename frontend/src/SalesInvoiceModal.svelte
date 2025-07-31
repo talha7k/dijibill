@@ -58,6 +58,12 @@
   // Reactive title based on edit mode
   $: modalTitle = editingInvoice ? 'Edit Sales Invoice' : 'New Sales Invoice'
 
+  // Watch for changes to editingInvoice and reinitialize form
+  $: if (editingInvoice !== null && isOpen) {
+    console.log('editingInvoice changed, reinitializing form:', editingInvoice)
+    initializeFormData()
+  }
+
   // Transform data for FormField options
   $: customerOptions = (customers || []).map(customer => ({ 
     value: customer.id.toString(), 
@@ -98,8 +104,9 @@
   })
   
   $: if (isOpen) {
-    loadData()
-    initializeFormData()
+    loadData().then(() => {
+      initializeFormData()
+    })
   }
   
   $: if (invoiceItems) {
@@ -139,6 +146,8 @@
   }
 
   function initializeFormData() {
+    console.log('initializeFormData called with editingInvoice:', editingInvoice)
+    
     if (editingInvoice) {
       // Populate form with existing invoice data
       invoiceData = {
@@ -147,7 +156,8 @@
         issue_date: editingInvoice.issue_date ? new Date(editingInvoice.issue_date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
         due_date: editingInvoice.due_date ? new Date(editingInvoice.due_date).toISOString().split('T')[0] : '',
         payment_terms: editingInvoice.payment_terms || '',
-        notes: editingInvoice.notes || ''
+        notes: editingInvoice.notes || '',
+        status: editingInvoice.status || 'draft'
       }
       
       // Set string values for FormField binding
@@ -156,6 +166,7 @@
       
       // Populate invoice items if they exist
       if (editingInvoice.items && editingInvoice.items.length > 0) {
+        console.log('Populating items:', editingInvoice.items)
         invoiceItems = editingInvoice.items.map(item => ({
           product_id: item.product_id || 0,
           quantity: item.quantity || 1,
@@ -164,7 +175,24 @@
           vat_amount: item.vat_amount || 0,
           total_amount: item.total_amount || 0
         }))
+      } else {
+        console.log('No items found, using default item')
+        invoiceItems = [
+          {
+            product_id: 0,
+            quantity: 1,
+            unit_price: 0,
+            vat_rate: 15,
+            vat_amount: 0,
+            total_amount: 0
+          }
+        ]
       }
+      
+      // Set additional charges if they exist
+      discount = editingInvoice.discount || 0
+      deliveryFees = editingInvoice.delivery_fees || 0
+      
     } else {
       // Reset form for new invoice
       invoiceData = {
@@ -173,7 +201,8 @@
         issue_date: new Date().toISOString().split('T')[0],
         due_date: '',
         payment_terms: '',
-        notes: ''
+        notes: '',
+        status: 'draft'
       }
       customerIdString = ''
       salesCategoryIdString = ''
@@ -187,7 +216,14 @@
           total_amount: 0
         }
       ]
+      discount = 0
+      deliveryFees = 0
     }
+    
+    // Force reactivity update
+    invoiceItems = [...invoiceItems]
+    calculateTotals()
+    console.log('Form initialized with items:', invoiceItems)
   }
   
   function addItem() {
@@ -409,6 +445,8 @@
       notes: '',
       status: 'draft'
     }
+    customerIdString = ''
+    salesCategoryIdString = ''
     invoiceItems = [{
       product_id: 0,
       quantity: 1,
@@ -419,6 +457,14 @@
     }]
     discount = 0
     deliveryFees = 0
+    
+    // Clear form errors
+    formErrors = {
+      customer_id: '',
+      sales_category_id: '',
+      issue_date: '',
+      items: []
+    }
   }
 </script>
 

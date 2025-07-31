@@ -2,6 +2,7 @@
   import { onMount } from 'svelte'
   import { 
     GetSalesInvoices, 
+    GetSalesInvoiceByID,
     GenerateInvoiceHTML, 
     ViewInvoiceHTML, 
     SaveInvoiceHTML,
@@ -68,6 +69,7 @@
   }
   
   function handleInvoiceSaved() {
+    console.log('Invoice saved event received, refreshing table...')
     editingInvoice = null
     showInvoiceModal = false
     loadInvoices() // Refresh the list
@@ -138,10 +140,18 @@
     }
   }
 
-  function editInvoice(invoice) {
+  async function editInvoice(invoice) {
     console.log('editInvoice called with invoice:', invoice)
-    editingInvoice = invoice
-    showInvoiceModal = true
+    try {
+      // Fetch complete invoice data including items and customer
+      const completeInvoice = await GetSalesInvoiceByID(invoice.id)
+      console.log('Complete invoice data loaded:', completeInvoice)
+      editingInvoice = completeInvoice
+      showInvoiceModal = true
+    } catch (error) {
+      console.error('Error loading invoice for editing:', error)
+      alert('Error loading invoice: ' + error.message)
+    }
   }
   
   $: filteredInvoices = (invoices || []).filter(invoice => 
@@ -256,5 +266,5 @@
   bind:isOpen={showInvoiceModal}
   {editingInvoice}
   on:close={closeInvoiceModal}
-  on:save={handleInvoiceSaved}
+  on:saved={handleInvoiceSaved}
 />

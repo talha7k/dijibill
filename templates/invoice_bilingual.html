@@ -36,7 +36,8 @@
         /* --- HEADER STYLES UPDATED --- */
         .company-info {
             flex: 1;
-            color: #007bff; /* Sets a consistent color for all header text */
+            color: #007bff;
+            /* Sets a consistent color for all header text */
         }
 
         .detail-line {
@@ -66,6 +67,7 @@
             direction: ltr;
             text-align: left;
         }
+
         /* --- END OF HEADER STYLE UPDATES --- */
 
         .qr-code {
@@ -277,8 +279,12 @@
             <div class="secondary" lang="en">{{.Invoice.Notes}}</div>
         </div>
         <div class="footer">
-            <p lang="ar">شكراً لتعاملكم معنا!</p>
-            <p lang="en">Thank you for your business!</p>
+            <div>
+                <p lang="ar">شكراً لتعاملكم معنا!</p>
+            </div>
+            <div>
+                <p lang="en">Thank you for your business!</p>
+            </div>
         </div>
     </div>
 </body>
