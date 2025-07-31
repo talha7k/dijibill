@@ -1,6 +1,6 @@
 <script>
   import { onMount } from 'svelte'
-  import { GetPurchaseInvoices, GetSuppliers, DeletePurchaseInvoice, CreatePurchaseInvoice, UpdatePurchaseInvoice } from '../wailsjs/go/main/App.js'
+  import { GetPurchaseInvoices, GetSuppliers, DeletePurchaseInvoice, CreatePurchaseInvoice, UpdatePurchaseInvoice, GetPurchaseInvoiceByID } from '../wailsjs/go/main/App.js'
   import PageLayout from './components/PageLayout.svelte'
   import DataTable from './components/DataTable.svelte'
   import PurchaseInvoiceModal from './components/PurchaseInvoiceModal.svelte'
@@ -64,9 +64,19 @@
     showInvoiceModal = true
   }
 
-  function handleEditInvoice(invoice) {
-    editingInvoice = invoice
-    showInvoiceModal = true
+  async function handleEditInvoice(invoice) {
+    try {
+      loading = true
+      // Fetch complete invoice data with items and supplier details
+      const completeInvoice = await GetPurchaseInvoiceByID(invoice.id)
+      editingInvoice = completeInvoice
+      showInvoiceModal = true
+    } catch (error) {
+      console.error('Error fetching invoice details:', error)
+      alert('Error loading invoice details: ' + error.message)
+    } finally {
+      loading = false
+    }
   }
 
   async function handleInvoiceSave(event) {
@@ -241,10 +251,7 @@
       label: 'Status',
       labelArabic: 'الحالة',
       sortable: true,
-      render: (invoice) => getStatusBadge(invoice.status)
-    },
-    {
-      label: 'Actions',
+      render: (invoice) => getStatusBadge(invoice.status),
       actions: [
         { key: 'edit', text: 'Edit', icon: 'fa-edit', class: 'btn-primary' },
         { key: 'delete', text: 'Delete', icon: 'fa-trash', class: 'btn-error' }

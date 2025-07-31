@@ -50,7 +50,15 @@ func (d *Database) CreatePurchaseInvoice(invoice *PurchaseInvoice) error {
 }
 
 func (d *Database) GetPurchaseInvoices() ([]PurchaseInvoice, error) {
-	query := `SELECT id, invoice_number, supplier_id, issue_date, due_date, sub_total, vat_amount, total_amount, status, notes, notes_arabic, created_at, updated_at FROM purchase_invoices ORDER BY created_at DESC`
+	query := `
+		SELECT 
+			pi.id, pi.invoice_number, pi.supplier_id, pi.issue_date, pi.due_date, 
+			pi.sub_total, pi.vat_amount, pi.total_amount, pi.status, pi.notes, pi.notes_arabic, 
+			pi.created_at, pi.updated_at,
+			s.id, s.company_name, s.contact_person, s.email, s.phone, s.address, s.vat_number
+		FROM purchase_invoices pi
+		LEFT JOIN suppliers s ON pi.supplier_id = s.id
+		ORDER BY pi.created_at DESC`
 
 	rows, err := d.db.Query(query)
 	if err != nil {
@@ -61,12 +69,25 @@ func (d *Database) GetPurchaseInvoices() ([]PurchaseInvoice, error) {
 	var invoices []PurchaseInvoice
 	for rows.Next() {
 		var inv PurchaseInvoice
-		scanErr := rows.Scan(&inv.ID, &inv.InvoiceNumber, &inv.SupplierID, &inv.IssueDate, &inv.DueDate,
+		var supplier Supplier
+		var supplierID *int
+		
+		scanErr := rows.Scan(
+			&inv.ID, &inv.InvoiceNumber, &inv.SupplierID, &inv.IssueDate, &inv.DueDate,
 			&inv.SubTotal, &inv.VATAmount, &inv.TotalAmount, &inv.Status, &inv.Notes, &inv.NotesArabic,
-			&inv.CreatedAt, &inv.UpdatedAt)
+			&inv.CreatedAt, &inv.UpdatedAt,
+			&supplierID, &supplier.CompanyName, &supplier.ContactPerson, &supplier.Email, 
+			&supplier.Phone, &supplier.Address, &supplier.VATNumber)
 		if scanErr != nil {
 			return nil, scanErr
 		}
+		
+		// Only assign supplier if it exists
+		if supplierID != nil {
+			supplier.ID = *supplierID
+			inv.Supplier = &supplier
+		}
+		
 		invoices = append(invoices, inv)
 	}
 	return invoices, nil

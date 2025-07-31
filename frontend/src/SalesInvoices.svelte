@@ -175,9 +175,9 @@
     { key: 'issue_date', label: 'Issue Date', render: (item) => formatDate(item.issue_date) },
     { key: 'due_date', label: 'Due Date', render: (item) => formatDate(item.due_date) },
     { key: 'total_amount', label: 'Amount', render: (item) => `<span class="font-medium">${formatCurrency(item.total_amount)}</span>` },
-    { key: 'status', label: 'Status' },
     { 
-      label: 'Actions',
+      key: 'status', 
+      label: 'Status',
       actions: [
         { key: 'view', text: 'View', icon: 'fa-eye', class: 'btn-info', title: 'View HTML' },
         { key: 'edit', text: 'Edit', icon: 'fa-edit', class: 'btn-warning', title: 'Edit Invoice' },
