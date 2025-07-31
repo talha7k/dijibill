@@ -242,6 +242,10 @@ export function Greet(arg1) {
   return window['go']['main']['App']['Greet'](arg1);
 }
 
+export function MarkPurchaseInvoiceReceived(arg1) {
+  return window['go']['main']['App']['MarkPurchaseInvoiceReceived'](arg1);
+}
+
 export function OpenPDFInViewer(arg1) {
   return window['go']['main']['App']['OpenPDFInViewer'](arg1);
 }

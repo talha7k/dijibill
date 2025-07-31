@@ -1,11 +1,12 @@
 <script>
   import { onMount } from 'svelte'
-  import { GetPurchaseInvoices, GetSuppliers, DeletePurchaseInvoice, CreatePurchaseInvoice, UpdatePurchaseInvoice, GetPurchaseInvoiceByID } from '../wailsjs/go/main/App.js'
+  import { GetPurchaseInvoices, GetSuppliers, DeletePurchaseInvoice, CreatePurchaseInvoice, UpdatePurchaseInvoice, GetPurchaseInvoiceByID, MarkPurchaseInvoiceReceived } from '../wailsjs/go/main/App.js'
   import PageLayout from './components/PageLayout.svelte'
   import DataTable from './components/DataTable.svelte'
   import PurchaseInvoiceModal from './components/PurchaseInvoiceModal.svelte'
-  import StatusBadge from './components/StatusBadge.svelte'
+  import ClickableStatusBadge from './components/ClickableStatusBadge.svelte'
   import ConfirmationModal from './components/ConfirmationModal.svelte'
+  import InventoryUpdateModal from './components/InventoryUpdateModal.svelte'
 
   /** @type {Array<any>} */
   let purchaseInvoices = []
@@ -28,6 +29,12 @@
   let showDeleteConfirm = false
   let invoiceToDelete = null
   let confirmLoading = false
+
+  // Inventory update modal state
+  let showInventoryUpdateModal = false
+  let inventoryUpdateMessage = ''
+  let updatedProducts = []
+  let markingReceived = false
 
   onMount(async () => {
     await loadData()
@@ -152,6 +159,47 @@
     showDeleteConfirmation(invoice);
   }
 
+  async function handleMarkAsReceived(invoice) {
+    if (invoice.status === 'received') {
+      alert('Invoice is already marked as received')
+      return
+    }
+
+    try {
+      markingReceived = true
+      
+      // Get complete invoice data with items
+      const completeInvoice = await GetPurchaseInvoiceByID(invoice.id)
+      
+      // Mark invoice as received and update inventory
+      await MarkPurchaseInvoiceReceived(invoice.id)
+      
+      // Prepare updated products list for display
+      updatedProducts = completeInvoice.items?.map(item => ({
+        name: item.product?.name || `Product ID: ${item.product_id}`,
+        quantity: item.quantity,
+        newStock: (item.product?.stock || 0) + Number(item.quantity)
+      })) || []
+      
+      inventoryUpdateMessage = `Invoice ${invoice.invoice_number} has been marked as received and inventory has been updated.`
+      showInventoryUpdateModal = true
+      
+      // Refresh the invoice list
+      await loadData()
+    } catch (error) {
+      console.error('Error marking invoice as received:', error)
+      alert('Error marking invoice as received: ' + error.message)
+    } finally {
+      markingReceived = false
+    }
+  }
+
+  function handleInventoryUpdateClose() {
+    showInventoryUpdateModal = false
+    inventoryUpdateMessage = ''
+    updatedProducts = []
+  }
+
   function handleInvoiceModalClose() {
     showInvoiceModal = false
     editingInvoice = null
@@ -255,7 +303,6 @@
       label: 'Status',
       labelArabic: 'الحالة',
       sortable: true,
-      render: (invoice) => getStatusBadge(invoice.status),
       actions: [
         { key: 'edit', text: 'Edit', icon: 'fa-edit', class: 'btn-primary' },
         { key: 'delete', text: 'Delete', icon: 'fa-trash', class: 'btn-error' }
@@ -298,7 +345,18 @@
         handleDeleteInvoice(item)
       }
     }}
-  />
+  >
+    <svelte:fragment slot="cell" let:item let:column>
+      {#if column.key === 'status'}
+        <ClickableStatusBadge
+          status={item.status}
+          clickable={item.status === 'pending'}
+          loading={markingReceived}
+          on:click={() => handleMarkAsReceived(item)}
+        />
+      {/if}
+    </svelte:fragment>
+  </DataTable>
 </PageLayout>
 
 <PurchaseInvoiceModal
@@ -320,4 +378,13 @@
   loading={confirmLoading}
   on:confirm={confirmDelete}
   on:cancel={cancelDelete}
+/>
+
+<!-- Inventory Update Modal -->
+<InventoryUpdateModal
+  show={showInventoryUpdateModal}
+  message={inventoryUpdateMessage}
+  {updatedProducts}
+  on:close={handleInventoryUpdateClose}
+  on:confirm={handleInventoryUpdateClose}
 />

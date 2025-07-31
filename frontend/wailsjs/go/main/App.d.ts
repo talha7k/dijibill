@@ -122,6 +122,8 @@ export function GetUnitsOfMeasurement():Promise<Array<database.UnitOfMeasurement
 
 export function Greet(arg1:string):Promise<string>;
 
+export function MarkPurchaseInvoiceReceived(arg1:number):Promise<void>;
+
 export function OpenPDFInViewer(arg1:string):Promise<void>;
 
 export function PopulateSampleData():Promise<void>;

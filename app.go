@@ -311,6 +311,55 @@ func (a *App) DeletePurchaseInvoice(id int) error {
 	return a.db.DeletePurchaseInvoice(id)
 }
 
+// MarkPurchaseInvoiceReceived marks a purchase invoice as received and updates product inventory
+func (a *App) MarkPurchaseInvoiceReceived(invoiceID int) error {
+	// Get the complete invoice with items
+	invoice, err := a.db.GetPurchaseInvoiceByID(invoiceID)
+	if err != nil {
+		return fmt.Errorf("failed to get purchase invoice: %w", err)
+	}
+
+	// Check if invoice is already received
+	if invoice.Status == "received" {
+		return fmt.Errorf("invoice is already marked as received")
+	}
+
+	// Update invoice status to received
+	invoice.Status = "received"
+	invoice.UpdatedAt = time.Now()
+	
+	err = a.db.UpdatePurchaseInvoice(invoice)
+	if err != nil {
+		return fmt.Errorf("failed to update invoice status: %w", err)
+	}
+
+	// Update product quantities for each item
+	for _, item := range invoice.Items {
+		if item.ProductID > 0 {
+			// Get current product
+			product, err := a.db.GetProductByID(item.ProductID)
+			if err != nil {
+				// Log error but continue with other items
+				fmt.Printf("Warning: failed to get product %d: %v\n", item.ProductID, err)
+				continue
+			}
+
+			// Update stock quantity
+			product.Stock += int(item.Quantity)
+			product.UpdatedAt = time.Now()
+
+			err = a.db.UpdateProduct(product)
+			if err != nil {
+				// Log error but continue with other items
+				fmt.Printf("Warning: failed to update product %d stock: %v\n", item.ProductID, err)
+				continue
+			}
+		}
+	}
+
+	return nil
+}
+
 // Purchase Product Category Management Methods
 
 func (a *App) CreatePurchaseProductCategory(category database.PurchaseProductCategory) error {

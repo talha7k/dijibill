@@ -128,15 +128,15 @@
 >
   <div class="space-y-6">
     <!-- Tab Navigation -->
-    <div class="flex space-x-1 bg-gray-100 p-1 rounded-lg">
+    <div class="flex space-x-1 p-1 rounded-lg">
       <button
-        class="flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors {$invoiceSelectionTab === 'open' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'}"
+        class="flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors {$invoiceSelectionTab === 'open' ? 'bg-white/20 text-blue-300 shadow-sm' : 'text-gray-300 hover:text-gray-200'}"
         on:click={() => handleTabChange('open')}
       >
         Open Invoices ({$openInvoices.length})
       </button>
       <button
-        class="flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors {$invoiceSelectionTab === 'past' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'}"
+        class="flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors {$invoiceSelectionTab === 'past' ? 'bg-white/20 text-blue-300 shadow-sm' : 'text-gray-300 hover:text-gray-200'}"
         on:click={() => handleTabChange('past')}
       >
         Past Invoices ({$pastInvoices.length})
@@ -145,7 +145,7 @@
 
     <!-- Date Filter for Past Invoices -->
     {#if $invoiceSelectionTab === 'past'}
-      <div class="bg-gray-50 p-4 rounded-lg">
+      <div class=" p-4 rounded-lg">
         <h4 class="font-medium mb-3">Date Filter</h4>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
@@ -161,7 +161,7 @@
             on:change={handleDateFilterChange}
           />
         </div>
-        <div class="text-sm text-gray-600 mt-2">
+        <div class="text-sm text-gray-300 mt-2">
           Showing {filteredPastInvoices.length} invoices
         </div>
       </div>
@@ -171,32 +171,32 @@
     <div class="max-h-96 overflow-y-auto">
       {#if $loading}
         <div class="text-center py-8">
-          <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <p class="mt-2 text-gray-600">Loading invoices...</p>
+          <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-300"></div>
+          <p class="mt-2 text-gray-300">Loading invoices...</p>
         </div>
       {:else}
         {#if $invoiceSelectionTab === 'open'}
           {#if $openInvoices.length === 0}
-            <div class="text-center py-8 text-gray-500">
+            <div class="text-center py-8 text-gray-300">
               No open invoices available
             </div>
           {:else}
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {#each $openInvoices as invoice}
                 <div 
-                  class="border rounded-lg p-4 cursor-pointer transition-all hover:shadow-md {$selectedInvoice?.id === invoice.id ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'}"
+                  class="border rounded-lg p-4 cursor-pointer transition-all hover:shadow-md {$selectedInvoice?.id === invoice.id ? 'border-blue-300 bg-blue-50' : 'border-gray-200 hover:border-gray-300'}"
                   on:click={() => handleInvoiceSelect(invoice)}
                 >
                   <div class="flex justify-between items-start mb-2">
-                    <div class="font-medium text-gray-900">
+                    <div class="font-medium text-gray-200">
                       {invoice.invoice_number || `Invoice #${invoice.id}`}
                     </div>
                     <StatusBadge status={invoice.status} />
                   </div>
-                  <div class="text-sm text-gray-600 mb-1">
+                  <div class="text-sm text-gray-300 mb-1">
                     {invoice.customer?.name || 'Walk-in Customer'}
                   </div>
-                  <div class="text-sm text-gray-500 mb-2">
+                  <div class="text-sm text-gray-300 mb-2">
                     Table: {invoice.table_number || 'N/A'}
                   </div>
                   <div class="text-sm font-medium text-green-600 mb-1">
@@ -211,7 +211,7 @@
           {/if}
         {:else}
           {#if filteredPastInvoices.length === 0}
-            <div class="text-center py-8 text-gray-500">
+            <div class="text-center py-8 text-gray-300">
               No past invoices found for the selected date range
             </div>
           {:else}
@@ -224,26 +224,26 @@
                   <div class="flex justify-between items-start">
                     <div class="flex-1">
                       <div class="flex justify-between items-center mb-2">
-                        <div class="font-medium text-gray-900">
+                        <div class="font-medium text-gray-200">
                           {invoice.invoice_number || `Invoice #${invoice.id}`}
                         </div>
                         <StatusBadge status={invoice.status} />
                       </div>
                       <div class="grid grid-cols-2 gap-4 text-sm">
                         <div>
-                          <div class="text-gray-600">Customer:</div>
+                          <div class="text-gray-300">Customer:</div>
                           <div class="font-medium">{invoice.customer?.name || 'Walk-in Customer'}</div>
                         </div>
                         <div>
-                          <div class="text-gray-600">Table:</div>
+                          <div class="text-gray-300">Table:</div>
                           <div class="font-medium">{invoice.table_number || 'N/A'}</div>
                         </div>
                         <div>
-                          <div class="text-gray-600">Amount:</div>
+                          <div class="text-gray-300">Amount:</div>
                           <div class="font-medium text-green-600">{formatCurrency(invoice.total_amount)}</div>
                         </div>
                         <div>
-                          <div class="text-gray-600">Date:</div>
+                          <div class="text-gray-300">Date:</div>
                           <div class="font-medium">{formatDate(invoice.created_at)}</div>
                         </div>
                       </div>
@@ -307,10 +307,10 @@
 >
   <div class="space-y-4">
     {#if invoiceToRefund}
-      <div class="bg-gray-50 p-4 rounded-lg">
+      <div class=" p-4 rounded-lg">
         <div class="font-medium">Invoice: {invoiceToRefund.invoice_number || `#${invoiceToRefund.id}`}</div>
-        <div class="text-sm text-gray-600">Amount: {formatCurrency(invoiceToRefund.total_amount)}</div>
-        <div class="text-sm text-gray-600">Customer: {invoiceToRefund.customer?.name || 'Walk-in Customer'}</div>
+        <div class="text-sm text-gray-300">Amount: {formatCurrency(invoiceToRefund.total_amount)}</div>
+        <div class="text-sm text-gray-300">Customer: {invoiceToRefund.customer?.name || 'Walk-in Customer'}</div>
       </div>
     {/if}
     
