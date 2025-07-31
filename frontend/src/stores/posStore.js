@@ -33,11 +33,21 @@ export const showSalesCategoryModal = writable(false)
 export const showTransferModal = writable(false)
 export const showRefundModal = writable(false)
 export const showPaymentModal = writable(false)
+export const showInvoiceSelectionModal = writable(false)
 
 // Transfer and refund states
 export const transferToInvoiceId = writable(null)
 export const selectedTransferInvoice = writable(null)
 export const refundReason = writable('')
+
+// Invoice selection states
+export const pastInvoices = writable([])
+export const selectedInvoice = writable(null)
+export const invoiceSelectionTab = writable('open') // 'open' or 'past'
+export const invoiceDateFilter = writable({
+  start_date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 days ago
+  end_date: new Date().toISOString().split('T')[0] // today
+})
 
 // Payment states
 export const currentInvoiceForPayment = writable(null)

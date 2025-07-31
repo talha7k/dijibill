@@ -1,27 +1,33 @@
 <script>
   import Modal from './Modal.svelte'
   import FormField from './FormField.svelte'
-  import { 
+  import InvoiceSelectionModal from './InvoiceSelectionModal.svelte'
+  import {
     showCustomerModal,
     showTableModal,
     showSalesCategoryModal,
     showTransferModal,
     showRefundModal,
     showPaymentModal,
-    currentSale,
+    showInvoiceSelectionModal,
     customers,
     salesCategories,
     selectedSalesCategory,
-    transferToInvoiceId,
-    selectedTransferInvoice,
-    refundReason,
     openInvoices,
+    selectedTransferInvoice,
+    currentSale,
     paymentTypes,
     paymentItems,
-    remainingAmount
+    remainingAmount,
+    refundReason,
+    loading
   } from '../stores/posStore.js'
-  import { loadOpenInvoices, addPaymentItem, removePaymentItem, processPayments } from '../services/posService.js'
-  import { onMount } from 'svelte'
+  import {
+    loadOpenInvoices,
+    addPaymentItem,
+    removePaymentItem,
+    processPayments
+  } from '../services/posService.js'
 
   export let onTransferItems = () => {}
   export let onRefundSale = () => {}
@@ -378,3 +384,6 @@
     </div>
   </div>
 </Modal>
+
+<!-- Invoice Selection Modal -->
+<InvoiceSelectionModal />

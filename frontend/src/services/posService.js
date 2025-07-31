@@ -6,6 +6,7 @@ import {
   CreateSalesInvoice,
   UpdateSalesInvoice,
   GetOpenSalesInvoices,
+  GetSalesInvoices,
   GetPaymentTypes,
   CreatePayment,
   GetPaymentsByInvoiceID,
@@ -31,10 +32,13 @@ import {
   selectedTransferInvoice,
   refundReason,
   openInvoices,
+  pastInvoices,
   paymentTypes,
   currentInvoiceForPayment,
   paymentItems,
-  remainingAmount
+  remainingAmount,
+  selectedInvoice,
+  invoiceDateFilter
 } from '../stores/posStore.js'
 import { get } from 'svelte/store'
 
@@ -494,6 +498,92 @@ export async function refundInvoice(invoiceId, refundReason = '') {
   } catch (error) {
     console.error('Error refunding invoice:', error)
     alert('Error refunding invoice: ' + error.message)
+  } finally {
+    loading.set(false)
+  }
+}
+
+/**
+ * Loads all past invoices for selection
+ */
+export async function loadPastInvoices() {
+  try {
+    loading.set(true)
+    const invoices = await GetSalesInvoices()
+    
+    // Filter out open invoices and sort by date (newest first)
+    const pastInvoicesList = invoices
+      .filter(invoice => invoice.status !== 'pending' && invoice.status !== 'draft')
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    
+    pastInvoices.set(pastInvoicesList)
+  } catch (error) {
+    console.error('Error loading past invoices:', error)
+    alert('Error loading past invoices: ' + error.message)
+  } finally {
+    loading.set(false)
+  }
+}
+
+/**
+ * Filters past invoices by date range
+ * @param {string} startDate - Start date in YYYY-MM-DD format
+ * @param {string} endDate - End date in YYYY-MM-DD format
+ */
+export function filterPastInvoicesByDate(startDate, endDate) {
+  const allPastInvoices = get(pastInvoices)
+  
+  if (!startDate && !endDate) {
+    return allPastInvoices
+  }
+  
+  return allPastInvoices.filter(invoice => {
+    const invoiceDate = new Date(invoice.created_at).toISOString().split('T')[0]
+    
+    if (startDate && invoiceDate < startDate) return false
+    if (endDate && invoiceDate > endDate) return false
+    
+    return true
+  })
+}
+
+/**
+ * Selects an invoice for actions (refund, reprint, etc.)
+ * @param {Object} invoice - The invoice to select
+ */
+export function selectInvoice(invoice) {
+  selectedInvoice.set(invoice)
+}
+
+/**
+ * Reprints a receipt for the selected invoice
+ * @param {number} invoiceId - The ID of the invoice to reprint
+ */
+export async function reprintReceipt(invoiceId) {
+  try {
+    loading.set(true)
+    
+    // Get the full invoice details
+    const invoice = await GetSalesInvoiceByID(invoiceId)
+    if (!invoice) {
+      alert('Invoice not found')
+      return
+    }
+    
+    // For now, we'll just show an alert. In a real implementation,
+    // this would trigger the receipt printing functionality
+    alert(`Reprinting receipt for Invoice #${invoice.invoice_number || invoice.id}`)
+    
+    // TODO: Implement actual receipt printing logic here
+    // This could involve:
+    // 1. Generating a receipt template
+    // 2. Sending to a printer
+    // 3. Opening a print dialog
+    // 4. Generating a PDF
+    
+  } catch (error) {
+    console.error('Error reprinting receipt:', error)
+    alert('Error reprinting receipt: ' + error.message)
   } finally {
     loading.set(false)
   }
