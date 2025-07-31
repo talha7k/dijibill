@@ -1,8 +1,6 @@
 <script>
-  import { createEventDispatcher, onMount } from 'svelte';
-  import { fade, fly } from 'svelte/transition';
-  import { quintOut } from 'svelte/easing';
-  import { tweened } from 'svelte/motion';
+  import { createEventDispatcher, onMount, onDestroy } from 'svelte';
+  import { gsap } from 'gsap';
   import introSlidesData from '../data/introSlides.json';
 
   const dispatch = createEventDispatcher();
@@ -13,10 +11,9 @@
   let slides = introSlidesData.slides;
   let isTransitioning = false;
   let slideContainer;
+  let mainContainer;
   let preloadedData = new Map();
-  
-  // Performance optimizations
-  const slideProgress = tweened(0, { duration: 300, easing: quintOut });
+  let tl; // GSAP timeline
   
   // Preload and cache slide data
   onMount(() => {
@@ -29,11 +26,109 @@
       });
     });
     
-    // Preload next slide in background
-    if (slides.length > 1) {
-      preloadSlide(1);
+    // Initialize GSAP animations
+    if (show) {
+      initializeAnimations();
     }
   });
+
+  onDestroy(() => {
+    if (tl) {
+      tl.kill();
+    }
+  });
+
+  function initializeAnimations() {
+    if (!mainContainer) return;
+    
+    // Create master timeline
+    tl = gsap.timeline();
+    
+    // Initial entrance animation
+    tl.fromTo(mainContainer, 
+      { opacity: 0, scale: 0.9 },
+      { opacity: 1, scale: 1, duration: 0.8, ease: "power3.out" }
+    );
+    
+    // Animate background orbs
+    gsap.to(".bg-orb-1", {
+      rotation: 360,
+      duration: 20,
+      repeat: -1,
+      ease: "none"
+    });
+    
+    gsap.to(".bg-orb-2", {
+      rotation: -360,
+      duration: 25,
+      repeat: -1,
+      ease: "none"
+    });
+    
+    gsap.to(".bg-orb-3", {
+      rotation: 360,
+      duration: 30,
+      repeat: -1,
+      ease: "none"
+    });
+    
+    // Animate slide content
+    animateSlideContent();
+  }
+
+  function animateSlideContent() {
+    const slideContent = document.querySelector('.slide-content');
+    const features = document.querySelectorAll('.feature-card');
+    const icon = document.querySelector('.slide-icon-wrapper');
+    const title = document.querySelector('.slide-title');
+    const description = document.querySelector('.slide-description');
+    
+    if (!slideContent) return;
+    
+    // Create slide animation timeline
+    const slideTl = gsap.timeline();
+    
+    // Animate icon
+    if (icon) {
+      slideTl.fromTo(icon,
+        { scale: 0, rotation: -180 },
+        { scale: 1, rotation: 0, duration: 0.6, ease: "back.out(1.7)" }
+      );
+    }
+    
+    // Animate title
+    if (title) {
+      slideTl.fromTo(title,
+        { y: 30, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" },
+        "-=0.3"
+      );
+    }
+    
+    // Animate description
+    if (description) {
+      slideTl.fromTo(description,
+        { y: 20, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" },
+        "-=0.3"
+      );
+    }
+    
+    // Animate features with stagger
+    if (features.length > 0) {
+      slideTl.fromTo(features,
+        { x: 50, opacity: 0 },
+        { 
+          x: 0, 
+          opacity: 1, 
+          duration: 0.4, 
+          ease: "power2.out",
+          stagger: 0.1
+        },
+        "-=0.2"
+      );
+    }
+  }
 
   function preloadSlide(index) {
     if (index >= 0 && index < slides.length && !preloadedData.has(index)) {
@@ -52,18 +147,30 @@
       isTransitioning = true;
       const nextIndex = currentSlide + 1;
       
-      // Preload next slide in background
-      if (nextIndex + 1 < slides.length) {
-        preloadSlide(nextIndex + 1);
+      // Animate slide transition with GSAP
+      const currentContent = document.querySelector('.slide-content');
+      if (currentContent) {
+        gsap.to(currentContent, {
+          x: -100,
+          opacity: 0,
+          duration: 0.3,
+          ease: "power2.in",
+          onComplete: () => {
+            currentSlide = nextIndex;
+            // Trigger reactive update and then animate in
+            setTimeout(() => {
+              animateSlideContent();
+              isTransitioning = false;
+            }, 50);
+          }
+        });
+      } else {
+        currentSlide = nextIndex;
+        setTimeout(() => {
+          animateSlideContent();
+          isTransitioning = false;
+        }, 50);
       }
-      
-      currentSlide = nextIndex;
-      slideProgress.set(nextIndex);
-      
-      // Use requestAnimationFrame for smoother transitions
-      requestAnimationFrame(() => {
-        setTimeout(() => isTransitioning = false, 300);
-      });
     } else {
       completeIntro();
     }
@@ -75,12 +182,30 @@
       isTransitioning = true;
       const prevIndex = currentSlide - 1;
       
-      currentSlide = prevIndex;
-      slideProgress.set(prevIndex);
-      
-      requestAnimationFrame(() => {
-        setTimeout(() => isTransitioning = false, 300);
-      });
+      // Animate slide transition with GSAP
+      const currentContent = document.querySelector('.slide-content');
+      if (currentContent) {
+        gsap.to(currentContent, {
+          x: 100,
+          opacity: 0,
+          duration: 0.3,
+          ease: "power2.in",
+          onComplete: () => {
+            currentSlide = prevIndex;
+            // Trigger reactive update and then animate in
+            setTimeout(() => {
+              animateSlideContent();
+              isTransitioning = false;
+            }, 50);
+          }
+        });
+      } else {
+        currentSlide = prevIndex;
+        setTimeout(() => {
+          animateSlideContent();
+          isTransitioning = false;
+        }, 50);
+      }
     }
   }
 
@@ -91,12 +216,30 @@
     // Preload target slide if not already loaded
     preloadSlide(index);
     
-    currentSlide = index;
-    slideProgress.set(index);
-    
-    requestAnimationFrame(() => {
-      setTimeout(() => isTransitioning = false, 300);
-    });
+    // Animate slide transition with GSAP
+    const currentContent = document.querySelector('.slide-content');
+    if (currentContent) {
+      gsap.to(currentContent, {
+        scale: 0.8,
+        opacity: 0,
+        duration: 0.3,
+        ease: "power2.in",
+        onComplete: () => {
+          currentSlide = index;
+          // Trigger reactive update and then animate in
+          setTimeout(() => {
+            animateSlideContent();
+            isTransitioning = false;
+          }, 50);
+        }
+      });
+    } else {
+      currentSlide = index;
+      setTimeout(() => {
+        animateSlideContent();
+        isTransitioning = false;
+      }, 50);
+    }
   }
 
   function skipIntro() {
@@ -151,25 +294,32 @@
   // Use preloaded data for better performance
   $: currentSlideData = preloadedData.get(currentSlide) || slides[currentSlide];
   $: colorClasses = currentSlideData?.colorClasses || getColorClasses(currentSlideData?.color);
+  
+  // Reactive statement to trigger animations when show changes
+  $: if (show && mainContainer) {
+    initializeAnimations();
+  }
+  
+  // Reactive statement to trigger slide content animations when currentSlide changes
+  $: if (currentSlide !== undefined && !isTransitioning) {
+    setTimeout(() => animateSlideContent(), 100);
+  }
 </script>
 
 {#if show}
   <div 
-    class="fixed inset-0 bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 z-50 flex items-center justify-center overflow-hidden"
-    transition:fade={{ duration: 600, easing: quintOut }}
+    class="fixed inset-0 bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 z-50 overflow-hidden"
+    bind:this={mainContainer}
   >
-    <!-- Optimized animated background elements with CSS transforms -->
+    <!-- Animated background elements with GSAP -->
     <div class="absolute inset-0 overflow-hidden">
       <div class="bg-orb bg-orb-1"></div>
       <div class="bg-orb bg-orb-2"></div>
       <div class="bg-orb bg-orb-3"></div>
     </div>
     
-    <div 
-      class="relative bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl w-full max-w-6xl mx-8 overflow-hidden"
-      transition:fly={{ y: 50, duration: 800, delay: 300, easing: quintOut }}
-      bind:this={slideContainer}
-    >
+    <!-- Full screen content container -->
+    <div class="relative h-full flex flex-col">
       <!-- Header -->
       <div class="flex items-center justify-between p-8 border-b border-white/20">
         <div class="flex items-center space-x-4">
@@ -192,123 +342,120 @@
         </button>
       </div>
 
-      <!-- Content with optimized transitions -->
-      <div class="p-8">
-        <div class="slide-content-wrapper">
-          {#key currentSlide}
-            <div 
-              class="slide-content"
-              in:fly={{ x: 100, duration: 400, delay: 50, easing: quintOut }}
-              out:fly={{ x: -100, duration: 200, easing: quintOut }}
-            >
-              <!-- Left side - Main content -->
-              <div class="slide-main-content">
-                <!-- Icon with optimized rendering -->
-                <div class="slide-icon-container">
-                  <div class="slide-icon-wrapper">
-                    <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="{currentSlideData?.iconSvg || getIconSvg(currentSlideData?.icon)}"></path>
-                    </svg>
+      <!-- Main content area - takes up remaining space -->
+      <div class="flex-1 flex items-center justify-center p-8">
+        <div class="w-full max-w-7xl mx-auto">
+          <div class="slide-content-wrapper">
+            {#key currentSlide}
+              <div class="slide-content">
+                <!-- Left side - Main content -->
+                <div class="slide-main-content">
+                  <!-- Icon -->
+                  <div class="slide-icon-container">
+                    <div class="slide-icon-wrapper">
+                      <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="{currentSlideData?.iconSvg || getIconSvg(currentSlideData?.icon)}"></path>
+                      </svg>
+                    </div>
                   </div>
+
+                  <!-- Title -->
+                  <h3 class="slide-title">
+                    {currentSlideData?.title || ''}
+                  </h3>
+
+                  <!-- Description -->
+                  <p class="slide-description">
+                    {currentSlideData?.description || ''}
+                  </p>
                 </div>
 
-                <!-- Title -->
-                <h3 class="slide-title">
-                  {currentSlideData?.title || ''}
-                </h3>
-
-                <!-- Description -->
-                <p class="slide-description">
-                  {currentSlideData?.description || ''}
-                </p>
-              </div>
-
-              <!-- Right side - Features with staggered animations -->
-              <div class="slide-features">
-                <h4 class="slide-features-title">Key Features</h4>
-                <div class="features-grid">
-                  {#each (currentSlideData?.features || []) as feature, index}
-                    <div 
-                      class="feature-card"
-                      style="--delay: {index * 50}ms"
-                      in:fly={{ x: 30, duration: 300, delay: 100 + (index * 50), easing: quintOut }}
-                    >
-                      <div class="feature-content">
-                        <div class="feature-icon">
-                          <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                          </svg>
-                        </div>
-                        <div class="feature-text">
-                          <h5 class="feature-title">{feature.title}</h5>
-                          <p class="feature-description">{feature.description}</p>
+                <!-- Right side - Features -->
+                <div class="slide-features">
+                  <h4 class="slide-features-title">Key Features</h4>
+                  <div class="features-grid">
+                    {#each (currentSlideData?.features || []) as feature, index}
+                      <div class="feature-card" style="--delay: {index * 50}ms">
+                        <div class="feature-content">
+                          <div class="feature-icon">
+                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                          </div>
+                          <div class="feature-text">
+                            <h5 class="feature-title">{feature.title}</h5>
+                            <p class="feature-description">{feature.description}</p>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  {/each}
+                    {/each}
+                  </div>
                 </div>
               </div>
-            </div>
-          {/key}
+            {/key}
+          </div>
         </div>
       </div>
 
-      <!-- Optimized Progress Indicators -->
-      <div class="progress-container">
-        <div class="progress-indicators">
-          {#each slides as slide, index}
-            <button
-              on:click={() => goToSlide(index)}
-              class="progress-dot {index === currentSlide ? 'active' : ''}"
-              disabled={isTransitioning}
-              aria-label="Go to slide {index + 1}"
-            ></button>
-          {/each}
-        </div>
-      </div>
-
-      <!-- Navigation with improved accessibility -->
-      <div class="navigation-container">
-        <button
-          on:click={prevSlide}
-          disabled={currentSlide === 0 || isTransitioning}
-          class="nav-button nav-button-prev"
-          aria-label="Previous slide"
-        >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-          </svg>
-          <span class="font-medium">Previous</span>
-        </button>
-
-        <div class="slide-counter">
-          {currentSlide + 1} of {slides.length}
+      <!-- Bottom section with progress and navigation -->
+      <div class="bg-white/5 backdrop-blur-xl border-t border-white/20">
+        <!-- Progress Indicators -->
+        <div class="progress-container">
+          <div class="progress-indicators">
+            {#each slides as slide, index}
+              <button
+                on:click={() => goToSlide(index)}
+                class="progress-dot {index === currentSlide ? 'active' : ''}"
+                disabled={isTransitioning}
+                aria-label="Go to slide {index + 1}"
+              ></button>
+            {/each}
+          </div>
         </div>
 
-        <button
-          on:click={nextSlide}
-          disabled={isTransitioning}
-          class="nav-button nav-button-next"
-          aria-label={currentSlide === slides.length - 1 ? 'Get started' : 'Next slide'}
-        >
-          <span>{currentSlide === slides.length - 1 ? 'Get Started' : 'Next'}</span>
-          {#if currentSlide === slides.length - 1}
+        <!-- Navigation -->
+        <div class="navigation-container">
+          <button
+            on:click={prevSlide}
+            disabled={currentSlide === 0 || isTransitioning}
+            class="nav-button nav-button-prev"
+            aria-label="Previous slide"
+          >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
             </svg>
-          {:else}
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-            </svg>
-          {/if}
-        </button>
+            <span class="font-medium">Previous</span>
+          </button>
+
+          <div class="slide-counter">
+            {currentSlide + 1} of {slides.length}
+          </div>
+
+          <button
+            on:click={nextSlide}
+            disabled={isTransitioning}
+            class="nav-button nav-button-next"
+            aria-label={currentSlide === slides.length - 1 ? 'Get started' : 'Next slide'}
+          >
+            <span>{currentSlide === slides.length - 1 ? 'Get Started' : 'Next'}</span>
+            {#if currentSlide === slides.length - 1}
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            {:else}
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+              </svg>
+            {/if}
+          </button>
+        </div>
       </div>
     </div>
   </div>
 {/if}
 
 <style>
-  /* Hardware-accelerated animations for better performance */
+  /* GSAP-powered background orbs */
   .bg-orb {
     position: absolute;
     width: 20rem;
@@ -318,42 +465,27 @@
     filter: blur(3rem);
     opacity: 0.7;
     will-change: transform;
-    animation: pulse-optimized 6s ease-in-out infinite;
   }
 
   .bg-orb-1 {
     top: -10rem;
     right: -10rem;
     background: #a855f7;
-    animation-delay: 0s;
   }
 
   .bg-orb-2 {
     bottom: -10rem;
     left: -10rem;
     background: #ec4899;
-    animation-delay: 2s;
   }
 
   .bg-orb-3 {
     top: 10rem;
     left: 10rem;
     background: #6366f1;
-    animation-delay: 4s;
   }
 
-  @keyframes pulse-optimized {
-    0%, 100% {
-      transform: scale(1) translateZ(0);
-      opacity: 0.7;
-    }
-    50% {
-      transform: scale(1.1) translateZ(0);
-      opacity: 0.5;
-    }
-  }
-
-  /* Optimized slide components */
+  /* Slide components */
   .slide-number-badge {
     width: 3rem;
     height: 3rem;
@@ -381,20 +513,22 @@
 
   .slide-content-wrapper {
     position: relative;
-    min-height: 400px;
+    min-height: 500px;
   }
 
   .slide-content {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 2rem;
+    gap: 3rem;
     align-items: center;
     will-change: transform;
+    height: 100%;
   }
 
   @media (min-width: 1024px) {
     .slide-content {
       grid-template-columns: 1fr 1fr;
+      gap: 4rem;
     }
   }
 
@@ -409,7 +543,7 @@
   }
 
   .slide-icon-container {
-    margin-bottom: 1.5rem;
+    margin-bottom: 2rem;
     display: flex;
     justify-content: center;
   }
@@ -421,11 +555,11 @@
   }
 
   .slide-icon-wrapper {
-    width: 6rem;
-    height: 6rem;
+    width: 8rem;
+    height: 8rem;
     background-color: rgba(255, 255, 255, 0.2);
     backdrop-filter: blur(4px);
-    border-radius: 1rem;
+    border-radius: 1.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -435,36 +569,37 @@
   }
 
   .slide-title {
-    font-size: 1.875rem;
+    font-size: 2.5rem;
     font-weight: 700;
     color: white;
-    margin-bottom: 1rem;
-    line-height: 1.25;
+    margin-bottom: 1.5rem;
+    line-height: 1.2;
   }
 
   @media (min-width: 1024px) {
     .slide-title {
-      font-size: 2.25rem;
+      font-size: 3rem;
     }
   }
 
   .slide-description {
     color: rgba(255, 255, 255, 0.8);
-    font-size: 1.125rem;
+    font-size: 1.25rem;
     line-height: 1.75;
+    max-width: 600px;
   }
 
   .slide-features {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 1.5rem;
   }
 
   .slide-features-title {
-    font-size: 1.25rem;
+    font-size: 1.5rem;
     font-weight: 600;
     color: white;
-    margin-bottom: 1.5rem;
+    margin-bottom: 2rem;
     text-align: center;
   }
 
@@ -476,35 +611,35 @@
 
   .features-grid {
     display: grid;
-    gap: 1rem;
+    gap: 1.5rem;
   }
 
   .feature-card {
     background-color: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(4px);
-    border-radius: 0.75rem;
-    padding: 1rem;
+    border-radius: 1rem;
+    padding: 1.5rem;
     border: 1px solid rgba(255, 255, 255, 0.2);
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease, transform 0.3s ease;
     will-change: transform;
-    animation-delay: var(--delay);
   }
 
   .feature-card:hover {
     background-color: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
   }
 
   .feature-content {
     display: flex;
     align-items: flex-start;
-    gap: 0.75rem;
+    gap: 1rem;
   }
 
   .feature-icon {
-    width: 2rem;
-    height: 2rem;
+    width: 2.5rem;
+    height: 2.5rem;
     background-color: rgba(255, 255, 255, 0.2);
-    border-radius: 0.5rem;
+    border-radius: 0.75rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -519,29 +654,29 @@
   .feature-title {
     font-weight: 600;
     color: white;
-    font-size: 0.875rem;
-    margin-bottom: 0.25rem;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
   }
 
   .feature-description {
     color: rgba(255, 255, 255, 0.7);
-    font-size: 0.75rem;
+    font-size: 0.875rem;
     line-height: 1.75;
   }
 
   .progress-container {
-    padding: 0 2rem 1.5rem;
+    padding: 1.5rem 2rem;
   }
 
   .progress-indicators {
     display: flex;
     justify-content: center;
-    gap: 0.75rem;
+    gap: 1rem;
   }
 
   .progress-dot {
-    width: 0.75rem;
-    height: 0.75rem;
+    width: 1rem;
+    height: 1rem;
     border-radius: 50%;
     background-color: rgba(255, 255, 255, 0.3);
     transition: all 0.3s ease;
@@ -569,17 +704,14 @@
     align-items: center;
     justify-content: space-between;
     padding: 2rem;
-    background-color: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(4px);
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
   }
 
   .nav-button {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    padding: 0.75rem 1.5rem;
-    border-radius: 0.75rem;
+    padding: 1rem 2rem;
+    border-radius: 1rem;
     transition: all 0.3s ease;
     border: none;
     cursor: pointer;
@@ -604,7 +736,7 @@
   .nav-button-next {
     background-color: white;
     color: #374151;
-    padding: 0.75rem 2rem;
+    padding: 1rem 2.5rem;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   }
 
@@ -623,6 +755,7 @@
   .slide-counter {
     color: rgba(255, 255, 255, 0.6);
     font-weight: 500;
+    font-size: 1rem;
   }
 
   /* Performance optimizations */
@@ -638,24 +771,5 @@
   .progress-dot,
   .nav-button {
     contain: layout style paint;
-  }
-
-  /* Custom scrollbar for content if needed */
-  :global(.intro-slider-content::-webkit-scrollbar) {
-    width: 6px;
-  }
-  
-  :global(.intro-slider-content::-webkit-scrollbar-track) {
-    background: #f1f1f1;
-    border-radius: 3px;
-  }
-  
-  :global(.intro-slider-content::-webkit-scrollbar-thumb) {
-    background: #c1c1c1;
-    border-radius: 3px;
-  }
-  
-  :global(.intro-slider-content::-webkit-scrollbar-thumb:hover) {
-    background: #a8a8a8;
   }
 </style>
