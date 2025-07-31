@@ -158,6 +158,8 @@ type SalesInvoice struct {
 	NotesArabic      string             `json:"notes_arabic"`
 	QRCode           string             `json:"qr_code"`
 	Items            []SalesInvoiceItem `json:"items,omitempty"`
+	CreatedBy        *int               `json:"created_by,omitempty"`  // User who created the invoice
+	UpdatedBy        *int               `json:"updated_by,omitempty"`  // User who last updated the invoice
 	CreatedAt        time.Time          `json:"created_at"`
 	UpdatedAt        time.Time          `json:"updated_at"`
 }
@@ -194,6 +196,8 @@ type PurchaseInvoice struct {
 	Notes            string                `json:"notes"`
 	NotesArabic      string                `json:"notes_arabic"`
 	Items            []PurchaseInvoiceItem `json:"items,omitempty"`
+	CreatedBy        *int                  `json:"created_by,omitempty"`  // User who created the invoice
+	UpdatedBy        *int                  `json:"updated_by,omitempty"`  // User who last updated the invoice
 	CreatedAt        time.Time             `json:"created_at"`
 	UpdatedAt        time.Time             `json:"updated_at"`
 }

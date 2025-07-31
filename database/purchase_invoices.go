@@ -20,11 +20,11 @@ func (d *Database) CreatePurchaseInvoice(invoice *PurchaseInvoice) error {
 
 	// Insert purchase invoice
 	query := `
-		INSERT INTO purchase_invoices (invoice_number, supplier_id, issue_date, due_date, sub_total, vat_amount, vat_rate, vat_inclusive, total_amount, status, notes, notes_arabic)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+		INSERT INTO purchase_invoices (invoice_number, supplier_id, issue_date, due_date, sub_total, vat_amount, vat_rate, vat_inclusive, total_amount, status, notes, notes_arabic, created_by, updated_by)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
 	result, err := tx.Exec(query, invoice.InvoiceNumber, invoice.SupplierID, invoice.IssueDate.Time, invoice.DueDate.Time,
-		invoice.SubTotal, invoice.VATAmount, invoice.VATRate, invoice.VATInclusive, invoice.TotalAmount, invoice.Status, invoice.Notes, invoice.NotesArabic)
+		invoice.SubTotal, invoice.VATAmount, invoice.VATRate, invoice.VATInclusive, invoice.TotalAmount, invoice.Status, invoice.Notes, invoice.NotesArabic, invoice.CreatedBy, invoice.CreatedBy)
 	if err != nil {
 		return err
 	}
@@ -55,7 +55,7 @@ func (d *Database) GetPurchaseInvoices() ([]PurchaseInvoice, error) {
 		SELECT 
 			pi.id, pi.invoice_number, pi.supplier_id, pi.issue_date, pi.due_date, 
 			pi.sub_total, pi.vat_amount, pi.vat_rate, pi.vat_inclusive, pi.total_amount, pi.status, pi.notes, pi.notes_arabic, 
-			pi.created_at, pi.updated_at,
+			pi.created_at, pi.updated_at, pi.created_by, pi.updated_by,
 			s.id, s.company_name, s.contact_person, s.email, s.phone, s.address, s.vat_number
 		FROM purchase_invoices pi
 		LEFT JOIN suppliers s ON pi.supplier_id = s.id
@@ -78,7 +78,7 @@ func (d *Database) GetPurchaseInvoices() ([]PurchaseInvoice, error) {
 		scanErr := rows.Scan(
 			&inv.ID, &inv.InvoiceNumber, &inv.SupplierID, 
 			&issueDate, &dueDate, &inv.SubTotal, &vatAmount, &inv.VATRate, &inv.VATInclusive, &inv.TotalAmount, 
-			&inv.Status, &inv.Notes, &inv.NotesArabic, &inv.CreatedAt, &inv.UpdatedAt,
+			&inv.Status, &inv.Notes, &inv.NotesArabic, &inv.CreatedAt, &inv.UpdatedAt, &inv.CreatedBy, &inv.UpdatedBy,
 			&supplierID, &supplier.CompanyName, &supplier.ContactPerson, &supplier.Email, &supplier.Phone, 
 			&supplier.Address, &supplier.VATNumber)
 		if scanErr != nil {
@@ -104,14 +104,14 @@ func (d *Database) GetPurchaseInvoices() ([]PurchaseInvoice, error) {
 }
 
 func (d *Database) GetPurchaseInvoiceByID(id int) (*PurchaseInvoice, error) {
-	query := `SELECT id, invoice_number, supplier_id, issue_date, due_date, sub_total, vat_amount, vat_rate, vat_inclusive, total_amount, status, notes, notes_arabic, created_at, updated_at FROM purchase_invoices WHERE id = ?`
+	query := `SELECT id, invoice_number, supplier_id, issue_date, due_date, sub_total, vat_amount, vat_rate, vat_inclusive, total_amount, status, notes, notes_arabic, created_at, updated_at, created_by, updated_by FROM purchase_invoices WHERE id = ?`
 
 	var inv PurchaseInvoice
 	var issueDate, dueDate time.Time
 	var vatAmount float64
 	err := d.db.QueryRow(query, id).Scan(&inv.ID, &inv.InvoiceNumber, &inv.SupplierID, &issueDate, &dueDate,
 		&inv.SubTotal, &vatAmount, &inv.VATRate, &inv.VATInclusive, &inv.TotalAmount, &inv.Status, &inv.Notes, &inv.NotesArabic,
-		&inv.CreatedAt, &inv.UpdatedAt)
+		&inv.CreatedAt, &inv.UpdatedAt, &inv.CreatedBy, &inv.UpdatedBy)
 	if err != nil {
 		return nil, err
 	}

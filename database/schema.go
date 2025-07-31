@@ -495,5 +495,59 @@ func (d *Database) runMigrations() error {
 		log.Println("Added intro_viewed column to users table")
 	}
 
+	// Check if created_by column exists in sales_invoices table
+	columnExists = false
+	err = d.db.QueryRow("SELECT COUNT(*) FROM pragma_table_info('sales_invoices') WHERE name='created_by'").Scan(&columnExists)
+	if err != nil {
+		return err
+	}
+
+	// Add created_by and updated_by columns to sales_invoices if they don't exist
+	if !columnExists {
+		_, err = d.db.Exec("ALTER TABLE sales_invoices ADD COLUMN created_by INTEGER")
+		if err != nil {
+			return fmt.Errorf("error adding created_by column to sales_invoices: %v", err)
+		}
+		_, err = d.db.Exec("ALTER TABLE sales_invoices ADD COLUMN updated_by INTEGER")
+		if err != nil {
+			return fmt.Errorf("error adding updated_by column to sales_invoices: %v", err)
+		}
+		log.Println("Added created_by and updated_by columns to sales_invoices table")
+	}
+
+	// Check if created_by column exists in purchase_invoices table
+	columnExists = false
+	err = d.db.QueryRow("SELECT COUNT(*) FROM pragma_table_info('purchase_invoices') WHERE name='created_by'").Scan(&columnExists)
+	if err != nil {
+		return err
+	}
+
+	// Add created_by and updated_by columns to purchase_invoices if they don't exist
+	if !columnExists {
+		_, err = d.db.Exec("ALTER TABLE purchase_invoices ADD COLUMN created_by INTEGER")
+		if err != nil {
+			return fmt.Errorf("error adding created_by column to purchase_invoices: %v", err)
+		}
+		_, err = d.db.Exec("ALTER TABLE purchase_invoices ADD COLUMN updated_by INTEGER")
+		if err != nil {
+			return fmt.Errorf("error adding updated_by column to purchase_invoices: %v", err)
+		}
+		log.Println("Added created_by and updated_by columns to purchase_invoices table")
+	}
+
+	// Create indexes for the new user tracking columns
+	indexes := []string{
+		"CREATE INDEX IF NOT EXISTS idx_sales_invoices_created_by ON sales_invoices(created_by)",
+		"CREATE INDEX IF NOT EXISTS idx_sales_invoices_updated_by ON sales_invoices(updated_by)",
+		"CREATE INDEX IF NOT EXISTS idx_purchase_invoices_created_by ON purchase_invoices(created_by)",
+		"CREATE INDEX IF NOT EXISTS idx_purchase_invoices_updated_by ON purchase_invoices(updated_by)",
+	}
+
+	for _, indexQuery := range indexes {
+		if _, err := d.db.Exec(indexQuery); err != nil {
+			log.Printf("Warning: Could not create index: %v", err)
+		}
+	}
+
 	return nil
 }

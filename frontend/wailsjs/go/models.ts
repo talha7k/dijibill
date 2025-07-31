@@ -443,6 +443,8 @@ export namespace database {
 	    notes_arabic: string;
 	    qr_code: string;
 	    items?: SalesInvoiceItem[];
+	    created_by?: number;
+	    updated_by?: number;
 	    created_at: time.Time;
 	    updated_at: time.Time;
 	
@@ -470,6 +472,8 @@ export namespace database {
 	        this.notes_arabic = source["notes_arabic"];
 	        this.qr_code = source["qr_code"];
 	        this.items = this.convertValues(source["items"], SalesInvoiceItem);
+	        this.created_by = source["created_by"];
+	        this.updated_by = source["updated_by"];
 	        this.created_at = this.convertValues(source["created_at"], time.Time);
 	        this.updated_at = this.convertValues(source["updated_at"], time.Time);
 	    }
@@ -682,6 +686,8 @@ export namespace database {
 	    notes: string;
 	    notes_arabic: string;
 	    items?: PurchaseInvoiceItem[];
+	    created_by?: number;
+	    updated_by?: number;
 	    created_at: time.Time;
 	    updated_at: time.Time;
 	
@@ -707,6 +713,8 @@ export namespace database {
 	        this.notes = source["notes"];
 	        this.notes_arabic = source["notes_arabic"];
 	        this.items = this.convertValues(source["items"], PurchaseInvoiceItem);
+	        this.created_by = source["created_by"];
+	        this.updated_by = source["updated_by"];
 	        this.created_at = this.convertValues(source["created_at"], time.Time);
 	        this.updated_at = this.convertValues(source["updated_at"], time.Time);
 	    }

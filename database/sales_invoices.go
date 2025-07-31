@@ -21,11 +21,11 @@ func (d *Database) CreateSalesInvoice(invoice *SalesInvoice) error {
 
 	// Insert sales invoice
 	query := `
-		INSERT INTO sales_invoices (invoice_number, customer_id, sales_category_id, table_number, issue_date, due_date, sub_total, vat_amount, total_amount, status, notes, notes_arabic, qr_code)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+		INSERT INTO sales_invoices (invoice_number, customer_id, sales_category_id, table_number, issue_date, due_date, sub_total, vat_amount, total_amount, status, notes, notes_arabic, qr_code, created_by, updated_by)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
 	result, err := tx.Exec(query, invoice.InvoiceNumber, invoice.CustomerID, invoice.SalesCategoryID, invoice.TableNumber, invoice.IssueDate.Time, invoice.DueDate.Time,
-		invoice.SubTotal, invoice.VATAmount, invoice.TotalAmount, invoice.Status, invoice.Notes, invoice.NotesArabic, invoice.QRCode)
+		invoice.SubTotal, invoice.VATAmount, invoice.TotalAmount, invoice.Status, invoice.Notes, invoice.NotesArabic, invoice.QRCode, invoice.CreatedBy, invoice.CreatedBy)
 	if err != nil {
 		return err
 	}
@@ -57,6 +57,7 @@ func (d *Database) GetSalesInvoices() ([]SalesInvoice, error) {
 			si.id, si.invoice_number, si.customer_id, si.sales_category_id, si.table_number,
 			si.issue_date, si.due_date, si.sub_total, si.vat_amount, si.total_amount, 
 			si.status, si.notes, si.notes_arabic, si.qr_code, si.created_at, si.updated_at,
+			si.created_by, si.updated_by,
 			c.id as customer_id, c.name as customer_name, c.email as customer_email, 
 			c.phone as customer_phone, c.address as customer_address, c.city as customer_city, 
 			c.country as customer_country, c.vat_number as customer_vat_number, 
@@ -84,6 +85,7 @@ func (d *Database) GetSalesInvoices() ([]SalesInvoice, error) {
 			&inv.ID, &inv.InvoiceNumber, &inv.CustomerID, &inv.SalesCategoryID, &inv.TableNumber,
 			&issueDate, &dueDate, &inv.SubTotal, &inv.VATAmount, &inv.TotalAmount, 
 			&inv.Status, &inv.Notes, &inv.NotesArabic, &inv.QRCode, &inv.CreatedAt, &inv.UpdatedAt,
+			&inv.CreatedBy, &inv.UpdatedBy,
 			&customerID, &customerName, &customerEmail, &customerPhone, &customerAddress, 
 			&customerCity, &customerCountry, &customerVATNumber, 
 			&customerCreatedAt, &customerUpdatedAt)
@@ -276,13 +278,13 @@ func (d *Database) GetOpenSalesInvoices() ([]SalesInvoice, error) {
 }
 
 func (d *Database) GetSalesInvoiceByID(id int) (*SalesInvoice, error) {
-	query := `SELECT id, invoice_number, customer_id, sales_category_id, table_number, issue_date, due_date, sub_total, vat_amount, total_amount, status, notes, notes_arabic, qr_code, created_at, updated_at FROM sales_invoices WHERE id = ?`
+	query := `SELECT id, invoice_number, customer_id, sales_category_id, table_number, issue_date, due_date, sub_total, vat_amount, total_amount, status, notes, notes_arabic, qr_code, created_at, updated_at, created_by, updated_by FROM sales_invoices WHERE id = ?`
 
 	var inv SalesInvoice
 	var issueDate, dueDate time.Time
 	err := d.db.QueryRow(query, id).Scan(&inv.ID, &inv.InvoiceNumber, &inv.CustomerID, &inv.SalesCategoryID, &inv.TableNumber, &issueDate, &dueDate,
 		&inv.SubTotal, &inv.VATAmount, &inv.TotalAmount, &inv.Status, &inv.Notes, &inv.NotesArabic,
-		&inv.QRCode, &inv.CreatedAt, &inv.UpdatedAt)
+		&inv.QRCode, &inv.CreatedAt, &inv.UpdatedAt, &inv.CreatedBy, &inv.UpdatedBy)
 	if err != nil {
 		return nil, err
 	}
@@ -328,11 +330,11 @@ func (d *Database) UpdateSalesInvoice(invoice *SalesInvoice) error {
 	query := `
 		UPDATE sales_invoices 
 		SET invoice_number = ?, customer_id = ?, sales_category_id = ?, table_number = ?, issue_date = ?, due_date = ?, 
-		    sub_total = ?, vat_amount = ?, total_amount = ?, status = ?, notes = ?, notes_arabic = ?, qr_code = ?, updated_at = CURRENT_TIMESTAMP
+		    sub_total = ?, vat_amount = ?, total_amount = ?, status = ?, notes = ?, notes_arabic = ?, qr_code = ?, updated_by = ?, updated_at = CURRENT_TIMESTAMP
 		WHERE id = ?`
 
 	_, err = tx.Exec(query, invoice.InvoiceNumber, invoice.CustomerID, invoice.SalesCategoryID, invoice.TableNumber, invoice.IssueDate.Time, invoice.DueDate.Time,
-		invoice.SubTotal, invoice.VATAmount, invoice.TotalAmount, invoice.Status, invoice.Notes, invoice.NotesArabic, invoice.QRCode, invoice.ID)
+		invoice.SubTotal, invoice.VATAmount, invoice.TotalAmount, invoice.Status, invoice.Notes, invoice.NotesArabic, invoice.QRCode, invoice.UpdatedBy, invoice.ID)
 	if err != nil {
 		return err
 	}
