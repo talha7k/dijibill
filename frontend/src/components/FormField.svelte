@@ -125,6 +125,45 @@
       {dir}
       on:input={handleInput}
     />
+  {:else if type === 'date'}
+    <input 
+      id={fieldId}
+      {name}
+      type="date"
+      class="input-glass {error ? 'border-error' : ''}"
+      bind:value
+      {required}
+      {disabled}
+      {min}
+      {max}
+      on:input={handleInput}
+    />
+  {:else if type === 'datetime-local'}
+    <input 
+      id={fieldId}
+      {name}
+      type="datetime-local"
+      class="input-glass {error ? 'border-error' : ''}"
+      bind:value
+      {required}
+      {disabled}
+      {min}
+      {max}
+      on:input={handleInput}
+    />
+  {:else if type === 'time'}
+    <input 
+      id={fieldId}
+      {name}
+      type="time"
+      class="input-glass {error ? 'border-error' : ''}"
+      bind:value
+      {required}
+      {disabled}
+      {min}
+      {max}
+      on:input={handleInput}
+    />
   {:else}
     <input 
       id={fieldId}

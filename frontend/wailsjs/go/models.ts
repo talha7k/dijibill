@@ -79,22 +79,22 @@ export namespace database {
 	    }
 	
 		convertValues(a: any, clazz: any, asMap: boolean = false): any {
-	    if (!a) {
-	        return a;
-	    }
-	    if (a.slice && a.map) {
-	        return (a as any[]).map(elem => this.convertValues(elem, clazz));
-	    } else if ("object" === typeof a) {
-	        if (asMap) {
-	            for (const key of Object.keys(a)) {
-	                a[key] = clazz && typeof clazz === 'function' ? new clazz(a[key]) : a[key];
-	            }
-	            return a;
-	        }
-	        return clazz && typeof clazz === 'function' ? new clazz(a) : a;
-	    }
-	    return a;
-	}
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, clazz));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = clazz && typeof clazz === 'function' ? new clazz(a[key]) : a[key];
+		            }
+		            return a;
+		        }
+		        return clazz && typeof clazz === 'function' ? new clazz(a) : a;
+		    }
+		    return a;
+		}
 	}
 	export class DefaultProductSettings {
 	    id: number;

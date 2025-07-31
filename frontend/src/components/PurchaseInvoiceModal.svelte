@@ -40,8 +40,8 @@
       invoiceForm = {
         invoice_number: invoice?.invoice_number || '',
         supplier_id: invoice?.supplier_id || '',
-        issue_date: invoice?.issue_date || '',
-        due_date: invoice?.due_date || '',
+        issue_date: invoice?.issue_date ? new Date(invoice.issue_date).toISOString().split('T')[0] : '',
+        due_date: invoice?.due_date ? new Date(invoice.due_date).toISOString().split('T')[0] : '',
         amount: invoice?.amount || '',
         vat_amount: invoice?.vat_amount || '',
         total_amount: invoice?.total_amount || '',
