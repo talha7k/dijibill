@@ -232,7 +232,7 @@
   }
   
   .touch-dropdown-button.disabled {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.5);
     color: rgba(255, 255, 255, 0.4);
     cursor: not-allowed;
   }
@@ -245,7 +245,7 @@
   .dropdown-arrow {
     width: 1.25rem;
     height: 1.25rem;
-    color: rgba(255, 255, 255, 0.6);
+    color: rgba(255, 255, 255, 0.8);
     transition: transform 200ms ease-in-out;
     flex-shrink: 0;
   }
@@ -259,7 +259,7 @@
     z-index: 50;
     width: 100%;
     margin-top: 0.25rem;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(67, 67, 67, 0.8);
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 0.5rem;
     box-shadow: var(--shadow-glass);
@@ -307,7 +307,7 @@
   
   .options-grid {
     display: grid;
-    gap: 0.25rem;
+    gap: 0.45rem;
     padding: 0.5rem;
     max-height: 16rem;
     overflow-y: auto;
@@ -320,10 +320,11 @@
     border-radius: 0.375rem;
     transition: all 150ms ease-in-out;
     background: transparent;
-    border: none;
     color: white;
     cursor: pointer;
     min-height: 70px;
+    box-shadow: 0 0 0 1px var(--color-primary-200);
+
   }
   
   .option-item:hover {

@@ -234,6 +234,14 @@ export function GetTaxRates() {
   return window['go']['main']['App']['GetTaxRates']();
 }
 
+export function GetTodaysSales() {
+  return window['go']['main']['App']['GetTodaysSales']();
+}
+
+export function GetTopSellingProducts() {
+  return window['go']['main']['App']['GetTopSellingProducts']();
+}
+
 export function GetUnitsOfMeasurement() {
   return window['go']['main']['App']['GetUnitsOfMeasurement']();
 }

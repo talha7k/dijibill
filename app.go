@@ -248,6 +248,16 @@ func (a *App) DeleteSalesInvoice(id int) error {
 	return a.db.DeleteSalesInvoice(id)
 }
 
+// Dashboard Methods
+
+func (a *App) GetTodaysSales() (map[string]interface{}, error) {
+	return a.db.GetTodaysSales()
+}
+
+func (a *App) GetTopSellingProducts() ([]map[string]interface{}, error) {
+	return a.db.GetTopSellingProducts()
+}
+
 // Purchase Invoice Management Methods
 
 func (a *App) CreatePurchaseInvoice(invoice database.PurchaseInvoice) error {

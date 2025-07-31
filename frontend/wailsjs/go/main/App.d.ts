@@ -118,6 +118,10 @@ export function GetSuppliers():Promise<Array<database.Supplier>>;
 
 export function GetTaxRates():Promise<Array<database.TaxRate>>;
 
+export function GetTodaysSales():Promise<Record<string, any>>;
+
+export function GetTopSellingProducts():Promise<Array<Record<string, any>>>;
+
 export function GetUnitsOfMeasurement():Promise<Array<database.UnitOfMeasurement>>;
 
 export function Greet(arg1:string):Promise<string>;

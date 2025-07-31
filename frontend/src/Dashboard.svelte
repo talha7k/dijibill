@@ -2,10 +2,12 @@
   import { onMount } from 'svelte'
   import { wailsReady } from './stores/wailsStore.js'
   import PageLayout from './components/PageLayout.svelte'
-  import { GetCustomers, GetInvoices, GetProducts } from '../wailsjs/go/main/App.js'
+  import { GetCustomers, GetInvoices, GetProducts, GetTodaysSales, GetTopSellingProducts } from '../wailsjs/go/main/App.js'
 
   let customers = []
   let invoices = []
+  let todaysSales = {}
+  let topProducts = []
   let isLoading = true
   let stats = {
     items: 0,
@@ -41,18 +43,22 @@
       console.log('📊 Loading dashboard data...')
       
       // Load data from backend
-      const [customersData, invoicesData, productsData] = await Promise.all([
+      const [customersData, invoicesData, productsData, todaysSalesData, topProductsData] = await Promise.all([
         GetCustomers(),
         GetInvoices(),
-        GetProducts()
+        GetProducts(),
+        GetTodaysSales(),
+        GetTopSellingProducts()
       ])
 
       customers = customersData || []
       invoices = invoicesData || []
+      todaysSales = todaysSalesData || {}
+      topProducts = topProductsData || []
       
       // Calculate stats
       stats.customers = customers.length
-      stats.items = productsData?.length || 0
+      stats.items = todaysSales.items_sold || 0
       stats.products = productsData?.length || 0
       stats.payments = (invoices || []).filter(inv => inv.status === 'paid').length
       
@@ -62,6 +68,8 @@
       // Fallback to empty data
       customers = []
       invoices = []
+      todaysSales = {}
+      topProducts = []
       stats = { items: 0, customers: 0, products: 0, payments: 0 }
     } finally {
       isLoading = false
@@ -73,6 +81,15 @@
   $: totalInvoices = (invoices || []).length
   $: overdueCustomers = (customers || []).slice(0, 3) // Mock overdue customers
   $: topCustomers = (customers || []).slice(0, 3) // Mock top customers
+
+  // Format currency
+  function formatCurrency(amount) {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'SAR',
+      minimumFractionDigits: 2
+    }).format(amount || 0)
+  }
 </script>
 
 <PageLayout 
@@ -91,36 +108,36 @@
   {:else}
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      <!-- Items Card -->
+      <!-- Today's Sales Card -->
       <div class="card bg-base-100/20 backdrop-blur-lg border border-white/20 shadow-xl">
         <div class="card-body p-6">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-white/70 mb-1">Items</p>
-              <p class="text-2xl font-bold text-white">{stats.items}</p>
-              <p class="text-xs text-primary mt-1">All items</p>
+              <p class="text-sm text-white/70 mb-1">Today's Sales</p>
+              <p class="text-2xl font-bold text-white">{todaysSales.sales_count || 0}</p>
+              <p class="text-xs text-primary mt-1">{formatCurrency(todaysSales.total_amount)}</p>
             </div>
             <div class="text-primary">
               <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
               </svg>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Customers Card -->
+      <!-- Items Sold Today Card -->
       <div class="card bg-base-100/20 backdrop-blur-lg border border-white/20 shadow-xl">
         <div class="card-body p-6">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-white/70 mb-1">Customers</p>
-              <p class="text-2xl font-bold text-white">{stats.customers}</p>
-              <p class="text-xs text-secondary mt-1">All customers</p>
+              <p class="text-sm text-white/70 mb-1">Items Sold Today</p>
+              <p class="text-2xl font-bold text-white">{todaysSales.items_sold || 0}</p>
+              <p class="text-xs text-secondary mt-1">Total items</p>
             </div>
             <div class="text-secondary">
               <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
               </svg>
             </div>
           </div>
@@ -218,31 +235,29 @@
 
     <!-- Customer Tables -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <!-- Top Customers -->
+      <!-- Top Selling Products -->
       <div class="card bg-base-100/20 backdrop-blur-lg border border-white/20 shadow-xl">
         <div class="card-body p-6">
-          <h3 class="text-lg font-semibold mb-4 text-white">Top Customers</h3>
+          <h3 class="text-lg font-semibold mb-4 text-white">Top Selling Products</h3>
           <div class="overflow-x-auto">
             <table class="table table-sm w-full">
               <thead>
                 <tr class="border-white/20">
-                  <th class="text-white/70">Customer Name</th>
-                  <th class="text-white/70">Status</th>
-                  <th class="text-white/70">Amount</th>
+                  <th class="text-white/70">Product</th>
+                  <th class="text-white/70">Qty Sold</th>
+                  <th class="text-white/70">Revenue</th>
                 </tr>
               </thead>
               <tbody>
-                {#each topCustomers as customer}
+                {#each topProducts as product}
                   <tr class="border-white/20">
-                    <td class="text-white">{customer.name || 'Sample Customer'}</td>
-                    <td class="text-warning">Overdue</td>
-                    <td class="text-primary font-semibold">€ 4,918.00</td>
+                    <td class="text-white">{product.name}</td>
+                    <td class="text-white">{product.total_quantity}</td>
+                    <td class="text-primary font-semibold">{formatCurrency(product.total_revenue)}</td>
                   </tr>
                 {:else}
                   <tr class="border-white/20">
-                    <td class="text-white">Edenta Arabia LTD</td>
-                    <td class="text-warning">Overdue</td>
-                    <td class="text-primary font-semibold">€ 4,918.00</td>
+                    <td colspan="3" class="text-center text-white/50">No products found</td>
                   </tr>
                 {/each}
               </tbody>

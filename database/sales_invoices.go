@@ -1,6 +1,7 @@
 package database
 
 import (
+	"database/sql"
 	"fmt"
 	"time"
 )
@@ -75,14 +76,16 @@ func (d *Database) GetSalesInvoices() ([]SalesInvoice, error) {
 		var inv SalesInvoice
 		var customer Customer
 		var customerID, customerCreatedAt, customerUpdatedAt interface{}
+		var customerName, customerEmail, customerPhone, customerAddress sql.NullString
+		var customerCity, customerCountry, customerVATNumber sql.NullString
 		var issueDate, dueDate time.Time
 		
 		scanErr := rows.Scan(
 			&inv.ID, &inv.InvoiceNumber, &inv.CustomerID, &inv.SalesCategoryID, &inv.TableNumber,
 			&issueDate, &dueDate, &inv.SubTotal, &inv.VATAmount, &inv.TotalAmount, 
 			&inv.Status, &inv.Notes, &inv.NotesArabic, &inv.QRCode, &inv.CreatedAt, &inv.UpdatedAt,
-			&customerID, &customer.Name, &customer.Email, &customer.Phone, &customer.Address, 
-			&customer.City, &customer.Country, &customer.VATNumber, 
+			&customerID, &customerName, &customerEmail, &customerPhone, &customerAddress, 
+			&customerCity, &customerCountry, &customerVATNumber, 
 			&customerCreatedAt, &customerUpdatedAt)
 		if scanErr != nil {
 			return nil, scanErr
@@ -95,6 +98,13 @@ func (d *Database) GetSalesInvoices() ([]SalesInvoice, error) {
 		// Only set customer if customer data exists
 		if customerID != nil {
 			customer.ID = int(customerID.(int64))
+			customer.Name = customerName.String
+			customer.Email = customerEmail.String
+			customer.Phone = customerPhone.String
+			customer.Address = customerAddress.String
+			customer.City = customerCity.String
+			customer.Country = customerCountry.String
+			customer.VATNumber = customerVATNumber.String
 			if customerCreatedAt != nil {
 				customer.CreatedAt = customerCreatedAt.(time.Time)
 			}
@@ -107,6 +117,93 @@ func (d *Database) GetSalesInvoices() ([]SalesInvoice, error) {
 		invoices = append(invoices, inv)
 	}
 	return invoices, nil
+}
+
+// GetTodaysSales returns sales statistics for today
+func (d *Database) GetTodaysSales() (map[string]interface{}, error) {
+	today := time.Now().Format("2006-01-02")
+	
+	// Get today's sales count and total
+	salesQuery := `
+		SELECT 
+			COUNT(*) as sales_count,
+			COALESCE(SUM(total_amount), 0) as total_amount,
+			COALESCE(SUM(CASE WHEN status = 'paid' THEN total_amount ELSE 0 END), 0) as paid_amount
+		FROM sales_invoices 
+		WHERE DATE(created_at) = ?`
+	
+	var salesCount int
+	var totalAmount, paidAmount float64
+	err := d.db.QueryRow(salesQuery, today).Scan(&salesCount, &totalAmount, &paidAmount)
+	if err != nil {
+		return nil, err
+	}
+	
+	// Get today's items sold
+	itemsQuery := `
+		SELECT COALESCE(SUM(quantity), 0) as items_sold
+		FROM sales_invoice_items sii
+		JOIN sales_invoices si ON sii.invoice_id = si.id
+		WHERE DATE(si.created_at) = ?`
+	
+	var itemsSold int
+	err = d.db.QueryRow(itemsQuery, today).Scan(&itemsSold)
+	if err != nil {
+		return nil, err
+	}
+	
+	return map[string]interface{}{
+		"sales_count":   salesCount,
+		"total_amount":  totalAmount,
+		"paid_amount":   paidAmount,
+		"items_sold":    itemsSold,
+		"date":          today,
+	}, nil
+}
+
+// GetTopSellingProducts returns the top 5 selling products
+func (d *Database) GetTopSellingProducts() ([]map[string]interface{}, error) {
+	query := `
+		SELECT 
+			p.id, p.name, p.name_arabic,
+			COALESCE(SUM(sii.quantity), 0) as total_sold,
+			COALESCE(SUM(sii.total_amount), 0) as total_revenue
+		FROM products p
+		LEFT JOIN sales_invoice_items sii ON p.id = sii.product_id
+		LEFT JOIN sales_invoices si ON sii.invoice_id = si.id
+		WHERE p.is_active = 1
+		GROUP BY p.id, p.name, p.name_arabic
+		ORDER BY total_sold DESC
+		LIMIT 5`
+	
+	rows, err := d.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	
+	var products []map[string]interface{}
+	for rows.Next() {
+		var id int
+		var name, nameArabic string
+		var totalSold int
+		var totalRevenue float64
+		
+		err := rows.Scan(&id, &name, &nameArabic, &totalSold, &totalRevenue)
+		if err != nil {
+			return nil, err
+		}
+		
+		products = append(products, map[string]interface{}{
+			"id":            id,
+			"name":          name,
+			"name_arabic":   nameArabic,
+			"total_sold":    totalSold,
+			"total_revenue": totalRevenue,
+		})
+	}
+	
+	return products, nil
 }
 
 func (d *Database) GetOpenSalesInvoices() ([]SalesInvoice, error) {
@@ -135,14 +232,16 @@ func (d *Database) GetOpenSalesInvoices() ([]SalesInvoice, error) {
 		var inv SalesInvoice
 		var customer Customer
 		var customerID, customerCreatedAt, customerUpdatedAt interface{}
+		var customerName, customerEmail, customerPhone, customerAddress sql.NullString
+		var customerCity, customerCountry, customerVATNumber sql.NullString
 		var issueDate, dueDate time.Time
 		
 		scanErr := rows.Scan(
 			&inv.ID, &inv.InvoiceNumber, &inv.CustomerID, &inv.SalesCategoryID, &inv.TableNumber,
 			&issueDate, &dueDate, &inv.SubTotal, &inv.VATAmount, &inv.TotalAmount, 
 			&inv.Status, &inv.Notes, &inv.NotesArabic, &inv.QRCode, &inv.CreatedAt, &inv.UpdatedAt,
-			&customerID, &customer.Name, &customer.Email, &customer.Phone, &customer.Address, 
-			&customer.City, &customer.Country, &customer.VATNumber, 
+			&customerID, &customerName, &customerEmail, &customerPhone, &customerAddress, 
+			&customerCity, &customerCountry, &customerVATNumber, 
 			&customerCreatedAt, &customerUpdatedAt)
 		if scanErr != nil {
 			return nil, scanErr
@@ -155,6 +254,13 @@ func (d *Database) GetOpenSalesInvoices() ([]SalesInvoice, error) {
 		// Only set customer if customer data exists
 		if customerID != nil {
 			customer.ID = int(customerID.(int64))
+			customer.Name = customerName.String
+			customer.Email = customerEmail.String
+			customer.Phone = customerPhone.String
+			customer.Address = customerAddress.String
+			customer.City = customerCity.String
+			customer.Country = customerCountry.String
+			customer.VATNumber = customerVATNumber.String
 			if customerCreatedAt != nil {
 				customer.CreatedAt = customerCreatedAt.(time.Time)
 			}
