@@ -549,5 +549,43 @@ func (d *Database) runMigrations() error {
 		}
 	}
 
+	// Check if storage_type column exists in system_settings table
+	columnExists = false
+	err = d.db.QueryRow("SELECT COUNT(*) FROM pragma_table_info('system_settings') WHERE name='storage_type'").Scan(&columnExists)
+	if err != nil {
+		return err
+	}
+
+	// Add storage configuration columns if they don't exist
+	if !columnExists {
+		storageColumns := []string{
+			"ALTER TABLE system_settings ADD COLUMN storage_type TEXT DEFAULT 'local'",
+			"ALTER TABLE system_settings ADD COLUMN storage_local_path TEXT DEFAULT './app_images'",
+			"ALTER TABLE system_settings ADD COLUMN storage_s3_bucket TEXT DEFAULT ''",
+			"ALTER TABLE system_settings ADD COLUMN storage_s3_region TEXT DEFAULT ''",
+			"ALTER TABLE system_settings ADD COLUMN storage_s3_prefix TEXT DEFAULT ''",
+		}
+
+		for _, columnQuery := range storageColumns {
+			if _, err := d.db.Exec(columnQuery); err != nil {
+				return fmt.Errorf("error adding storage configuration column: %v", err)
+			}
+		}
+
+		// Update existing records with default values
+		_, err = d.db.Exec(`UPDATE system_settings SET 
+			storage_type = 'local',
+			storage_local_path = './app_images',
+			storage_s3_bucket = '',
+			storage_s3_region = '',
+			storage_s3_prefix = ''
+		WHERE storage_type IS NULL OR storage_type = ''`)
+		if err != nil {
+			return fmt.Errorf("error updating existing system_settings with storage defaults: %v", err)
+		}
+
+		log.Println("Added storage configuration columns to system_settings table")
+	}
+
 	return nil
 }

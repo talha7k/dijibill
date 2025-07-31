@@ -869,6 +869,11 @@ export namespace database {
 	    auto_backup: boolean;
 	    backup_frequency: string;
 	    last_backup_time?: time.Time;
+	    storage_type: string;
+	    storage_local_path: string;
+	    storage_s3_bucket: string;
+	    storage_s3_region: string;
+	    storage_s3_prefix: string;
 	    created_at: time.Time;
 	    updated_at: time.Time;
 	
@@ -889,6 +894,11 @@ export namespace database {
 	        this.auto_backup = source["auto_backup"];
 	        this.backup_frequency = source["backup_frequency"];
 	        this.last_backup_time = this.convertValues(source["last_backup_time"], time.Time);
+	        this.storage_type = source["storage_type"];
+	        this.storage_local_path = source["storage_local_path"];
+	        this.storage_s3_bucket = source["storage_s3_bucket"];
+	        this.storage_s3_region = source["storage_s3_region"];
+	        this.storage_s3_prefix = source["storage_s3_prefix"];
 	        this.created_at = this.convertValues(source["created_at"], time.Time);
 	        this.updated_at = this.convertValues(source["updated_at"], time.Time);
 	    }
