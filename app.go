@@ -213,6 +213,12 @@ func (a *App) CreateSalesInvoice(invoice database.SalesInvoice) (database.SalesI
 	invoice.CreatedAt = time.Now()
 	invoice.UpdatedAt = time.Now()
 
+	// Set created_by and updated_by from current user session
+	if user, err := a.GetCurrentUser(); err == nil && user != nil {
+		invoice.CreatedBy = &user.ID
+		invoice.UpdatedBy = &user.ID
+	}
+
 	if invoice.Status == "" {
 		invoice.Status = "draft"
 	}
@@ -256,6 +262,11 @@ func (a *App) UpdateSalesInvoice(invoice database.SalesInvoice) error {
 	invoice.TotalAmount = totalAmount
 	invoice.UpdatedAt = time.Now()
 
+	// Set updated_by from current user session
+	if user, err := a.GetCurrentUser(); err == nil && user != nil {
+		invoice.UpdatedBy = &user.ID
+	}
+
 	return a.db.UpdateSalesInvoice(&invoice)
 }
 
@@ -295,6 +306,12 @@ func (a *App) CreatePurchaseInvoice(invoice database.PurchaseInvoice) error {
 	invoice.CreatedAt = time.Now()
 	invoice.UpdatedAt = time.Now()
 
+	// Set created_by and updated_by from current user session
+	if user, err := a.GetCurrentUser(); err == nil && user != nil {
+		invoice.CreatedBy = &user.ID
+		invoice.UpdatedBy = &user.ID
+	}
+
 	if invoice.Status == "" {
 		invoice.Status = "draft"
 	}
@@ -329,6 +346,11 @@ func (a *App) UpdatePurchaseInvoice(invoice database.PurchaseInvoice) error {
 	invoice.TotalAmount = totalAmount
 	invoice.UpdatedAt = time.Now()
 
+	// Set updated_by from current user session
+	if user, err := a.GetCurrentUser(); err == nil && user != nil {
+		invoice.UpdatedBy = &user.ID
+	}
+
 	return a.db.UpdatePurchaseInvoice(&invoice)
 }
 
@@ -352,6 +374,11 @@ func (a *App) MarkPurchaseInvoiceReceived(invoiceID int) error {
 	// Update invoice status to received
 	invoice.Status = "received"
 	invoice.UpdatedAt = time.Now()
+	
+	// Set updated_by from current user session
+	if user, err := a.GetCurrentUser(); err == nil && user != nil {
+		invoice.UpdatedBy = &user.ID
+	}
 	
 	err = a.db.UpdatePurchaseInvoice(invoice)
 	if err != nil {

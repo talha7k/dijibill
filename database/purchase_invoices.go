@@ -152,11 +152,11 @@ func (d *Database) UpdatePurchaseInvoice(invoice *PurchaseInvoice) error {
 	query := `
 		UPDATE purchase_invoices 
 		SET invoice_number = ?, supplier_id = ?, issue_date = ?, due_date = ?, 
-		    sub_total = ?, vat_amount = ?, vat_rate = ?, vat_inclusive = ?, total_amount = ?, status = ?, notes = ?, notes_arabic = ?, updated_at = CURRENT_TIMESTAMP
+		    sub_total = ?, vat_amount = ?, vat_rate = ?, vat_inclusive = ?, total_amount = ?, status = ?, notes = ?, notes_arabic = ?, updated_by = ?, updated_at = CURRENT_TIMESTAMP
 		WHERE id = ?`
 
 	_, err = tx.Exec(query, invoice.InvoiceNumber, invoice.SupplierID, invoice.IssueDate.Time, invoice.DueDate.Time,
-		invoice.SubTotal, invoice.VATAmount, invoice.VATRate, invoice.VATInclusive, invoice.TotalAmount, invoice.Status, invoice.Notes, invoice.NotesArabic, invoice.ID)
+		invoice.SubTotal, invoice.VATAmount, invoice.VATRate, invoice.VATInclusive, invoice.TotalAmount, invoice.Status, invoice.Notes, invoice.NotesArabic, invoice.UpdatedBy, invoice.ID)
 	if err != nil {
 		return err
 	}
