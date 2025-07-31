@@ -14,7 +14,7 @@
   // State variables
   let purchaseProducts = []
   let categories = []
-  let isLoading = false
+  let isLoading = true
   let searchTerm = ''
   let showPurchaseProductModal = false
   let editingPurchaseProduct = null
@@ -88,7 +88,8 @@
 
   async function loadPurchaseProducts() {
     try {
-      purchaseProducts = await GetPurchaseProducts()
+      const result = await GetPurchaseProducts()
+      purchaseProducts = Array.isArray(result) ? result : []
     } catch (error) {
       console.error('Error loading purchase products:', error)
       purchaseProducts = [] // Ensure purchaseProducts is always an array
@@ -97,7 +98,8 @@
 
   async function loadCategories() {
     try {
-      categories = await GetPurchaseProductCategories()
+      const result = await GetPurchaseProductCategories()
+      categories = Array.isArray(result) ? result : []
     } catch (error) {
       console.error('Error loading categories:', error)
       categories = [] // Ensure categories is always an array

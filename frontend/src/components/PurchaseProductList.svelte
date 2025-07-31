@@ -47,11 +47,17 @@
     }).format(amount)
   }
 
-  $: filteredPurchaseProducts = (purchaseProducts || []).filter(product => 
-    product.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.sku?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.barcode?.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  $: filteredPurchaseProducts = Array.isArray(purchaseProducts) ? purchaseProducts.filter(product => {
+    if (!product) return false
+    const searchLower = (searchTerm || '').toLowerCase()
+    if (!searchLower) return true
+    
+    return (
+      (product.name || '').toLowerCase().includes(searchLower) ||
+      (product.sku || '').toLowerCase().includes(searchLower) ||
+      (product.barcode || '').toLowerCase().includes(searchLower)
+    )
+  }) : []
 
   // Table configuration
   /** @type {Array<{label: string, key?: string, class?: string, render?: Function, actions?: Array<{key: string, text: string, icon?: string, class?: string, title?: string}>}>} */
