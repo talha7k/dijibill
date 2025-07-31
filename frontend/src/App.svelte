@@ -186,13 +186,17 @@
   // Handle intro completion
   async function handleIntroComplete() {
     try {
-      if (currentUser) {
+      if (currentUser && isAuthenticated) {
+        // For authenticated users, mark intro as viewed in the database
         await MarkIntroAsViewed(currentUser.id)
         userHasViewedIntro = true
-        showIntroSlider = false
       }
+      // For both authenticated and non-authenticated users, hide the intro slider
+      showIntroSlider = false
     } catch (error) {
       console.error('Error marking intro as viewed:', error)
+      // Still hide the intro slider even if there's an error
+      showIntroSlider = false
     }
   }
 
