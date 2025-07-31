@@ -90,8 +90,10 @@
           id: editingInvoice.id,
           supplier_id: parseInt(invoiceData.supplier_id),
           amount: parseFloat(invoiceData.amount),
-          tax_amount: parseFloat(invoiceData.tax_amount),
-          total_amount: parseFloat(invoiceData.total_amount)
+          vat_amount: parseFloat(invoiceData.vat_amount) || 0,
+          total_amount: parseFloat(invoiceData.total_amount),
+          vat_rate: parseFloat(invoiceData.vat_rate) || 0,
+          vat_inclusive: invoiceData.vat_inclusive || false
         })
       } else {
         // Create new invoice
@@ -99,8 +101,10 @@
           ...invoiceData,
           supplier_id: parseInt(invoiceData.supplier_id),
           amount: parseFloat(invoiceData.amount),
-          tax_amount: parseFloat(invoiceData.tax_amount),
-          total_amount: parseFloat(invoiceData.total_amount)
+          vat_amount: parseFloat(invoiceData.vat_amount) || 0,
+          total_amount: parseFloat(invoiceData.total_amount),
+          vat_rate: parseFloat(invoiceData.vat_rate) || 0,
+          vat_inclusive: invoiceData.vat_inclusive || false
         })
       }
       

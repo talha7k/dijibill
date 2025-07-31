@@ -20,11 +20,11 @@ func (d *Database) CreatePurchaseInvoice(invoice *PurchaseInvoice) error {
 
 	// Insert purchase invoice
 	query := `
-		INSERT INTO purchase_invoices (invoice_number, supplier_id, issue_date, due_date, sub_total, vat_amount, total_amount, status, notes, notes_arabic)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+		INSERT INTO purchase_invoices (invoice_number, supplier_id, issue_date, due_date, sub_total, vat_amount, vat_rate, vat_inclusive, total_amount, status, notes, notes_arabic)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
 	result, err := tx.Exec(query, invoice.InvoiceNumber, invoice.SupplierID, invoice.IssueDate.Time, invoice.DueDate.Time,
-		invoice.SubTotal, invoice.VATAmount, invoice.TotalAmount, invoice.Status, invoice.Notes, invoice.NotesArabic)
+		invoice.SubTotal, invoice.VATAmount, invoice.VATRate, invoice.VATInclusive, invoice.TotalAmount, invoice.Status, invoice.Notes, invoice.NotesArabic)
 	if err != nil {
 		return err
 	}
@@ -54,7 +54,7 @@ func (d *Database) GetPurchaseInvoices() ([]PurchaseInvoice, error) {
 	query := `
 		SELECT 
 			pi.id, pi.invoice_number, pi.supplier_id, pi.issue_date, pi.due_date, 
-			pi.sub_total, pi.vat_amount, pi.total_amount, pi.status, pi.notes, pi.notes_arabic, 
+			pi.sub_total, pi.vat_amount, pi.vat_rate, pi.vat_inclusive, pi.total_amount, pi.status, pi.notes, pi.notes_arabic, 
 			pi.created_at, pi.updated_at,
 			s.id, s.company_name, s.contact_person, s.email, s.phone, s.address, s.vat_number
 		FROM purchase_invoices pi
@@ -77,7 +77,7 @@ func (d *Database) GetPurchaseInvoices() ([]PurchaseInvoice, error) {
 		
 		scanErr := rows.Scan(
 			&inv.ID, &inv.InvoiceNumber, &inv.SupplierID, 
-			&issueDate, &dueDate, &inv.SubTotal, &vatAmount, &inv.TotalAmount, 
+			&issueDate, &dueDate, &inv.SubTotal, &vatAmount, &inv.VATRate, &inv.VATInclusive, &inv.TotalAmount, 
 			&inv.Status, &inv.Notes, &inv.NotesArabic, &inv.CreatedAt, &inv.UpdatedAt,
 			&supplierID, &supplier.CompanyName, &supplier.ContactPerson, &supplier.Email, &supplier.Phone, 
 			&supplier.Address, &supplier.VATNumber)
@@ -104,13 +104,13 @@ func (d *Database) GetPurchaseInvoices() ([]PurchaseInvoice, error) {
 }
 
 func (d *Database) GetPurchaseInvoiceByID(id int) (*PurchaseInvoice, error) {
-	query := `SELECT id, invoice_number, supplier_id, issue_date, due_date, sub_total, vat_amount, total_amount, status, notes, notes_arabic, created_at, updated_at FROM purchase_invoices WHERE id = ?`
+	query := `SELECT id, invoice_number, supplier_id, issue_date, due_date, sub_total, vat_amount, vat_rate, vat_inclusive, total_amount, status, notes, notes_arabic, created_at, updated_at FROM purchase_invoices WHERE id = ?`
 
 	var inv PurchaseInvoice
 	var issueDate, dueDate time.Time
 	var vatAmount float64
 	err := d.db.QueryRow(query, id).Scan(&inv.ID, &inv.InvoiceNumber, &inv.SupplierID, &issueDate, &dueDate,
-		&inv.SubTotal, &vatAmount, &inv.TotalAmount, &inv.Status, &inv.Notes, &inv.NotesArabic,
+		&inv.SubTotal, &vatAmount, &inv.VATRate, &inv.VATInclusive, &inv.TotalAmount, &inv.Status, &inv.Notes, &inv.NotesArabic,
 		&inv.CreatedAt, &inv.UpdatedAt)
 	if err != nil {
 		return nil, err
@@ -152,11 +152,11 @@ func (d *Database) UpdatePurchaseInvoice(invoice *PurchaseInvoice) error {
 	query := `
 		UPDATE purchase_invoices 
 		SET invoice_number = ?, supplier_id = ?, issue_date = ?, due_date = ?, 
-		    sub_total = ?, vat_amount = ?, total_amount = ?, status = ?, notes = ?, notes_arabic = ?, updated_at = CURRENT_TIMESTAMP
+		    sub_total = ?, vat_amount = ?, vat_rate = ?, vat_inclusive = ?, total_amount = ?, status = ?, notes = ?, notes_arabic = ?, updated_at = CURRENT_TIMESTAMP
 		WHERE id = ?`
 
 	_, err = tx.Exec(query, invoice.InvoiceNumber, invoice.SupplierID, invoice.IssueDate.Time, invoice.DueDate.Time,
-		invoice.SubTotal, invoice.VATAmount, invoice.TotalAmount, invoice.Status, invoice.Notes, invoice.NotesArabic, invoice.ID)
+		invoice.SubTotal, invoice.VATAmount, invoice.VATRate, invoice.VATInclusive, invoice.TotalAmount, invoice.Status, invoice.Notes, invoice.NotesArabic, invoice.ID)
 	if err != nil {
 		return err
 	}

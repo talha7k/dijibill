@@ -675,6 +675,8 @@ export namespace database {
 	    due_date: Date;
 	    sub_total: number;
 	    vat_amount: number;
+	    vat_rate: number;
+	    vat_inclusive: boolean;
 	    total_amount: number;
 	    status: string;
 	    notes: string;
@@ -699,11 +701,128 @@ export namespace database {
 	        this.due_date = this.convertValues(source["due_date"], Date);
 	        this.sub_total = source["sub_total"];
 	        this.vat_amount = source["vat_amount"];
+	        this.vat_rate = source["vat_rate"];
+	        this.vat_inclusive = source["vat_inclusive"];
 	        this.total_amount = source["total_amount"];
 	        this.status = source["status"];
 	        this.notes = source["notes"];
 	        this.notes_arabic = source["notes_arabic"];
 	        this.items = this.convertValues(source["items"], PurchaseInvoiceItem);
+	        this.created_at = this.convertValues(source["created_at"], null);
+	        this.updated_at = this.convertValues(source["updated_at"], null);
+	    }
+	
+		convertValues(a: any, clazz: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, clazz));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = clazz && typeof clazz === 'function' ? new clazz(a[key]) : a[key];
+		            }
+		            return a;
+		        }
+		        return clazz && typeof clazz === 'function' ? new clazz(a) : a;
+		    }
+		    return a;
+		}
+	}
+	
+	export class PurchaseProductCategory {
+	    id: number;
+	    name: string;
+	    name_arabic: string;
+	    description: string;
+	    description_arabic: string;
+	    is_active: boolean;
+	    // Go type: time
+	    created_at: any;
+	    // Go type: time
+	    updated_at: any;
+	
+	    static createFrom(source: any = {}) {
+	        return new PurchaseProductCategory(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.name_arabic = source["name_arabic"];
+	        this.description = source["description"];
+	        this.description_arabic = source["description_arabic"];
+	        this.is_active = source["is_active"];
+	        this.created_at = this.convertValues(source["created_at"], null);
+	        this.updated_at = this.convertValues(source["updated_at"], null);
+	    }
+	
+		convertValues(a: any, clazz: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, clazz));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = clazz && typeof clazz === 'function' ? new clazz(a[key]) : a[key];
+		            }
+		            return a;
+		        }
+		        return clazz && typeof clazz === 'function' ? new clazz(a) : a;
+		    }
+		    return a;
+		}
+	}
+	export class PurchaseProduct {
+	    id: number;
+	    name: string;
+	    name_arabic: string;
+	    description: string;
+	    description_arabic: string;
+	    category_id: number;
+	    category_name: string;
+	    category?: PurchaseProductCategory;
+	    unit_price: number;
+	    vat_rate: number;
+	    unit: string;
+	    unit_arabic: string;
+	    sku: string;
+	    barcode: string;
+	    is_active: boolean;
+	    notes: string;
+	    notes_arabic: string;
+	    // Go type: time
+	    created_at: any;
+	    // Go type: time
+	    updated_at: any;
+	
+	    static createFrom(source: any = {}) {
+	        return new PurchaseProduct(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.name_arabic = source["name_arabic"];
+	        this.description = source["description"];
+	        this.description_arabic = source["description_arabic"];
+	        this.category_id = source["category_id"];
+	        this.category_name = source["category_name"];
+	        this.category = this.convertValues(source["category"], PurchaseProductCategory);
+	        this.unit_price = source["unit_price"];
+	        this.vat_rate = source["vat_rate"];
+	        this.unit = source["unit"];
+	        this.unit_arabic = source["unit_arabic"];
+	        this.sku = source["sku"];
+	        this.barcode = source["barcode"];
+	        this.is_active = source["is_active"];
+	        this.notes = source["notes"];
+	        this.notes_arabic = source["notes_arabic"];
 	        this.created_at = this.convertValues(source["created_at"], null);
 	        this.updated_at = this.convertValues(source["updated_at"], null);
 	    }

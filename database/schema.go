@@ -129,6 +129,8 @@ func (d *Database) createTables() error {
 			due_date DATETIME,
 			sub_total REAL NOT NULL,
 			vat_amount REAL NOT NULL,
+			vat_rate REAL DEFAULT 15.0,
+			vat_inclusive BOOLEAN DEFAULT 0,
 			total_amount REAL NOT NULL,
 			status TEXT DEFAULT 'draft',
 			notes TEXT,
@@ -226,12 +228,47 @@ func (d *Database) createTables() error {
 			FOREIGN KEY (default_tax_rate_id) REFERENCES tax_rates(id),
 			FOREIGN KEY (default_unit_id) REFERENCES units_of_measurement(id)
 		)`,
+		`CREATE TABLE IF NOT EXISTS purchase_product_categories (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			name TEXT NOT NULL,
+			name_arabic TEXT,
+			description TEXT,
+			description_arabic TEXT,
+			is_active BOOLEAN DEFAULT 1,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+		)`,
+		`CREATE TABLE IF NOT EXISTS purchase_products (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			name TEXT NOT NULL,
+			name_arabic TEXT,
+			description TEXT,
+			description_arabic TEXT,
+			category_id INTEGER,
+			unit_price REAL DEFAULT 0.0,
+			vat_rate REAL DEFAULT 15.0,
+			unit TEXT DEFAULT 'pcs',
+			unit_arabic TEXT DEFAULT 'قطعة',
+			sku TEXT,
+			barcode TEXT,
+			is_active BOOLEAN DEFAULT 1,
+			notes TEXT,
+			notes_arabic TEXT,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			FOREIGN KEY (category_id) REFERENCES purchase_product_categories(id)
+		)`,
 	}
 
 	for _, query := range queries {
 		if _, err := d.db.Exec(query); err != nil {
 			return fmt.Errorf("error creating table: %v", err)
 		}
+	}
+
+	// Run migrations for existing databases
+	if err := d.runMigrations(); err != nil {
+		log.Printf("Warning: Could not run migrations: %v", err)
 	}
 
 	// Insert default company if not exists
@@ -242,6 +279,43 @@ func (d *Database) createTables() error {
 	// Insert default settings data
 	if err := d.insertDefaultSettings(); err != nil {
 		log.Printf("Warning: Could not insert default settings: %v", err)
+	}
+
+	return nil
+}
+
+// runMigrations handles database schema migrations for existing databases
+func (d *Database) runMigrations() error {
+	// Check if vat_rate column exists in purchase_invoices table
+	var columnExists bool
+	err := d.db.QueryRow("SELECT COUNT(*) FROM pragma_table_info('purchase_invoices') WHERE name='vat_rate'").Scan(&columnExists)
+	if err != nil {
+		return err
+	}
+
+	// Add vat_rate column if it doesn't exist
+	if !columnExists {
+		_, err = d.db.Exec("ALTER TABLE purchase_invoices ADD COLUMN vat_rate REAL DEFAULT 15.0")
+		if err != nil {
+			return fmt.Errorf("error adding vat_rate column: %v", err)
+		}
+		log.Println("Added vat_rate column to purchase_invoices table")
+	}
+
+	// Check if vat_inclusive column exists in purchase_invoices table
+	columnExists = false
+	err = d.db.QueryRow("SELECT COUNT(*) FROM pragma_table_info('purchase_invoices') WHERE name='vat_inclusive'").Scan(&columnExists)
+	if err != nil {
+		return err
+	}
+
+	// Add vat_inclusive column if it doesn't exist
+	if !columnExists {
+		_, err = d.db.Exec("ALTER TABLE purchase_invoices ADD COLUMN vat_inclusive BOOLEAN DEFAULT 0")
+		if err != nil {
+			return fmt.Errorf("error adding vat_inclusive column: %v", err)
+		}
+		log.Println("Added vat_inclusive column to purchase_invoices table")
 	}
 
 	return nil

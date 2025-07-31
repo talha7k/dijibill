@@ -179,7 +179,9 @@ type PurchaseInvoice struct {
 	IssueDate        Date                  `json:"issue_date"`
 	DueDate          Date                  `json:"due_date"`
 	SubTotal         float64               `json:"sub_total"`
-	VATAmount        float64               `json:"vat_amount,string"`
+	VATAmount        float64               `json:"vat_amount"`
+	VATRate          float64               `json:"vat_rate"`
+	VATInclusive     bool                  `json:"vat_inclusive"`
 	TotalAmount      float64               `json:"total_amount"`
 	Status           string                `json:"status"` // draft, received, paid, cancelled
 	Notes            string                `json:"notes"`
@@ -307,4 +309,39 @@ type DefaultProductSettings struct {
 	DefaultPriceChangeAllowed bool    `json:"default_price_change_allowed"` // Whether price changes are allowed
 	CreatedAt                 time.Time `json:"created_at"`
 	UpdatedAt                 time.Time `json:"updated_at"`
+}
+
+// PurchaseProductCategory represents categories for purchase products
+type PurchaseProductCategory struct {
+	ID                int       `json:"id"`
+	Name              string    `json:"name"`
+	NameArabic        string    `json:"name_arabic"`
+	Description       string    `json:"description"`
+	DescriptionArabic string    `json:"description_arabic"`
+	IsActive          bool      `json:"is_active"`
+	CreatedAt         time.Time `json:"created_at"`
+	UpdatedAt         time.Time `json:"updated_at"`
+}
+
+// PurchaseProduct represents products that can be purchased from suppliers
+type PurchaseProduct struct {
+	ID                int                       `json:"id"`
+	Name              string                    `json:"name"`
+	NameArabic        string                    `json:"name_arabic"`
+	Description       string                    `json:"description"`
+	DescriptionArabic string                    `json:"description_arabic"`
+	CategoryID        int                       `json:"category_id"`
+	CategoryName      string                    `json:"category_name"`           // Joined from purchase_product_categories table
+	Category          *PurchaseProductCategory  `json:"category,omitempty"`
+	UnitPrice         float64                   `json:"unit_price"`              // Expected purchase price
+	VATRate           float64                   `json:"vat_rate"`
+	Unit              string                    `json:"unit"`
+	UnitArabic        string                    `json:"unit_arabic"`
+	SKU               string                    `json:"sku"`
+	Barcode           string                    `json:"barcode"`
+	IsActive          bool                      `json:"is_active"`
+	Notes             string                    `json:"notes"`
+	NotesArabic       string                    `json:"notes_arabic"`
+	CreatedAt         time.Time                 `json:"created_at"`
+	UpdatedAt         time.Time                 `json:"updated_at"`
 }

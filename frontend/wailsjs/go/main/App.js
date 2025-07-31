@@ -30,6 +30,14 @@ export function CreatePurchaseInvoice(arg1) {
   return window['go']['main']['App']['CreatePurchaseInvoice'](arg1);
 }
 
+export function CreatePurchaseProduct(arg1) {
+  return window['go']['main']['App']['CreatePurchaseProduct'](arg1);
+}
+
+export function CreatePurchaseProductCategory(arg1) {
+  return window['go']['main']['App']['CreatePurchaseProductCategory'](arg1);
+}
+
 export function CreateSalesCategory(arg1) {
   return window['go']['main']['App']['CreateSalesCategory'](arg1);
 }
@@ -72,6 +80,14 @@ export function DeleteProduct(arg1) {
 
 export function DeletePurchaseInvoice(arg1) {
   return window['go']['main']['App']['DeletePurchaseInvoice'](arg1);
+}
+
+export function DeletePurchaseProduct(arg1) {
+  return window['go']['main']['App']['DeletePurchaseProduct'](arg1);
+}
+
+export function DeletePurchaseProductCategory(arg1) {
+  return window['go']['main']['App']['DeletePurchaseProductCategory'](arg1);
 }
 
 export function DeleteSalesCategory(arg1) {
@@ -176,6 +192,14 @@ export function GetPurchaseInvoiceByID(arg1) {
 
 export function GetPurchaseInvoices() {
   return window['go']['main']['App']['GetPurchaseInvoices']();
+}
+
+export function GetPurchaseProductCategories() {
+  return window['go']['main']['App']['GetPurchaseProductCategories']();
+}
+
+export function GetPurchaseProducts() {
+  return window['go']['main']['App']['GetPurchaseProducts']();
 }
 
 export function GetQRCodeInfo(arg1) {
@@ -284,6 +308,14 @@ export function UpdateProduct(arg1) {
 
 export function UpdatePurchaseInvoice(arg1) {
   return window['go']['main']['App']['UpdatePurchaseInvoice'](arg1);
+}
+
+export function UpdatePurchaseProduct(arg1) {
+  return window['go']['main']['App']['UpdatePurchaseProduct'](arg1);
+}
+
+export function UpdatePurchaseProductCategory(arg1) {
+  return window['go']['main']['App']['UpdatePurchaseProductCategory'](arg1);
 }
 
 export function UpdateSalesCategory(arg1) {

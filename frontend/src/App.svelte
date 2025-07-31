@@ -7,6 +7,7 @@
   import Customer from './Customer.svelte'
   import Payments from './Payments.svelte'
   import PurchaseInvoices from './PurchaseInvoices.svelte'
+  import PurchaseProducts from './PurchaseProducts.svelte'
   import Suppliers from './Suppliers.svelte'
   import Products from './Products.svelte'
   import Users from './Users.svelte'
@@ -77,6 +78,11 @@
           id: 'purchase-invoices',
           label: 'Purchase Invoices',
           icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'
+        },
+        {
+          id: 'purchase-products',
+          label: 'Purchase Products',
+          icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4'
         },
         {
           id: 'suppliers',
@@ -205,6 +211,8 @@
               Payments
             {:else if currentView === 'purchase-invoices'}
               Purchase Invoices
+            {:else if currentView === 'purchase-products'}
+              Purchase Products
             {:else if currentView === 'suppliers'}
               Suppliers
             {:else if currentView === 'products'}
@@ -321,6 +329,8 @@
           <Payments />
         {:else if currentView === 'purchase-invoices'}
           <PurchaseInvoices />
+        {:else if currentView === 'purchase-products'}
+          <PurchaseProducts />
         {:else if currentView === 'suppliers'}
           <Suppliers />
         {:else if currentView === 'products'}

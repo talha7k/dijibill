@@ -16,6 +16,10 @@ export function CreateProductCategory(arg1:database.ProductCategory):Promise<voi
 
 export function CreatePurchaseInvoice(arg1:database.PurchaseInvoice):Promise<void>;
 
+export function CreatePurchaseProduct(arg1:database.PurchaseProduct):Promise<void>;
+
+export function CreatePurchaseProductCategory(arg1:database.PurchaseProductCategory):Promise<void>;
+
 export function CreateSalesCategory(arg1:database.SalesCategory):Promise<void>;
 
 export function CreateSalesInvoice(arg1:database.SalesInvoice):Promise<void>;
@@ -37,6 +41,10 @@ export function DeletePaymentType(arg1:number):Promise<void>;
 export function DeleteProduct(arg1:number):Promise<void>;
 
 export function DeletePurchaseInvoice(arg1:number):Promise<void>;
+
+export function DeletePurchaseProduct(arg1:number):Promise<void>;
+
+export function DeletePurchaseProductCategory(arg1:number):Promise<void>;
 
 export function DeleteSalesCategory(arg1:number):Promise<void>;
 
@@ -89,6 +97,10 @@ export function GetProducts():Promise<Array<database.Product>>;
 export function GetPurchaseInvoiceByID(arg1:number):Promise<database.PurchaseInvoice>;
 
 export function GetPurchaseInvoices():Promise<Array<database.PurchaseInvoice>>;
+
+export function GetPurchaseProductCategories():Promise<Array<database.PurchaseProductCategory>>;
+
+export function GetPurchaseProducts():Promise<Array<database.PurchaseProduct>>;
 
 export function GetQRCodeInfo(arg1:string):Promise<Record<string, any>>;
 
@@ -143,6 +155,10 @@ export function UpdatePaymentType(arg1:database.PaymentType):Promise<void>;
 export function UpdateProduct(arg1:database.Product):Promise<void>;
 
 export function UpdatePurchaseInvoice(arg1:database.PurchaseInvoice):Promise<void>;
+
+export function UpdatePurchaseProduct(arg1:database.PurchaseProduct):Promise<void>;
+
+export function UpdatePurchaseProductCategory(arg1:database.PurchaseProductCategory):Promise<void>;
 
 export function UpdateSalesCategory(arg1:database.SalesCategory):Promise<void>;
 

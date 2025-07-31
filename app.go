@@ -302,6 +302,50 @@ func (a *App) DeletePurchaseInvoice(id int) error {
 	return a.db.DeletePurchaseInvoice(id)
 }
 
+// Purchase Product Category Management Methods
+
+func (a *App) CreatePurchaseProductCategory(category database.PurchaseProductCategory) error {
+	category.CreatedAt = time.Now()
+	category.UpdatedAt = time.Now()
+	_, err := a.db.CreatePurchaseProductCategory(category)
+	return err
+}
+
+func (a *App) GetPurchaseProductCategories() ([]database.PurchaseProductCategory, error) {
+	return a.db.GetPurchaseProductCategories()
+}
+
+func (a *App) UpdatePurchaseProductCategory(category database.PurchaseProductCategory) error {
+	category.UpdatedAt = time.Now()
+	return a.db.UpdatePurchaseProductCategory(category)
+}
+
+func (a *App) DeletePurchaseProductCategory(id int) error {
+	return a.db.DeletePurchaseProductCategory(id)
+}
+
+// Purchase Product Management Methods
+
+func (a *App) CreatePurchaseProduct(product database.PurchaseProduct) error {
+	product.CreatedAt = time.Now()
+	product.UpdatedAt = time.Now()
+	_, err := a.db.CreatePurchaseProduct(product)
+	return err
+}
+
+func (a *App) GetPurchaseProducts() ([]database.PurchaseProduct, error) {
+	return a.db.GetPurchaseProducts()
+}
+
+func (a *App) UpdatePurchaseProduct(product database.PurchaseProduct) error {
+	product.UpdatedAt = time.Now()
+	return a.db.UpdatePurchaseProduct(product)
+}
+
+func (a *App) DeletePurchaseProduct(id int) error {
+	return a.db.DeletePurchaseProduct(id)
+}
+
 // Company Management Methods
 
 func (a *App) GetCompany() (*database.Company, error) {
