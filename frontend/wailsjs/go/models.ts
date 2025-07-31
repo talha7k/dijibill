@@ -40,6 +40,7 @@ export namespace database {
 	}
 	export class Customer {
 	    id: number;
+	    company_id: number;
 	    name: string;
 	    name_arabic: string;
 	    vat_number: string;
@@ -61,6 +62,7 @@ export namespace database {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.id = source["id"];
+	        this.company_id = source["company_id"];
 	        this.name = source["name"];
 	        this.name_arabic = source["name_arabic"];
 	        this.vat_number = source["vat_number"];
@@ -585,6 +587,7 @@ export namespace database {
 	}
 	export class Supplier {
 	    id: number;
+	    company_id: number;
 	    company_name: string;
 	    company_name_arabic: string;
 	    contact_person: string;
@@ -610,6 +613,7 @@ export namespace database {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.id = source["id"];
+	        this.company_id = source["company_id"];
 	        this.company_name = source["company_name"];
 	        this.company_name_arabic = source["company_name_arabic"];
 	        this.contact_person = source["contact_person"];
@@ -827,6 +831,7 @@ export namespace database {
 	
 	export class SystemSettings {
 	    id: number;
+	    company_id: number;
 	    currency: string;
 	    language: string;
 	    timezone: string;
@@ -846,6 +851,7 @@ export namespace database {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.id = source["id"];
+	        this.company_id = source["company_id"];
 	        this.currency = source["currency"];
 	        this.language = source["language"];
 	        this.timezone = source["timezone"];

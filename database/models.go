@@ -54,6 +54,7 @@ func (d Date) MarshalJSON() ([]byte, error) {
 // Customer represents a customer in the system
 type Customer struct {
 	ID            int       `json:"id"`
+	CompanyID     int       `json:"company_id"`  // Customer belongs to a company
 	Name          string    `json:"name"`
 	NameArabic    string    `json:"name_arabic"`
 	VATNumber     string    `json:"vat_number"`
@@ -72,6 +73,7 @@ type Customer struct {
 // Supplier represents a supplier in the system
 type Supplier struct {
 	ID                  int       `json:"id"`
+	CompanyID           int       `json:"company_id"`  // Supplier belongs to a company
 	CompanyName         string    `json:"company_name"`
 	CompanyNameArabic   string    `json:"company_name_arabic"`
 	ContactPerson       string    `json:"contact_person"`
@@ -347,9 +349,27 @@ type PurchaseProduct struct {
 	UpdatedAt         time.Time                 `json:"updated_at"`
 }
 
+// User represents a user in the system
+type User struct {
+	ID          int       `json:"id"`
+	Username    string    `json:"username"`
+	Email       string    `json:"email"`
+	Password    string    `json:"password"` // This should be hashed
+	FirstName   string    `json:"first_name"`
+	LastName    string    `json:"last_name"`
+	Role        string    `json:"role"`        // admin, manager, user
+	IsActive    bool      `json:"is_active"`
+	CompanyID   int       `json:"company_id"`  // User belongs to a company
+	Company     *Company  `json:"company,omitempty"`
+	LastLogin   *time.Time `json:"last_login,omitempty"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+}
+
 // SystemSettings represents system-wide configuration settings
 type SystemSettings struct {
 	ID               int        `json:"id"`
+	CompanyID        int        `json:"company_id"`  // Settings per company
 	Currency         string     `json:"currency"`
 	Language         string     `json:"language"`
 	Timezone         string     `json:"timezone"`
