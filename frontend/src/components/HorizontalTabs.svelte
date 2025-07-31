@@ -72,9 +72,7 @@
         on:click={() => handleTabClick(tab.id)}
       >
         {#if tab.icon}
-          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={tab.icon}></path>
-          </svg>
+          <i class="fas fa-{tab.icon} w-5 h-5 mr-2"></i>
         {/if}
         {tab.label || tab.name}
       </button>
@@ -92,9 +90,7 @@
             class="flex-shrink-0 p-2 text-white/60 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={!canScrollLeft}
           >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-            </svg>
+            <i class="fas fa-chevron-left w-5 h-5"></i>
           </button>
         {/if}
 
@@ -127,9 +123,7 @@
             class="flex-shrink-0 p-2 text-white/60 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={!canScrollRight}
           >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-            </svg>
+            <i class="fas fa-chevron-right w-5 h-5"></i>
           </button>
         {/if}
       </div>

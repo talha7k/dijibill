@@ -127,15 +127,7 @@
             {/if}
           </div>
         </div>
-        <svg
-          class="dropdown-arrow"
-          class:rotated={isOpen}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-        </svg>
+        <i class="fas fa-chevron-down dropdown-arrow" class:rotated={isOpen}></i>
       </div>
     </button>
     
@@ -152,9 +144,7 @@
               placeholder="Search..."
               class="search-input"
             />
-            <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
+            <i class="fas fa-search search-icon"></i>
           </div>
         {/if}
         
@@ -188,9 +178,7 @@
         <!-- No Results -->
         {#if filteredOptions.length === 0}
           <div class="no-results">
-            <svg class="no-results-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.47-.881-6.08-2.33" />
-            </svg>
+            <i class="fas fa-search-minus no-results-icon"></i>
             <p>No options found</p>
           </div>
         {/if}

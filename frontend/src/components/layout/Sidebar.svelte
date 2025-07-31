@@ -34,9 +34,7 @@
     <div class="p-4 border-b border-white/20">
       <div class="flex items-center gap-3">
         <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-          <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-          </svg>
+          <i class="fas fa-file-invoice w-5 h-5 text-white"></i>
         </div>
         <div>
           <h1 class="text-lg font-bold text-white">E-Invoice</h1>
@@ -54,9 +52,7 @@
             class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors {currentView === 'dashboard' ? 'bg-primary text-white' : 'text-white/80 hover:bg-white/10'}"
             on:click={() => switchView('dashboard')}
           >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{menuItems[0]?.icon || 'M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2 2v-2m0 0V5a2 2 0 012-2h6l2 2h6a2 2 0 012 2v2M7 13h10M7 17h4'}"></path>
-            </svg>
+            <i class="fas fa-tachometer-alt w-5 h-5"></i>
             <span class="text-sm font-medium">{menuItems[0]?.label || 'Dashboard'}</span>
           </button>
         </li>
@@ -74,16 +70,12 @@
                     class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors {currentView === item.id ? 'bg-primary text-white' : 'text-white/80 hover:bg-white/10'}"
                     on:click={() => switchView(item.id)}
                   >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{item.icon}"></path>
-                    </svg>
+                    <i class="fas fa-{item.icon} w-4 h-4"></i>
                     <span class="text-sm">{item.label}</span>
                     {#if item.id === 'payments'}
                       <div class="ml-auto">
                         <div class="w-4 h-4 bg-accent rounded-full flex items-center justify-center">
-                          <svg class="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 8 8">
-                            <circle cx="4" cy="4" r="3"/>
-                          </svg>
+                          <i class="fas fa-circle w-2 h-2 text-white"></i>
                         </div>
                       </div>
                     {/if}
