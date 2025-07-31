@@ -346,6 +346,10 @@ export function ShowSaveDialog(arg1) {
   return window['go']['main']['App']['ShowSaveDialog'](arg1);
 }
 
+export function Signup(arg1) {
+  return window['go']['main']['App']['Signup'](arg1);
+}
+
 export function SwitchCompany(arg1) {
   return window['go']['main']['App']['SwitchCompany'](arg1);
 }

@@ -8,6 +8,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.29
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 	github.com/wailsapp/wails/v2 v2.10.2
+	golang.org/x/crypto v0.33.0
 )
 
 require (
@@ -34,7 +35,6 @@ require (
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	github.com/wailsapp/go-webview2 v1.0.19 // indirect
 	github.com/wailsapp/mimetype v1.4.1 // indirect
-	golang.org/x/crypto v0.33.0 // indirect
 	golang.org/x/net v0.35.0 // indirect
 	golang.org/x/sys v0.30.0 // indirect
 	golang.org/x/text v0.27.0 // indirect

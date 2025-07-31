@@ -4,105 +4,373 @@
       "id": "welcome",
       "title": "Welcome to DijiBill",
       "description": "Your complete business management solution for invoicing, inventory, and sales tracking.",
-      "icon": "M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z M3 7l9 6 9-6",
-      "iconType": "outline",
-      "color": "blue"
+      "icon": "fas fa-rocket",
+      "color": "blue",
+      "features": [
+        {
+          "title": "Complete Business Solution",
+          "description": "All-in-one platform for your business needs",
+          "icon": "fas fa-briefcase"
+        },
+        {
+          "title": "Easy to Use",
+          "description": "Intuitive interface designed for efficiency",
+          "icon": "fas fa-mouse-pointer"
+        },
+        {
+          "title": "Cloud Ready",
+          "description": "Access your data from anywhere",
+          "icon": "fas fa-cloud"
+        }
+      ]
     },
     {
       "id": "dashboard",
       "title": "Dashboard",
       "description": "Get a comprehensive overview of your business with real-time analytics, sales summaries, and key performance indicators.",
-      "icon": "M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z",
-      "iconType": "outline",
-      "color": "green"
+      "icon": "fas fa-chart-line",
+      "color": "green",
+      "features": [
+        {
+          "title": "Real-time Analytics",
+          "description": "Live data updates and insights",
+          "icon": "fas fa-chart-bar"
+        },
+        {
+          "title": "Sales Overview",
+          "description": "Track your sales performance",
+          "icon": "fas fa-dollar-sign"
+        },
+        {
+          "title": "KPI Monitoring",
+          "description": "Monitor key performance indicators",
+          "icon": "fas fa-tachometer-alt"
+        },
+        {
+          "title": "Custom Reports",
+          "description": "Generate detailed business reports",
+          "icon": "fas fa-file-chart-line"
+        }
+      ]
     },
     {
       "id": "sales-invoices",
       "title": "Sales Invoices",
       "description": "Create, manage, and track all your sales invoices. Generate professional invoices with ZATCA QR codes for compliance.",
-      "icon": "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z",
-      "iconType": "outline",
-      "color": "purple"
+      "icon": "fas fa-file-invoice-dollar",
+      "color": "purple",
+      "features": [
+        {
+          "title": "Professional Templates",
+          "description": "Beautiful, customizable invoice designs",
+          "icon": "fas fa-palette"
+        },
+        {
+          "title": "ZATCA Compliance",
+          "description": "QR codes for Saudi tax compliance",
+          "icon": "fas fa-qrcode"
+        },
+        {
+          "title": "Auto Calculations",
+          "description": "Automatic tax and total calculations",
+          "icon": "fas fa-calculator"
+        },
+        {
+          "title": "Payment Tracking",
+          "description": "Monitor invoice payment status",
+          "icon": "fas fa-credit-card"
+        }
+      ]
     },
     {
       "id": "pos",
       "title": "Point of Sale (POS)",
       "description": "Fast and intuitive point-of-sale system for quick transactions. Perfect for retail and restaurant operations.",
-      "icon": "M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z",
-      "iconType": "outline",
-      "color": "indigo"
+      "icon": "fas fa-cash-register",
+      "color": "indigo",
+      "features": [
+        {
+          "title": "Quick Checkout",
+          "description": "Fast transaction processing",
+          "icon": "fas fa-bolt"
+        },
+        {
+          "title": "Barcode Scanner",
+          "description": "Scan products for instant addition",
+          "icon": "fas fa-barcode"
+        },
+        {
+          "title": "Multiple Payment Methods",
+          "description": "Cash, card, and digital payments",
+          "icon": "fas fa-wallet"
+        },
+        {
+          "title": "Receipt Printing",
+          "description": "Print or email receipts instantly",
+          "icon": "fas fa-receipt"
+        }
+      ]
     },
     {
       "id": "customers",
       "title": "Customer Management",
       "description": "Maintain detailed customer records, track purchase history, and build stronger customer relationships.",
-      "icon": "M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z",
-      "iconType": "outline",
-      "color": "pink"
+      "icon": "fas fa-users",
+      "color": "pink",
+      "features": [
+        {
+          "title": "Customer Database",
+          "description": "Comprehensive customer information",
+          "icon": "fas fa-address-book"
+        },
+        {
+          "title": "Purchase History",
+          "description": "Track all customer transactions",
+          "icon": "fas fa-history"
+        },
+        {
+          "title": "Contact Management",
+          "description": "Store contact details and preferences",
+          "icon": "fas fa-phone"
+        },
+        {
+          "title": "Customer Analytics",
+          "description": "Analyze customer behavior patterns",
+          "icon": "fas fa-chart-pie"
+        }
+      ]
     },
     {
       "id": "suppliers",
       "title": "Supplier Management",
       "description": "Manage your supplier relationships, track purchase orders, and maintain vendor information efficiently.",
-      "icon": "M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4",
-      "iconType": "outline",
-      "color": "orange"
+      "icon": "fas fa-truck",
+      "color": "orange",
+      "features": [
+        {
+          "title": "Vendor Database",
+          "description": "Complete supplier information management",
+          "icon": "fas fa-building"
+        },
+        {
+          "title": "Purchase Orders",
+          "description": "Create and track purchase orders",
+          "icon": "fas fa-shopping-cart"
+        },
+        {
+          "title": "Payment Terms",
+          "description": "Manage supplier payment conditions",
+          "icon": "fas fa-handshake"
+        },
+        {
+          "title": "Performance Tracking",
+          "description": "Monitor supplier performance metrics",
+          "icon": "fas fa-star"
+        }
+      ]
     },
     {
       "id": "products",
       "title": "Product Management",
       "description": "Organize your inventory with categories, track stock levels, and manage product pricing and details.",
-      "icon": "M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4",
-      "iconType": "outline",
-      "color": "teal"
+      "icon": "fas fa-boxes",
+      "color": "teal",
+      "features": [
+        {
+          "title": "Inventory Tracking",
+          "description": "Real-time stock level monitoring",
+          "icon": "fas fa-warehouse"
+        },
+        {
+          "title": "Product Categories",
+          "description": "Organize products efficiently",
+          "icon": "fas fa-tags"
+        },
+        {
+          "title": "Price Management",
+          "description": "Flexible pricing strategies",
+          "icon": "fas fa-dollar-sign"
+        },
+        {
+          "title": "Low Stock Alerts",
+          "description": "Automatic reorder notifications",
+          "icon": "fas fa-bell"
+        }
+      ]
     },
     {
       "id": "purchase-products",
       "title": "Purchase Products",
       "description": "Manage your purchasing workflow with dedicated product categories and supplier-specific pricing.",
-      "icon": "M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z",
-      "iconType": "outline",
-      "color": "cyan"
+      "icon": "fas fa-shopping-bag",
+      "color": "cyan",
+      "features": [
+        {
+          "title": "Purchase Categories",
+          "description": "Organize purchase items by category",
+          "icon": "fas fa-list"
+        },
+        {
+          "title": "Supplier Pricing",
+          "description": "Track different supplier prices",
+          "icon": "fas fa-money-bill-wave"
+        },
+        {
+          "title": "Bulk Ordering",
+          "description": "Efficient bulk purchase management",
+          "icon": "fas fa-layer-group"
+        },
+        {
+          "title": "Cost Analysis",
+          "description": "Compare costs across suppliers",
+          "icon": "fas fa-chart-line"
+        }
+      ]
     },
     {
       "id": "purchase-invoices",
       "title": "Purchase Invoices",
       "description": "Track all incoming invoices from suppliers, manage purchase orders, and maintain accurate financial records.",
-      "icon": "M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01",
-      "iconType": "outline",
-      "color": "emerald"
+      "icon": "fas fa-file-invoice",
+      "color": "emerald",
+      "features": [
+        {
+          "title": "Invoice Processing",
+          "description": "Streamlined invoice handling workflow",
+          "icon": "fas fa-cogs"
+        },
+        {
+          "title": "Approval Workflow",
+          "description": "Multi-level approval process",
+          "icon": "fas fa-check-circle"
+        },
+        {
+          "title": "Payment Scheduling",
+          "description": "Schedule and track payments",
+          "icon": "fas fa-calendar-alt"
+        },
+        {
+          "title": "Expense Tracking",
+          "description": "Monitor all business expenses",
+          "icon": "fas fa-chart-area"
+        }
+      ]
     },
     {
       "id": "payments",
       "title": "Payment Management",
       "description": "Track payments, manage different payment methods, and maintain comprehensive financial records.",
-      "icon": "M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z",
-      "iconType": "outline",
-      "color": "yellow"
+      "icon": "fas fa-credit-card",
+      "color": "yellow",
+      "features": [
+        {
+          "title": "Payment Methods",
+          "description": "Support for multiple payment types",
+          "icon": "fas fa-money-check-alt"
+        },
+        {
+          "title": "Transaction History",
+          "description": "Complete payment transaction logs",
+          "icon": "fas fa-list-alt"
+        },
+        {
+          "title": "Reconciliation",
+          "description": "Bank account reconciliation tools",
+          "icon": "fas fa-balance-scale"
+        },
+        {
+          "title": "Financial Reports",
+          "description": "Detailed financial reporting",
+          "icon": "fas fa-chart-bar"
+        }
+      ]
     },
     {
       "id": "users",
       "title": "User Management",
       "description": "Manage user accounts, set permissions, and control access to different parts of your business system.",
-      "icon": "M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z",
-      "iconType": "outline",
-      "color": "red"
+      "icon": "fas fa-user-cog",
+      "color": "red",
+      "features": [
+        {
+          "title": "User Accounts",
+          "description": "Create and manage user profiles",
+          "icon": "fas fa-user-plus"
+        },
+        {
+          "title": "Role-based Access",
+          "description": "Control permissions by user role",
+          "icon": "fas fa-shield-alt"
+        },
+        {
+          "title": "Activity Logging",
+          "description": "Track user actions and changes",
+          "icon": "fas fa-clipboard-list"
+        },
+        {
+          "title": "Security Settings",
+          "description": "Advanced security configurations",
+          "icon": "fas fa-lock"
+        }
+      ]
     },
     {
       "id": "administration",
       "title": "Administration",
       "description": "Configure system settings, manage company information, and access advanced administrative features.",
-      "icon": "M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z",
-      "iconType": "outline",
-      "color": "gray"
+      "icon": "fas fa-cog",
+      "color": "gray",
+      "features": [
+        {
+          "title": "System Configuration",
+          "description": "Customize system behavior and settings",
+          "icon": "fas fa-sliders-h"
+        },
+        {
+          "title": "Company Settings",
+          "description": "Manage company information and branding",
+          "icon": "fas fa-building"
+        },
+        {
+          "title": "Backup & Restore",
+          "description": "Data backup and recovery options",
+          "icon": "fas fa-database"
+        },
+        {
+          "title": "System Maintenance",
+          "description": "Tools for system optimization",
+          "icon": "fas fa-tools"
+        }
+      ]
     },
     {
       "id": "getting-started",
       "title": "You're All Set!",
       "description": "You're now ready to start using DijiBill. Begin by setting up your company information and adding your first products or customers.",
-      "icon": "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z",
-      "iconType": "outline",
-      "color": "green"
+      "icon": "fas fa-check-circle",
+      "color": "green",
+      "features": [
+        {
+          "title": "Quick Setup",
+          "description": "Get started in just a few steps",
+          "icon": "fas fa-play-circle"
+        },
+        {
+          "title": "Sample Data",
+          "description": "Pre-loaded examples to explore",
+          "icon": "fas fa-database"
+        },
+        {
+          "title": "Help & Support",
+          "description": "Documentation and support resources",
+          "icon": "fas fa-question-circle"
+        },
+        {
+          "title": "Training Materials",
+          "description": "Guides and tutorials to get you started",
+          "icon": "fas fa-graduation-cap"
+        }
+      ]
     }
   ]
 }

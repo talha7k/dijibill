@@ -16,6 +16,7 @@
   import GeneralSettings from './GeneralSettings.svelte'
   import Administration from './Administration.svelte'
   import Login from './Login.svelte'
+  import Signup from './Signup.svelte'
   import IntroSlider from './components/IntroSlider.svelte'
   import {Greet} from '../wailsjs/go/main/App.js'
 
@@ -29,6 +30,7 @@
   let authContext = null
   let currentUser = null
   let currentCompany = null
+  let authMode = 'login' // 'login' or 'signup'
   
   // Intro slider state
   let showIntroSlider = false
@@ -102,7 +104,8 @@
         authContext = null
         currentUser = null
         currentCompany = null
-        showIntroSlider = false
+        // Show intro slider for non-authenticated users
+        showIntroSlider = true
         userHasViewedIntro = false
       }
     } catch (error) {
@@ -111,7 +114,8 @@
       authContext = null
       currentUser = null
       currentCompany = null
-      showIntroSlider = false
+      // Show intro slider for non-authenticated users
+      showIntroSlider = true
       userHasViewedIntro = false
     }
   }
@@ -149,6 +153,34 @@
     
     // Check intro status after login
     checkIntroStatus()
+  }
+
+  // Handle signup success
+  function handleSignupSuccess(event) {
+    const context = event.detail
+    isAuthenticated = true
+    authContext = context
+    currentUser = {
+      id: context.user_id,
+      username: context.username,
+      role: context.role
+    }
+    currentCompany = {
+      id: context.company_id
+    }
+    
+    // New users should see the intro
+    showIntroSlider = true
+    userHasViewedIntro = false
+  }
+
+  // Switch between login and signup modes
+  function switchToSignup() {
+    authMode = 'signup'
+  }
+
+  function switchToLogin() {
+    authMode = 'login'
   }
 
   // Handle intro completion
@@ -672,8 +704,18 @@
           </div>
         </div>
       {:else if !isAuthenticated}
-        <!-- Login Screen -->
-        <Login on:login-success={handleLoginSuccess} />
+        <!-- Authentication Screen -->
+        {#if authMode === 'login'}
+          <Login 
+            on:login-success={handleLoginSuccess} 
+            on:switch-to-signup={switchToSignup}
+          />
+        {:else if authMode === 'signup'}
+          <Signup 
+            on:signup-success={handleSignupSuccess}
+            on:switch-to-login={switchToLogin}
+          />
+        {/if}
       {:else}
         <!-- Application Content -->
         {#if currentView === 'dashboard'}
@@ -710,7 +752,7 @@
   </div>
   
   <!-- Intro Slider Overlay -->
-  {#if showIntroSlider && isAuthenticated}
+  {#if showIntroSlider}
     <IntroSlider on:complete={handleIntroComplete} />
   {/if}
 </div>

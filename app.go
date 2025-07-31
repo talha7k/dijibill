@@ -13,6 +13,7 @@ import (
 	"dijibill/database"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // App struct
@@ -1377,8 +1378,8 @@ func (a *App) Login(username, password string) (*AuthContext, error) {
 		return nil, fmt.Errorf("invalid credentials")
 	}
 
-	// Verify password (in production, use proper password hashing)
-	if user.Password != password {
+	// Verify password using bcrypt
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
 		return nil, fmt.Errorf("invalid credentials")
 	}
 
@@ -1482,4 +1483,112 @@ func (a *App) GetCurrentUser() (*database.User, error) {
 		return nil, fmt.Errorf("no active session")
 	}
 	return a.db.GetUserByID(a.currentSession.UserID)
+}
+
+// SignupRequest represents the data needed for user signup
+type SignupRequest struct {
+	Username        string `json:"username"`
+	Email           string `json:"email"`
+	Password        string `json:"password"`
+	FirstName       string `json:"first_name"`
+	LastName        string `json:"last_name"`
+	CompanyName     string `json:"company_name"`
+	CompanyNameAr   string `json:"company_name_arabic"`
+	VATNumber       string `json:"vat_number"`
+	CRNumber        string `json:"cr_number"`
+	CompanyEmail    string `json:"company_email"`
+	CompanyPhone    string `json:"company_phone"`
+	CompanyAddress  string `json:"company_address"`
+	CompanyAddressAr string `json:"company_address_arabic"`
+	City            string `json:"city"`
+	CityAr          string `json:"city_arabic"`
+	Country         string `json:"country"`
+	CountryAr       string `json:"country_arabic"`
+}
+
+func (a *App) Signup(request SignupRequest) (*AuthContext, error) {
+	// Validate required fields
+	if request.Username == "" || request.Email == "" || request.Password == "" {
+		return nil, fmt.Errorf("username, email, and password are required")
+	}
+
+	if request.FirstName == "" || request.LastName == "" {
+		return nil, fmt.Errorf("first name and last name are required")
+	}
+
+	if request.CompanyName == "" {
+		return nil, fmt.Errorf("company name is required")
+	}
+
+	// Check if username already exists
+	if _, err := a.db.GetUserByUsername(request.Username); err == nil {
+		return nil, fmt.Errorf("username already exists")
+	}
+
+	// Check if email already exists
+	if _, err := a.db.GetUserByEmail(request.Email); err == nil {
+		return nil, fmt.Errorf("email already exists")
+	}
+
+	// Hash the password
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(request.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return nil, fmt.Errorf("failed to hash password: %v", err)
+	}
+
+	// Create the company first
+	company := database.Company{
+		Name:          request.CompanyName,
+		NameArabic:    request.CompanyNameAr,
+		VATNumber:     request.VATNumber,
+		CRNumber:      request.CRNumber,
+		Email:         request.CompanyEmail,
+		Phone:         request.CompanyPhone,
+		Address:       request.CompanyAddress,
+		AddressArabic: request.CompanyAddressAr,
+		City:          request.City,
+		CityArabic:    request.CityAr,
+		Country:       request.Country,
+		CountryArabic: request.CountryAr,
+	}
+
+	if err := a.db.CreateCompany(&company); err != nil {
+		return nil, fmt.Errorf("failed to create company: %v", err)
+	}
+
+	// Create the user and assign them to the new company as admin
+	user := database.User{
+		Username:    request.Username,
+		Email:       request.Email,
+		Password:    string(hashedPassword),
+		FirstName:   request.FirstName,
+		LastName:    request.LastName,
+		Role:        "admin", // First user of a company is admin
+		IsActive:    true,
+		CompanyID:   company.ID,
+		IntroViewed: false,
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
+	}
+
+	if err := a.db.CreateUser(&user); err != nil {
+		return nil, fmt.Errorf("failed to create user: %v", err)
+	}
+
+	// Create session for the new user
+	session, err := a.sessionManager.CreateSession(&user)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create session: %v", err)
+	}
+
+	// Update current session
+	a.currentSession = session
+
+	return &AuthContext{
+		SessionID: session.ID,
+		UserID:    session.UserID,
+		CompanyID: session.CompanyID,
+		Username:  session.Username,
+		Role:      session.Role,
+	}, nil
 }

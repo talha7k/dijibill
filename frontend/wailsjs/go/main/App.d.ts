@@ -176,6 +176,8 @@ export function ShowMessage(arg1:string,arg2:string):Promise<void>;
 
 export function ShowSaveDialog(arg1:string):Promise<string>;
 
+export function Signup(arg1:main.SignupRequest):Promise<main.AuthContext>;
+
 export function SwitchCompany(arg1:number):Promise<void>;
 
 export function TestCustomerNAHandling():Promise<void>;

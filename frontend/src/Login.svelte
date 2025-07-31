@@ -116,8 +116,18 @@
       <p>Default credentials:</p>
       <p class="font-mono text-xs bg-gray-100 p-2 rounded mt-1">
         Username: admin<br>
-        Password: admin123
+        Password: password
       </p>
+      <div class="mt-4 pt-4 border-t border-gray-200">
+        <p class="text-gray-600">Don't have an account?</p>
+        <button
+          type="button"
+          on:click={() => dispatch('switch-to-signup')}
+          class="text-blue-600 hover:text-blue-700 font-medium"
+        >
+          Create a new account
+        </button>
+      </div>
     </div>
   </div>
 </div>
