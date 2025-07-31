@@ -162,6 +162,10 @@ export function GetInvoices() {
   return window['go']['main']['App']['GetInvoices']();
 }
 
+export function GetOpenSalesInvoices() {
+  return window['go']['main']['App']['GetOpenSalesInvoices']();
+}
+
 export function GetPaymentByID(arg1) {
   return window['go']['main']['App']['GetPaymentByID'](arg1);
 }

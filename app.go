@@ -209,6 +209,10 @@ func (a *App) GetSalesInvoices() ([]database.SalesInvoice, error) {
 	return a.db.GetSalesInvoices()
 }
 
+func (a *App) GetOpenSalesInvoices() ([]database.SalesInvoice, error) {
+	return a.db.GetOpenSalesInvoices()
+}
+
 func (a *App) GetSalesInvoiceByID(id int) (*database.SalesInvoice, error) {
 	return a.db.GetSalesInvoiceByID(id)
 }

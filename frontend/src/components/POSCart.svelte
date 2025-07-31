@@ -3,15 +3,21 @@
     currentSale,
     showRefundModal,
     showTransferModal,
+    showPaymentModal,
     loading,
     removeItem,
     updateQuantity
   } from '../stores/posStore.js'
   import POSHeader from './POSHeader.svelte'
+  import { openPaymentModal } from '../services/posService.js'
 
   export let onSaveSale = () => {}
   export let onRefund = () => {}
   export let onTransfer = () => {}
+
+  async function handlePayment() {
+    await openPaymentModal()
+  }
 </script>
 
 <div class="w-1/3 bg-gray-800 flex flex-col">
@@ -87,30 +93,43 @@
     </div>
 
     <!-- Action Buttons -->
-    <div class="grid grid-cols-2 gap-2">
+    <div class="space-y-2">
+      <!-- Primary Action - Payment -->
       <button
-        class="bg-red-600 hover:bg-red-700 text-white py-3 px-4 rounded-lg font-medium transition-colors"
-        disabled={$currentSale.items.length === 0}
-        on:click={() => { $showRefundModal = true; onRefund(); }}
-        title="Refund"
-      >
-        Refund
-      </button>
-      <button
-        class="bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-medium transition-colors"
-        disabled={$currentSale.items.length === 0}
-        on:click={() => { $showTransferModal = true; onTransfer(); }}
-        title="Transfer"
-      >
-        Transfer
-      </button>
-      <button
-        class="bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg font-medium transition-colors col-span-2"
+        class="bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg font-medium transition-colors w-full"
         disabled={$currentSale.items.length === 0 || $loading}
-        on:click={onSaveSale}
+        on:click={handlePayment}
       >
-        {$loading ? 'Saving...' : 'Save Sale'}
+        {$loading ? 'Processing...' : 'Make Payment'}
       </button>
+      
+      <!-- Secondary Actions -->
+      <div class="grid grid-cols-3 gap-2">
+        <button
+          class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-3 rounded-lg font-medium transition-colors text-sm"
+          disabled={$currentSale.items.length === 0}
+          on:click={() => { $showTransferModal = true; onTransfer(); }}
+          title="Transfer to another invoice"
+        >
+          Transfer
+        </button>
+        <button
+          class="bg-red-600 hover:bg-red-700 text-white py-2 px-3 rounded-lg font-medium transition-colors text-sm"
+          disabled={$currentSale.items.length === 0}
+          on:click={() => { $showRefundModal = true; onRefund(); }}
+          title="Process refund"
+        >
+          Refund
+        </button>
+        <button
+          class="bg-gray-600 hover:bg-gray-700 text-white py-2 px-3 rounded-lg font-medium transition-colors text-sm"
+          disabled={$currentSale.items.length === 0 || $loading}
+          on:click={onSaveSale}
+          title="Save as draft"
+        >
+          {$loading ? 'Saving...' : 'Save Draft'}
+        </button>
+      </div>
     </div>
   </div>
 </div>

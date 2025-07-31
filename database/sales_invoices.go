@@ -109,6 +109,66 @@ func (d *Database) GetSalesInvoices() ([]SalesInvoice, error) {
 	return invoices, nil
 }
 
+func (d *Database) GetOpenSalesInvoices() ([]SalesInvoice, error) {
+	query := `
+		SELECT 
+			si.id, si.invoice_number, si.customer_id, si.sales_category_id, si.table_number,
+			si.issue_date, si.due_date, si.sub_total, si.vat_amount, si.total_amount, 
+			si.status, si.notes, si.notes_arabic, si.qr_code, si.created_at, si.updated_at,
+			c.id as customer_id, c.name as customer_name, c.email as customer_email, 
+			c.phone as customer_phone, c.address as customer_address, c.city as customer_city, 
+			c.country as customer_country, c.vat_number as customer_vat_number, 
+			c.created_at as customer_created_at, c.updated_at as customer_updated_at
+		FROM sales_invoices si
+		LEFT JOIN customers c ON si.customer_id = c.id
+		WHERE si.status IN ('draft', 'open', 'pending')
+		ORDER BY si.created_at DESC`
+
+	rows, err := d.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var invoices []SalesInvoice
+	for rows.Next() {
+		var inv SalesInvoice
+		var customer Customer
+		var customerID, customerCreatedAt, customerUpdatedAt interface{}
+		var issueDate, dueDate time.Time
+		
+		scanErr := rows.Scan(
+			&inv.ID, &inv.InvoiceNumber, &inv.CustomerID, &inv.SalesCategoryID, &inv.TableNumber,
+			&issueDate, &dueDate, &inv.SubTotal, &inv.VATAmount, &inv.TotalAmount, 
+			&inv.Status, &inv.Notes, &inv.NotesArabic, &inv.QRCode, &inv.CreatedAt, &inv.UpdatedAt,
+			&customerID, &customer.Name, &customer.Email, &customer.Phone, &customer.Address, 
+			&customer.City, &customer.Country, &customer.VATNumber, 
+			&customerCreatedAt, &customerUpdatedAt)
+		if scanErr != nil {
+			return nil, scanErr
+		}
+		
+		// Convert time.Time to custom Date type
+		inv.IssueDate = Date{Time: issueDate}
+		inv.DueDate = Date{Time: dueDate}
+		
+		// Only set customer if customer data exists
+		if customerID != nil {
+			customer.ID = int(customerID.(int64))
+			if customerCreatedAt != nil {
+				customer.CreatedAt = customerCreatedAt.(time.Time)
+			}
+			if customerUpdatedAt != nil {
+				customer.UpdatedAt = customerUpdatedAt.(time.Time)
+			}
+			inv.Customer = &customer
+		}
+		
+		invoices = append(invoices, inv)
+	}
+	return invoices, nil
+}
+
 func (d *Database) GetSalesInvoiceByID(id int) (*SalesInvoice, error) {
 	query := `SELECT id, invoice_number, customer_id, sales_category_id, table_number, issue_date, due_date, sub_total, vat_amount, total_amount, status, notes, notes_arabic, qr_code, created_at, updated_at FROM sales_invoices WHERE id = ?`
 

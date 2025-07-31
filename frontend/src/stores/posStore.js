@@ -17,12 +17,14 @@ export const salesCategories = writable([])
 export const selectedSalesCategory = writable(null)
 export const products = writable([])
 export const customers = writable([])
+export const openInvoices = writable([])
+export const paymentTypes = writable([])
 
 // UI state
-export const currentView = writable('categories') // 'categories' or 'products'
+export const currentView = writable('categories') // categories, products
 export const selectedCategory = writable(null)
-export const searchQuery = writable('')
 export const loading = writable(false)
+export const searchQuery = writable('')
 
 // Modal states
 export const showCustomerModal = writable(false)
@@ -30,10 +32,17 @@ export const showTableModal = writable(false)
 export const showSalesCategoryModal = writable(false)
 export const showTransferModal = writable(false)
 export const showRefundModal = writable(false)
+export const showPaymentModal = writable(false)
 
-// Transfer and refund data
+// Transfer and refund states
 export const transferToInvoiceId = writable(null)
+export const selectedTransferInvoice = writable(null)
 export const refundReason = writable('')
+
+// Payment states
+export const currentInvoiceForPayment = writable(null)
+export const paymentItems = writable([])
+export const remainingAmount = writable(0)
 
 // Derived stores
 export const filteredProducts = derived(
@@ -87,9 +96,9 @@ export function addProductToSale(product) {
         product_id: product.id,
         product_name: product.name,
         quantity: 1,
-        unit_price: product.price || 0,
+        unit_price: product.unit_price || 0,
         vat_rate: product.vat_rate || 15,
-        total: product.price || 0
+        total: product.unit_price || 0
       })
     }
     

@@ -82,6 +82,8 @@ export function GetInvoiceByID(arg1:number):Promise<database.SalesInvoice>;
 
 export function GetInvoices():Promise<Array<database.SalesInvoice>>;
 
+export function GetOpenSalesInvoices():Promise<Array<database.SalesInvoice>>;
+
 export function GetPaymentByID(arg1:number):Promise<database.Payment>;
 
 export function GetPaymentTypes():Promise<Array<database.PaymentType>>;
