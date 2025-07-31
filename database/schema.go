@@ -318,5 +318,21 @@ func (d *Database) runMigrations() error {
 		log.Println("Added vat_inclusive column to purchase_invoices table")
 	}
 
+	// Check if table_number column exists in sales_invoices table
+	columnExists = false
+	err = d.db.QueryRow("SELECT COUNT(*) FROM pragma_table_info('sales_invoices') WHERE name='table_number'").Scan(&columnExists)
+	if err != nil {
+		return err
+	}
+
+	// Add table_number column if it doesn't exist
+	if !columnExists {
+		_, err = d.db.Exec("ALTER TABLE sales_invoices ADD COLUMN table_number TEXT")
+		if err != nil {
+			return fmt.Errorf("error adding table_number column: %v", err)
+		}
+		log.Println("Added table_number column to sales_invoices table")
+	}
+
 	return nil
 }

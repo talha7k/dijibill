@@ -432,6 +432,7 @@ export namespace database {
 	    customer?: Customer;
 	    sales_category_id: number;
 	    sales_category?: SalesCategory;
+	    table_number?: string;
 	    issue_date: Date;
 	    due_date: Date;
 	    sub_total: number;
@@ -459,6 +460,7 @@ export namespace database {
 	        this.customer = this.convertValues(source["customer"], Customer);
 	        this.sales_category_id = source["sales_category_id"];
 	        this.sales_category = this.convertValues(source["sales_category"], SalesCategory);
+	        this.table_number = source["table_number"];
 	        this.issue_date = this.convertValues(source["issue_date"], Date);
 	        this.due_date = this.convertValues(source["due_date"], Date);
 	        this.sub_total = source["sub_total"];

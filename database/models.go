@@ -142,6 +142,7 @@ type SalesInvoice struct {
 	Customer         *Customer          `json:"customer,omitempty"`
 	SalesCategoryID  int                `json:"sales_category_id"`
 	SalesCategory    *SalesCategory     `json:"sales_category,omitempty"`
+	TableNumber      *string            `json:"table_number,omitempty"` // Optional table number for restaurant/cafe POS
 	IssueDate        Date               `json:"issue_date"`
 	DueDate          Date               `json:"due_date"`
 	SubTotal         float64            `json:"sub_total"`
