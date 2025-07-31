@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"log"
+	"mime/multipart"
 	"os"
 	"path/filepath"
 	"strings"
@@ -23,6 +24,7 @@ type App struct {
 	htmlInvoiceService *HTMLInvoiceService
 	sessionManager     *SessionManager
 	currentSession     *Session
+	fileService        *FileService
 }
 
 // NewApp creates a new App application struct
@@ -51,6 +53,17 @@ func (a *App) startup(ctx context.Context) {
 
 	// Initialize HTML invoice service
 	a.htmlInvoiceService = NewHTMLInvoiceService(a.ctx, a.db)
+
+	// Initialize file service
+	storageConfig := &StorageConfig{
+		Type:     StorageTypeLocal,
+		BasePath: filepath.Join(homeDir, "dijibill_files"),
+	}
+	fileDBPath := filepath.Join(homeDir, "dijibill_files.db")
+	a.fileService, err = NewFileService(storageConfig, fileDBPath)
+	if err != nil {
+		log.Printf("Warning: Failed to initialize file service: %v", err)
+	}
 
 	// Create sample data for testing
 	if err := a.CreateSampleData(); err != nil {
@@ -1436,6 +1449,144 @@ func (a *App) Login(username, password string) (*AuthContext, error) {
 		Username:  session.Username,
 		Role:      session.Role,
 	}, nil
+}
+
+// File Management Methods
+
+// UploadFile uploads a file with automatic image compression
+func (a *App) UploadFile(category, entityType string, entityID int) (string, error) {
+	if a.fileService == nil {
+		return "", fmt.Errorf("file service not initialized")
+	}
+
+	// Open file dialog
+	options := runtime.OpenDialogOptions{
+		Title: "Select File",
+		Filters: []runtime.FileFilter{
+			{
+				DisplayName: "All Files",
+				Pattern:     "*.*",
+			},
+			{
+				DisplayName: "Images",
+				Pattern:     "*.jpg;*.jpeg;*.png;*.gif;*.bmp;*.webp",
+			},
+			{
+				DisplayName: "Documents",
+				Pattern:     "*.pdf;*.doc;*.docx;*.txt",
+			},
+		},
+	}
+
+	filePath, err := runtime.OpenFileDialog(a.ctx, options)
+	if err != nil {
+		return "", fmt.Errorf("failed to open file dialog: %v", err)
+	}
+
+	if filePath == "" {
+		return "", fmt.Errorf("no file selected")
+	}
+
+	// Read the file
+	file, err := os.Open(filePath)
+	if err != nil {
+		return "", fmt.Errorf("failed to open file: %v", err)
+	}
+	defer file.Close()
+
+	// Get file info
+	fileInfo, err := file.Stat()
+	if err != nil {
+		return "", fmt.Errorf("failed to get file info: %v", err)
+	}
+
+	// Create multipart file header
+	header := &multipart.FileHeader{
+		Filename: filepath.Base(filePath),
+		Size:     fileInfo.Size(),
+		Header:   make(map[string][]string),
+	}
+
+	// Detect MIME type based on file extension
+	ext := strings.ToLower(filepath.Ext(filePath))
+	switch ext {
+	case ".jpg", ".jpeg":
+		header.Header["Content-Type"] = []string{"image/jpeg"}
+	case ".png":
+		header.Header["Content-Type"] = []string{"image/png"}
+	case ".gif":
+		header.Header["Content-Type"] = []string{"image/gif"}
+	case ".bmp":
+		header.Header["Content-Type"] = []string{"image/bmp"}
+	case ".webp":
+		header.Header["Content-Type"] = []string{"image/webp"}
+	case ".pdf":
+		header.Header["Content-Type"] = []string{"application/pdf"}
+	case ".doc":
+		header.Header["Content-Type"] = []string{"application/msword"}
+	case ".docx":
+		header.Header["Content-Type"] = []string{"application/vnd.openxmlformats-officedocument.wordprocessingml.document"}
+	case ".txt":
+		header.Header["Content-Type"] = []string{"text/plain"}
+	default:
+		header.Header["Content-Type"] = []string{"application/octet-stream"}
+	}
+
+	// Get current user ID
+	var userID *int
+	if a.currentSession != nil {
+		userID = &a.currentSession.UserID
+	}
+
+	// Save file with compression (if applicable)
+	metadata, err := a.fileService.SaveFileWithCompression(file, header, category, entityType, entityID, userID)
+	if err != nil {
+		return "", fmt.Errorf("failed to save file: %v", err)
+	}
+
+	// Return file URL
+	return a.fileService.GetFileURL(metadata.ID)
+}
+
+// GetFilesByEntity returns all files for a specific entity
+func (a *App) GetFilesByEntity(entityType string, entityID int) ([]FileMetadata, error) {
+	if a.fileService == nil {
+		return nil, fmt.Errorf("file service not initialized")
+	}
+	return a.fileService.GetFilesByEntity(entityType, entityID)
+}
+
+// DeleteFile deletes a file
+func (a *App) DeleteFile(fileID int) error {
+	if a.fileService == nil {
+		return fmt.Errorf("file service not initialized")
+	}
+	return a.fileService.DeleteFile(fileID)
+}
+
+// GetFileURL returns the URL for a file
+func (a *App) GetFileURL(fileID int) (string, error) {
+	if a.fileService == nil {
+		return "", fmt.Errorf("file service not initialized")
+	}
+	return a.fileService.GetFileURL(fileID)
+}
+
+// GetCompressionSettings returns current image compression settings
+func (a *App) GetCompressionSettings() (map[string]interface{}, error) {
+	if a.fileService == nil {
+		return nil, fmt.Errorf("file service not initialized")
+	}
+	return a.fileService.GetCompressionSettings(), nil
+}
+
+// UpdateCompressionSettings updates image compression settings
+func (a *App) UpdateCompressionSettings(maxSizeKB int64, maxWidth, maxHeight, jpegQuality, pngQuality int) error {
+	if a.fileService == nil {
+		return fmt.Errorf("file service not initialized")
+	}
+	a.fileService.UpdateCompressionSettings(maxSizeKB, maxWidth, maxHeight, jpegQuality, pngQuality)
+	return nil
 }
 
 func (a *App) Logout() error {
