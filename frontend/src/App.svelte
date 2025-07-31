@@ -1,6 +1,7 @@
 <script>
   import { onMount } from 'svelte'
   import { wailsReady, wailsError, initializeWailsRuntime } from './stores/wailsStore.js'
+  import { GetSystemSettings } from '../wailsjs/go/main/App'
   import Dashboard from './Dashboard.svelte'
   import QRValidation from './QRValidation.svelte'
   import SalesInvoices from './SalesInvoices.svelte'
@@ -14,7 +15,6 @@
   import Users from './Users.svelte'
   import GeneralSettings from './GeneralSettings.svelte'
   import Administration from './Administration.svelte'
-  import FormField from './components/FormField.svelte'
   import {Greet} from '../wailsjs/go/main/App.js'
 
   let currentView = 'dashboard' // Default to dashboard
@@ -25,7 +25,47 @@
   // Get runtime status for display
   $: runtimeStatus = $wailsReady ? 'Runtime Ready' : $wailsError ? 'Runtime Error' : 'Initializing...'
   let name = ''
-  let searchTerm = ''
+  let backupStatus = 'unknown' // 'recent', 'overdue', 'unknown'
+  let lastBackupTime = null
+  let autoBackupEnabled = false
+
+  // Check backup status
+  async function checkBackupStatus() {
+    try {
+      const settings = await GetSystemSettings()
+      if (settings) {
+        autoBackupEnabled = settings.auto_backup
+        lastBackupTime = settings.last_backup_time
+        
+        if (!autoBackupEnabled) {
+          backupStatus = 'disabled'
+          return
+        }
+        
+        if (!lastBackupTime) {
+          backupStatus = 'never'
+          return
+        }
+        
+        // Convert Go time to JavaScript Date
+        const lastBackup = new Date(lastBackupTime.toString())
+        const now = new Date()
+        const hoursSinceBackup = (now.getTime() - lastBackup.getTime()) / (1000 * 60 * 60)
+        
+        // Check backup frequency from settings
+        const backupFrequency = Number(settings.backup_frequency) || 24 // default 24 hours
+        
+        if (hoursSinceBackup <= backupFrequency) {
+          backupStatus = 'recent'
+        } else {
+          backupStatus = 'overdue'
+        }
+      }
+    } catch (error) {
+      console.error('Error checking backup status:', error)
+      backupStatus = 'unknown'
+    }
+  }
 
   // Auto-hide sidebar when switching to POS only
   $: {
@@ -51,6 +91,16 @@
   onMount(async () => {
     console.log('🎯 App component mounted, initializing Wails runtime...');
     await initializeWailsRuntime();
+    
+    // Check backup status when app loads
+    checkBackupStatus();
+    
+    // Check backup status every 5 minutes
+    const backupStatusInterval = setInterval(checkBackupStatus, 5 * 60 * 1000);
+    
+    return () => {
+      clearInterval(backupStatusInterval);
+    };
   });
 
   // Retry function for manual retry
@@ -402,14 +452,45 @@
             {/if}
           </div>
           
-          <!-- Search -->
-          <div class="form-control">
-            <FormField
-              type="text"
-              placeholder="Search..."
-              bind:value={searchTerm}
-              label=""
-            />
+          <!-- Backup Status -->
+          <div class="flex items-center gap-2">
+            {#if backupStatus === 'recent'}
+              <div class="badge badge-success badge-sm">
+                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
+                </svg>
+                Backup OK
+              </div>
+            {:else if backupStatus === 'overdue'}
+              <div class="badge badge-warning badge-sm">
+                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                </svg>
+                Backup Overdue
+              </div>
+            {:else if backupStatus === 'never'}
+              <div class="badge badge-error badge-sm">
+                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                </svg>
+                No Backup
+              </div>
+            {:else if backupStatus === 'disabled'}
+              <div class="badge badge-neutral badge-sm">
+                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524l8.367 8.368zm1.414-1.414L6.524 5.11a6 6 0 018.367 8.367zM18 10a8 8 0 11-16 0 8 8 0 0116 0z" clip-rule="evenodd"></path>
+                </svg>
+                Backup Disabled
+              </div>
+            {:else}
+              <div class="badge badge-ghost badge-sm">
+                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9 12a1 1 0 002 0V8a1 1 0 10-2 0v4zm1-7a1 1 0 100 2 1 1 0 000-2z"></path>
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm0-2a6 6 0 100-12 6 6 0 000 12z" clip-rule="evenodd"></path>
+                </svg>
+                Backup Status Unknown
+              </div>
+            {/if}
           </div>
           
           <!-- User Menu -->

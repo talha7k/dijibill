@@ -7,7 +7,8 @@
     GetTaxRates, 
     GetPaymentTypes, 
     GetSalesCategories, 
-    GetUnitsOfMeasurement 
+    GetUnitsOfMeasurement,
+    GetSystemSettings
   } from '../wailsjs/go/main/App.js'
 
   // Import components
@@ -79,6 +80,26 @@
         companySettings = company
       }
 
+      // Load system settings
+      try {
+        const settings = await GetSystemSettings()
+        if (settings) {
+          systemSettings = {
+            currency: settings.currency,
+            language: settings.language,
+            timezone: settings.timezone,
+            date_format: settings.date_format,
+            invoice_language: settings.invoice_language,
+            zatca_enabled: settings.zatca_enabled,
+            auto_backup: settings.auto_backup,
+            backup_frequency: settings.backup_frequency
+          }
+        }
+      } catch (systemError) {
+        console.error('Error loading system settings:', systemError)
+        // Keep default system settings if loading fails
+      }
+
       // Load all settings data from backend
       const [
         loadedTaxRates,
@@ -121,7 +142,13 @@
 
   function handleSystemSave(event) {
     systemSettings = event.detail.systemSettings
-    alert('System settings saved successfully!')
+    if (event.detail.message) {
+      alert(event.detail.message)
+    }
+  }
+
+  function handleSystemError(event) {
+    alert(event.detail.message)
   }
 
   // Tab configuration
@@ -176,6 +203,7 @@
             bind:systemSettings={systemSettings}
             bind:isLoading={isLoading}
             on:save={handleSystemSave}
+            on:error={handleSystemError}
           />
         {:else if activeTab === 'default-products'}
           <DefaultProductSettings />

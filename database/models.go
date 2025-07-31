@@ -346,3 +346,19 @@ type PurchaseProduct struct {
 	CreatedAt         time.Time                 `json:"created_at"`
 	UpdatedAt         time.Time                 `json:"updated_at"`
 }
+
+// SystemSettings represents system-wide configuration settings
+type SystemSettings struct {
+	ID               int        `json:"id"`
+	Currency         string     `json:"currency"`
+	Language         string     `json:"language"`
+	Timezone         string     `json:"timezone"`
+	DateFormat       string     `json:"date_format"`
+	InvoiceLanguage  string     `json:"invoice_language"`
+	ZatcaEnabled     bool       `json:"zatca_enabled"`
+	AutoBackup       bool       `json:"auto_backup"`
+	BackupFrequency  string     `json:"backup_frequency"`
+	LastBackupTime   *time.Time `json:"last_backup_time,omitempty"`
+	CreatedAt        time.Time  `json:"created_at"`
+	UpdatedAt        time.Time  `json:"updated_at"`
+}

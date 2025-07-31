@@ -230,6 +230,10 @@ export function GetSuppliers() {
   return window['go']['main']['App']['GetSuppliers']();
 }
 
+export function GetSystemSettings() {
+  return window['go']['main']['App']['GetSystemSettings']();
+}
+
 export function GetTaxRates() {
   return window['go']['main']['App']['GetTaxRates']();
 }
@@ -310,6 +314,10 @@ export function UpdateDefaultProductSettings(arg1) {
   return window['go']['main']['App']['UpdateDefaultProductSettings'](arg1);
 }
 
+export function UpdateLastBackupTime(arg1) {
+  return window['go']['main']['App']['UpdateLastBackupTime'](arg1);
+}
+
 export function UpdatePayment(arg1) {
   return window['go']['main']['App']['UpdatePayment'](arg1);
 }
@@ -344,6 +352,10 @@ export function UpdateSalesInvoice(arg1) {
 
 export function UpdateSupplier(arg1) {
   return window['go']['main']['App']['UpdateSupplier'](arg1);
+}
+
+export function UpdateSystemSettings(arg1) {
+  return window['go']['main']['App']['UpdateSystemSettings'](arg1);
 }
 
 export function UpdateTaxRate(arg1) {

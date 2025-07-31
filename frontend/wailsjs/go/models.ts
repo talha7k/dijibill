@@ -51,10 +51,8 @@ export namespace database {
 	    city_arabic: string;
 	    country: string;
 	    country_arabic: string;
-	    // Go type: time
-	    created_at: any;
-	    // Go type: time
-	    updated_at: any;
+	    created_at: time.Time;
+	    updated_at: time.Time;
 	
 	    static createFrom(source: any = {}) {
 	        return new Customer(source);
@@ -74,8 +72,8 @@ export namespace database {
 	        this.city_arabic = source["city_arabic"];
 	        this.country = source["country"];
 	        this.country_arabic = source["country_arabic"];
-	        this.created_at = this.convertValues(source["created_at"], null);
-	        this.updated_at = this.convertValues(source["updated_at"], null);
+	        this.created_at = this.convertValues(source["created_at"], time.Time);
+	        this.updated_at = this.convertValues(source["updated_at"], time.Time);
 	    }
 	
 		convertValues(a: any, clazz: any, asMap: boolean = false): any {
@@ -118,10 +116,8 @@ export namespace database {
 	    default_markup: number;
 	    default_price_includes_tax: boolean;
 	    default_price_change_allowed: boolean;
-	    // Go type: time
-	    created_at: any;
-	    // Go type: time
-	    updated_at: any;
+	    created_at: time.Time;
+	    updated_at: time.Time;
 	
 	    static createFrom(source: any = {}) {
 	        return new DefaultProductSettings(source);
@@ -138,8 +134,8 @@ export namespace database {
 	        this.default_markup = source["default_markup"];
 	        this.default_price_includes_tax = source["default_price_includes_tax"];
 	        this.default_price_change_allowed = source["default_price_change_allowed"];
-	        this.created_at = this.convertValues(source["created_at"], null);
-	        this.updated_at = this.convertValues(source["updated_at"], null);
+	        this.created_at = this.convertValues(source["created_at"], time.Time);
+	        this.updated_at = this.convertValues(source["updated_at"], time.Time);
 	    }
 	
 		convertValues(a: any, clazz: any, asMap: boolean = false): any {
@@ -168,10 +164,8 @@ export namespace database {
 	    is_default: boolean;
 	    is_active: boolean;
 	    description: string;
-	    // Go type: time
-	    created_at: any;
-	    // Go type: time
-	    updated_at: any;
+	    created_at: time.Time;
+	    updated_at: time.Time;
 	
 	    static createFrom(source: any = {}) {
 	        return new PaymentType(source);
@@ -186,8 +180,8 @@ export namespace database {
 	        this.is_default = source["is_default"];
 	        this.is_active = source["is_active"];
 	        this.description = source["description"];
-	        this.created_at = this.convertValues(source["created_at"], null);
-	        this.updated_at = this.convertValues(source["updated_at"], null);
+	        this.created_at = this.convertValues(source["created_at"], time.Time);
+	        this.updated_at = this.convertValues(source["updated_at"], time.Time);
 	    }
 	
 		convertValues(a: any, clazz: any, asMap: boolean = false): any {
@@ -214,10 +208,8 @@ export namespace database {
 	    name_arabic: string;
 	    description: string;
 	    description_arabic: string;
-	    // Go type: time
-	    created_at: any;
-	    // Go type: time
-	    updated_at: any;
+	    created_at: time.Time;
+	    updated_at: time.Time;
 	
 	    static createFrom(source: any = {}) {
 	        return new ProductCategory(source);
@@ -230,8 +222,8 @@ export namespace database {
 	        this.name_arabic = source["name_arabic"];
 	        this.description = source["description"];
 	        this.description_arabic = source["description_arabic"];
-	        this.created_at = this.convertValues(source["created_at"], null);
-	        this.updated_at = this.convertValues(source["updated_at"], null);
+	        this.created_at = this.convertValues(source["created_at"], time.Time);
+	        this.updated_at = this.convertValues(source["updated_at"], time.Time);
 	    }
 	
 		convertValues(a: any, clazz: any, asMap: boolean = false): any {
@@ -273,10 +265,8 @@ export namespace database {
 	    color: string;
 	    image_url: string;
 	    service_not_using_stock: boolean;
-	    // Go type: time
-	    created_at: any;
-	    // Go type: time
-	    updated_at: any;
+	    created_at: time.Time;
+	    updated_at: time.Time;
 	
 	    static createFrom(source: any = {}) {
 	        return new Product(source);
@@ -304,8 +294,8 @@ export namespace database {
 	        this.color = source["color"];
 	        this.image_url = source["image_url"];
 	        this.service_not_using_stock = source["service_not_using_stock"];
-	        this.created_at = this.convertValues(source["created_at"], null);
-	        this.updated_at = this.convertValues(source["updated_at"], null);
+	        this.created_at = this.convertValues(source["created_at"], time.Time);
+	        this.updated_at = this.convertValues(source["updated_at"], time.Time);
 	    }
 	
 		convertValues(a: any, clazz: any, asMap: boolean = false): any {
@@ -336,8 +326,7 @@ export namespace database {
 	    vat_rate: number;
 	    vat_amount: number;
 	    total_amount: number;
-	    // Go type: time
-	    created_at: any;
+	    created_at: time.Time;
 	
 	    static createFrom(source: any = {}) {
 	        return new SalesInvoiceItem(source);
@@ -354,7 +343,7 @@ export namespace database {
 	        this.vat_rate = source["vat_rate"];
 	        this.vat_amount = source["vat_amount"];
 	        this.total_amount = source["total_amount"];
-	        this.created_at = this.convertValues(source["created_at"], null);
+	        this.created_at = this.convertValues(source["created_at"], time.Time);
 	    }
 	
 		convertValues(a: any, clazz: any, asMap: boolean = false): any {
@@ -384,10 +373,8 @@ export namespace database {
 	    description_arabic: string;
 	    is_default: boolean;
 	    is_active: boolean;
-	    // Go type: time
-	    created_at: any;
-	    // Go type: time
-	    updated_at: any;
+	    created_at: time.Time;
+	    updated_at: time.Time;
 	
 	    static createFrom(source: any = {}) {
 	        return new SalesCategory(source);
@@ -403,8 +390,8 @@ export namespace database {
 	        this.description_arabic = source["description_arabic"];
 	        this.is_default = source["is_default"];
 	        this.is_active = source["is_active"];
-	        this.created_at = this.convertValues(source["created_at"], null);
-	        this.updated_at = this.convertValues(source["updated_at"], null);
+	        this.created_at = this.convertValues(source["created_at"], time.Time);
+	        this.updated_at = this.convertValues(source["updated_at"], time.Time);
 	    }
 	
 		convertValues(a: any, clazz: any, asMap: boolean = false): any {
@@ -443,10 +430,8 @@ export namespace database {
 	    notes_arabic: string;
 	    qr_code: string;
 	    items?: SalesInvoiceItem[];
-	    // Go type: time
-	    created_at: any;
-	    // Go type: time
-	    updated_at: any;
+	    created_at: time.Time;
+	    updated_at: time.Time;
 	
 	    static createFrom(source: any = {}) {
 	        return new SalesInvoice(source);
@@ -471,8 +456,8 @@ export namespace database {
 	        this.notes_arabic = source["notes_arabic"];
 	        this.qr_code = source["qr_code"];
 	        this.items = this.convertValues(source["items"], SalesInvoiceItem);
-	        this.created_at = this.convertValues(source["created_at"], null);
-	        this.updated_at = this.convertValues(source["updated_at"], null);
+	        this.created_at = this.convertValues(source["created_at"], time.Time);
+	        this.updated_at = this.convertValues(source["updated_at"], time.Time);
 	    }
 	
 		convertValues(a: any, clazz: any, asMap: boolean = false): any {
@@ -500,16 +485,13 @@ export namespace database {
 	    payment_type_id: number;
 	    payment_type?: PaymentType;
 	    amount: number;
-	    // Go type: time
-	    payment_date: any;
+	    payment_date: time.Time;
 	    reference: string;
 	    notes: string;
 	    notes_arabic: string;
 	    status: string;
-	    // Go type: time
-	    created_at: any;
-	    // Go type: time
-	    updated_at: any;
+	    created_at: time.Time;
+	    updated_at: time.Time;
 	
 	    static createFrom(source: any = {}) {
 	        return new Payment(source);
@@ -523,13 +505,13 @@ export namespace database {
 	        this.payment_type_id = source["payment_type_id"];
 	        this.payment_type = this.convertValues(source["payment_type"], PaymentType);
 	        this.amount = source["amount"];
-	        this.payment_date = this.convertValues(source["payment_date"], null);
+	        this.payment_date = this.convertValues(source["payment_date"], time.Time);
 	        this.reference = source["reference"];
 	        this.notes = source["notes"];
 	        this.notes_arabic = source["notes_arabic"];
 	        this.status = source["status"];
-	        this.created_at = this.convertValues(source["created_at"], null);
-	        this.updated_at = this.convertValues(source["updated_at"], null);
+	        this.created_at = this.convertValues(source["created_at"], time.Time);
+	        this.updated_at = this.convertValues(source["updated_at"], time.Time);
 	    }
 	
 		convertValues(a: any, clazz: any, asMap: boolean = false): any {
@@ -563,8 +545,7 @@ export namespace database {
 	    vat_rate: number;
 	    vat_amount: number;
 	    total_amount: number;
-	    // Go type: time
-	    created_at: any;
+	    created_at: time.Time;
 	
 	    static createFrom(source: any = {}) {
 	        return new PurchaseInvoiceItem(source);
@@ -581,7 +562,7 @@ export namespace database {
 	        this.vat_rate = source["vat_rate"];
 	        this.vat_amount = source["vat_amount"];
 	        this.total_amount = source["total_amount"];
-	        this.created_at = this.convertValues(source["created_at"], null);
+	        this.created_at = this.convertValues(source["created_at"], time.Time);
 	    }
 	
 		convertValues(a: any, clazz: any, asMap: boolean = false): any {
@@ -619,10 +600,8 @@ export namespace database {
 	    country_arabic: string;
 	    payment_terms: string;
 	    active: boolean;
-	    // Go type: time
-	    created_at: any;
-	    // Go type: time
-	    updated_at: any;
+	    created_at: time.Time;
+	    updated_at: time.Time;
 	
 	    static createFrom(source: any = {}) {
 	        return new Supplier(source);
@@ -646,8 +625,8 @@ export namespace database {
 	        this.country_arabic = source["country_arabic"];
 	        this.payment_terms = source["payment_terms"];
 	        this.active = source["active"];
-	        this.created_at = this.convertValues(source["created_at"], null);
-	        this.updated_at = this.convertValues(source["updated_at"], null);
+	        this.created_at = this.convertValues(source["created_at"], time.Time);
+	        this.updated_at = this.convertValues(source["updated_at"], time.Time);
 	    }
 	
 		convertValues(a: any, clazz: any, asMap: boolean = false): any {
@@ -684,10 +663,8 @@ export namespace database {
 	    notes: string;
 	    notes_arabic: string;
 	    items?: PurchaseInvoiceItem[];
-	    // Go type: time
-	    created_at: any;
-	    // Go type: time
-	    updated_at: any;
+	    created_at: time.Time;
+	    updated_at: time.Time;
 	
 	    static createFrom(source: any = {}) {
 	        return new PurchaseInvoice(source);
@@ -710,8 +687,8 @@ export namespace database {
 	        this.notes = source["notes"];
 	        this.notes_arabic = source["notes_arabic"];
 	        this.items = this.convertValues(source["items"], PurchaseInvoiceItem);
-	        this.created_at = this.convertValues(source["created_at"], null);
-	        this.updated_at = this.convertValues(source["updated_at"], null);
+	        this.created_at = this.convertValues(source["created_at"], time.Time);
+	        this.updated_at = this.convertValues(source["updated_at"], time.Time);
 	    }
 	
 		convertValues(a: any, clazz: any, asMap: boolean = false): any {
@@ -740,10 +717,8 @@ export namespace database {
 	    description: string;
 	    description_arabic: string;
 	    is_active: boolean;
-	    // Go type: time
-	    created_at: any;
-	    // Go type: time
-	    updated_at: any;
+	    created_at: time.Time;
+	    updated_at: time.Time;
 	
 	    static createFrom(source: any = {}) {
 	        return new PurchaseProductCategory(source);
@@ -757,8 +732,8 @@ export namespace database {
 	        this.description = source["description"];
 	        this.description_arabic = source["description_arabic"];
 	        this.is_active = source["is_active"];
-	        this.created_at = this.convertValues(source["created_at"], null);
-	        this.updated_at = this.convertValues(source["updated_at"], null);
+	        this.created_at = this.convertValues(source["created_at"], time.Time);
+	        this.updated_at = this.convertValues(source["updated_at"], time.Time);
 	    }
 	
 		convertValues(a: any, clazz: any, asMap: boolean = false): any {
@@ -797,10 +772,8 @@ export namespace database {
 	    is_active: boolean;
 	    notes: string;
 	    notes_arabic: string;
-	    // Go type: time
-	    created_at: any;
-	    // Go type: time
-	    updated_at: any;
+	    created_at: time.Time;
+	    updated_at: time.Time;
 	
 	    static createFrom(source: any = {}) {
 	        return new PurchaseProduct(source);
@@ -825,8 +798,8 @@ export namespace database {
 	        this.is_active = source["is_active"];
 	        this.notes = source["notes"];
 	        this.notes_arabic = source["notes_arabic"];
-	        this.created_at = this.convertValues(source["created_at"], null);
-	        this.updated_at = this.convertValues(source["updated_at"], null);
+	        this.created_at = this.convertValues(source["created_at"], time.Time);
+	        this.updated_at = this.convertValues(source["updated_at"], time.Time);
 	    }
 	
 		convertValues(a: any, clazz: any, asMap: boolean = false): any {
@@ -852,6 +825,58 @@ export namespace database {
 	
 	
 	
+	export class SystemSettings {
+	    id: number;
+	    currency: string;
+	    language: string;
+	    timezone: string;
+	    date_format: string;
+	    invoice_language: string;
+	    zatca_enabled: boolean;
+	    auto_backup: boolean;
+	    backup_frequency: string;
+	    last_backup_time?: time.Time;
+	    created_at: time.Time;
+	    updated_at: time.Time;
+	
+	    static createFrom(source: any = {}) {
+	        return new SystemSettings(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.currency = source["currency"];
+	        this.language = source["language"];
+	        this.timezone = source["timezone"];
+	        this.date_format = source["date_format"];
+	        this.invoice_language = source["invoice_language"];
+	        this.zatca_enabled = source["zatca_enabled"];
+	        this.auto_backup = source["auto_backup"];
+	        this.backup_frequency = source["backup_frequency"];
+	        this.last_backup_time = this.convertValues(source["last_backup_time"], time.Time);
+	        this.created_at = this.convertValues(source["created_at"], time.Time);
+	        this.updated_at = this.convertValues(source["updated_at"], time.Time);
+	    }
+	
+		convertValues(a: any, clazz: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, clazz));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = clazz && typeof clazz === 'function' ? new clazz(a[key]) : a[key];
+		            }
+		            return a;
+		        }
+		        return clazz && typeof clazz === 'function' ? new clazz(a) : a;
+		    }
+		    return a;
+		}
+	}
 	export class TaxRate {
 	    id: number;
 	    name: string;
@@ -860,10 +885,8 @@ export namespace database {
 	    is_default: boolean;
 	    is_active: boolean;
 	    description: string;
-	    // Go type: time
-	    created_at: any;
-	    // Go type: time
-	    updated_at: any;
+	    created_at: time.Time;
+	    updated_at: time.Time;
 	
 	    static createFrom(source: any = {}) {
 	        return new TaxRate(source);
@@ -878,8 +901,8 @@ export namespace database {
 	        this.is_default = source["is_default"];
 	        this.is_active = source["is_active"];
 	        this.description = source["description"];
-	        this.created_at = this.convertValues(source["created_at"], null);
-	        this.updated_at = this.convertValues(source["updated_at"], null);
+	        this.created_at = this.convertValues(source["created_at"], time.Time);
+	        this.updated_at = this.convertValues(source["updated_at"], time.Time);
 	    }
 	
 		convertValues(a: any, clazz: any, asMap: boolean = false): any {
@@ -907,10 +930,8 @@ export namespace database {
 	    arabic: string;
 	    is_default: boolean;
 	    is_active: boolean;
-	    // Go type: time
-	    created_at: any;
-	    // Go type: time
-	    updated_at: any;
+	    created_at: time.Time;
+	    updated_at: time.Time;
 	
 	    static createFrom(source: any = {}) {
 	        return new UnitOfMeasurement(source);
@@ -924,8 +945,8 @@ export namespace database {
 	        this.arabic = source["arabic"];
 	        this.is_default = source["is_default"];
 	        this.is_active = source["is_active"];
-	        this.created_at = this.convertValues(source["created_at"], null);
-	        this.updated_at = this.convertValues(source["updated_at"], null);
+	        this.created_at = this.convertValues(source["created_at"], time.Time);
+	        this.updated_at = this.convertValues(source["updated_at"], time.Time);
 	    }
 	
 		convertValues(a: any, clazz: any, asMap: boolean = false): any {
@@ -945,6 +966,23 @@ export namespace database {
 		    }
 		    return a;
 		}
+	}
+
+}
+
+export namespace time {
+	
+	export class Time {
+	
+	
+	    static createFrom(source: any = {}) {
+	        return new Time(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	
+	    }
 	}
 
 }

@@ -122,6 +122,27 @@ func (d *Database) insertDefaultSettings() error {
 		}
 	}
 
+	// Insert default system settings
+	var systemSettingsCount int
+	err = d.db.QueryRow("SELECT COUNT(*) FROM system_settings").Scan(&systemSettingsCount)
+	if err != nil {
+		return err
+	}
+
+	if systemSettingsCount == 0 {
+		_, execErr := d.db.Exec(`
+			INSERT INTO system_settings (
+				currency, language, timezone, date_format, invoice_language, 
+				zatca_enabled, auto_backup, backup_frequency
+			) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+			"SAR", "en", "Asia/Riyadh", "DD/MM/YYYY", "english", 
+			true, true, "daily")
+		
+		if execErr != nil {
+			log.Printf("Warning: Could not insert default system settings: %v", execErr)
+		}
+	}
+
 	return nil
 }
 

@@ -1,5 +1,7 @@
 <script>
   import { createEventDispatcher, onMount } from 'svelte'
+  import { GetSystemSettings, UpdateSystemSettings } from '../../wailsjs/go/main/App.js'
+  import { database } from '../../wailsjs/go/models'
   import FormField from './FormField.svelte'
 
   const dispatch = createEventDispatcher()
@@ -17,24 +19,72 @@
 
   export let isLoading = false
 
-  onMount(() => {
-    // Load existing settings from localStorage
-    const savedSettings = localStorage.getItem('systemSettings')
-    if (savedSettings) {
-      try {
-        const parsed = JSON.parse(savedSettings)
-        systemSettings = { ...systemSettings, ...parsed }
-      } catch (error) {
-        console.error('Error loading system settings from localStorage:', error)
+  onMount(async () => {
+    try {
+      isLoading = true
+      const settings = await GetSystemSettings()
+      if (settings) {
+        systemSettings = {
+          currency: settings.currency,
+          language: settings.language,
+          timezone: settings.timezone,
+          date_format: settings.date_format,
+          invoice_language: settings.invoice_language,
+          zatca_enabled: settings.zatca_enabled,
+          auto_backup: settings.auto_backup,
+          backup_frequency: settings.backup_frequency
+        }
       }
+    } catch (error) {
+      console.error('Error loading system settings:', error)
+      // Fallback to localStorage for backward compatibility
+      const savedSettings = localStorage.getItem('systemSettings')
+      if (savedSettings) {
+        try {
+          const parsed = JSON.parse(savedSettings)
+          systemSettings = { ...systemSettings, ...parsed }
+        } catch (parseError) {
+          console.error('Error parsing localStorage settings:', parseError)
+        }
+      }
+    } finally {
+      isLoading = false
     }
   })
 
-  function saveSystemSettings() {
-    // Save to localStorage for immediate access by other components
-    localStorage.setItem('systemSettings', JSON.stringify(systemSettings))
-    
-    dispatch('save', { systemSettings })
+  async function saveSystemSettings() {
+    try {
+      isLoading = true
+      
+      const settings = database.SystemSettings.createFrom({
+        id: 1, // Assuming single system settings record
+        currency: systemSettings.currency,
+        language: systemSettings.language,
+        timezone: systemSettings.timezone,
+        date_format: systemSettings.date_format,
+        invoice_language: systemSettings.invoice_language,
+        zatca_enabled: systemSettings.zatca_enabled,
+        auto_backup: systemSettings.auto_backup,
+        backup_frequency: systemSettings.backup_frequency
+      })
+
+      await UpdateSystemSettings(settings)
+      
+      // Also save to localStorage for immediate access by other components
+      localStorage.setItem('systemSettings', JSON.stringify(systemSettings))
+      
+      dispatch('save', { 
+        systemSettings,
+        message: 'System settings saved successfully!'
+      })
+    } catch (error) {
+      console.error('Error saving system settings:', error)
+      dispatch('error', { 
+        message: 'Failed to save system settings. Please try again.'
+      })
+    } finally {
+      isLoading = false
+    }
   }
 </script>
 

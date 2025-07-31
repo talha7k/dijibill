@@ -1338,3 +1338,18 @@ func (a *App) TestCustomerNAHandling() error {
 func (a *App) Greet(name string) string {
 	return fmt.Sprintf("Hello %s, Welcome to DijiBill!", name)
 }
+
+// System Settings Management Methods
+
+func (a *App) GetSystemSettings() (*database.SystemSettings, error) {
+	return a.db.GetSystemSettings()
+}
+
+func (a *App) UpdateSystemSettings(settings database.SystemSettings) error {
+	settings.UpdatedAt = time.Now()
+	return a.db.UpdateSystemSettings(&settings)
+}
+
+func (a *App) UpdateLastBackupTime(backupTime time.Time) error {
+	return a.db.UpdateLastBackupTime(backupTime)
+}

@@ -258,6 +258,20 @@ func (d *Database) createTables() error {
 			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 			FOREIGN KEY (category_id) REFERENCES purchase_product_categories(id)
 		)`,
+		`CREATE TABLE IF NOT EXISTS system_settings (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			currency TEXT DEFAULT 'SAR',
+			language TEXT DEFAULT 'en',
+			timezone TEXT DEFAULT 'Asia/Riyadh',
+			date_format TEXT DEFAULT 'DD/MM/YYYY',
+			invoice_language TEXT DEFAULT 'english',
+			zatca_enabled BOOLEAN DEFAULT 1,
+			auto_backup BOOLEAN DEFAULT 1,
+			backup_frequency TEXT DEFAULT 'daily',
+			last_backup_time DATETIME,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+		)`,
 	}
 
 	for _, query := range queries {
