@@ -2,7 +2,8 @@
   import { createEventDispatcher } from 'svelte';
   
   export let isAuthenticated = false;
-  export let currentUser = null; // { username: string, role: string } | null
+  /** @type {{ username: string, role: string } | null} */
+  export let currentUser = null;
   export let currentPageIcon = '';
   export let currentPageTitle = '';
   export let wailsReady = false;
@@ -123,8 +124,8 @@
           <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[9999] p-2 shadow bg-base-100 rounded-box w-52">
             <li class="menu-title">
               <span class="text-xs text-gray-500">Signed in as</span>
-              <span class="font-semibold">{currentUser?.username || 'Unknown'}</span>
-              <span class="text-xs text-gray-500 capitalize">{currentUser?.role || 'user'}</span>
+              <span class="font-semibold">{currentUser.username}</span>
+              <span class="text-xs text-gray-500 capitalize">{currentUser.role}</span>
             </li>
             <div class="divider my-1"></div>
             <li>
