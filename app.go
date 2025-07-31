@@ -55,12 +55,8 @@ func (a *App) startup(ctx context.Context) {
 	a.htmlInvoiceService = NewHTMLInvoiceService(a.ctx, a.db)
 
 	// Initialize file service
-	storageConfig := &StorageConfig{
-		Type:     StorageTypeLocal,
-		BasePath: filepath.Join(homeDir, "dijibill_files"),
-	}
 	fileDBPath := filepath.Join(homeDir, "dijibill_files.db")
-	a.fileService, err = NewFileService(storageConfig, fileDBPath)
+	a.fileService, err = NewFileService(fileDBPath)
 	if err != nil {
 		log.Printf("Warning: Failed to initialize file service: %v", err)
 	}
@@ -1544,8 +1540,8 @@ func (a *App) UploadFile(category, entityType string, entityID int) (string, err
 		return "", fmt.Errorf("failed to save file: %v", err)
 	}
 
-	// Return file URL
-	return a.fileService.GetFileURL(metadata.ID)
+	// Return file ID as string (frontend can use this to request file content)
+	return fmt.Sprintf("%d", metadata.ID), nil
 }
 
 // GetFilesByEntity returns all files for a specific entity
@@ -1564,12 +1560,12 @@ func (a *App) DeleteFile(fileID int) error {
 	return a.fileService.DeleteFile(fileID)
 }
 
-// GetFileURL returns the URL for a file
-func (a *App) GetFileURL(fileID int) (string, error) {
+// GetFileContent returns the file content and metadata for a file
+func (a *App) GetFileContent(fileID int) ([]byte, *FileMetadata, error) {
 	if a.fileService == nil {
-		return "", fmt.Errorf("file service not initialized")
+		return nil, nil, fmt.Errorf("file service not initialized")
 	}
-	return a.fileService.GetFileURL(fileID)
+	return a.fileService.GetFileContent(fileID)
 }
 
 // GetCompressionSettings returns current image compression settings

@@ -1100,6 +1100,68 @@ export namespace main {
 	        this.role = source["role"];
 	    }
 	}
+	export class FileMetadata {
+	    id: number;
+	    original_name: string;
+	    stored_name: string;
+	    relative_path: string;
+	    file_size: number;
+	    mime_type: string;
+	    category: string;
+	    entity_type: string;
+	    entity_id: number;
+	    storage_type: string;
+	    hash: string;
+	    created_at: time.Time;
+	    created_by?: number;
+	    updated_at: time.Time;
+	    updated_by?: number;
+	    sync_status: string;
+	    last_sync_at?: time.Time;
+	
+	    static createFrom(source: any = {}) {
+	        return new FileMetadata(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.original_name = source["original_name"];
+	        this.stored_name = source["stored_name"];
+	        this.relative_path = source["relative_path"];
+	        this.file_size = source["file_size"];
+	        this.mime_type = source["mime_type"];
+	        this.category = source["category"];
+	        this.entity_type = source["entity_type"];
+	        this.entity_id = source["entity_id"];
+	        this.storage_type = source["storage_type"];
+	        this.hash = source["hash"];
+	        this.created_at = this.convertValues(source["created_at"], time.Time);
+	        this.created_by = source["created_by"];
+	        this.updated_at = this.convertValues(source["updated_at"], time.Time);
+	        this.updated_by = source["updated_by"];
+	        this.sync_status = source["sync_status"];
+	        this.last_sync_at = this.convertValues(source["last_sync_at"], time.Time);
+	    }
+	
+		convertValues(a: any, clazz: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, clazz));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = clazz && typeof clazz === 'function' ? new clazz(a[key]) : a[key];
+		            }
+		            return a;
+		        }
+		        return clazz && typeof clazz === 'function' ? new clazz(a) : a;
+		    }
+		    return a;
+		}
+	}
 	export class SignupRequest {
 	    username: string;
 	    email: string;

@@ -89,12 +89,20 @@ func (fd *FileDatabase) createTables() error {
 			sync_status TEXT NOT NULL DEFAULT 'pending',
 			last_sync_at DATETIME
 		)`,
+		`CREATE TABLE IF NOT EXISTS file_content (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			file_metadata_id INTEGER NOT NULL,
+			content BLOB NOT NULL,
+			created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			FOREIGN KEY (file_metadata_id) REFERENCES file_metadata(id) ON DELETE CASCADE
+		)`,
 		`CREATE INDEX IF NOT EXISTS idx_file_metadata_entity ON file_metadata(entity_type, entity_id)`,
 		`CREATE INDEX IF NOT EXISTS idx_file_metadata_category ON file_metadata(category)`,
 		`CREATE INDEX IF NOT EXISTS idx_file_metadata_storage_type ON file_metadata(storage_type)`,
 		`CREATE INDEX IF NOT EXISTS idx_file_metadata_sync_status ON file_metadata(sync_status)`,
 		`CREATE INDEX IF NOT EXISTS idx_file_metadata_hash ON file_metadata(hash)`,
 		`CREATE UNIQUE INDEX IF NOT EXISTS idx_file_metadata_path ON file_metadata(relative_path)`,
+		`CREATE INDEX IF NOT EXISTS idx_file_content_metadata_id ON file_content(file_metadata_id)`,
 	}
 
 	for _, query := range queries {
@@ -134,6 +142,76 @@ func (fd *FileDatabase) CreateFileMetadata(metadata *FileMetadata) error {
 	
 	metadata.ID = int(id)
 	return nil
+}
+
+// CreateFileMetadataWithContent inserts a new file metadata record along with file content
+func (fd *FileDatabase) CreateFileMetadataWithContent(metadata *FileMetadata, content []byte) error {
+	// Start transaction
+	tx, err := fd.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	
+	// Insert metadata
+	metadataQuery := `
+		INSERT INTO file_metadata (
+			original_name, stored_name, relative_path, file_size, mime_type,
+			category, entity_type, entity_id, storage_type, hash,
+			created_at, created_by, updated_at, updated_by, sync_status
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+	`
+	
+	result, err := tx.Exec(metadataQuery,
+		metadata.OriginalName, metadata.StoredName, metadata.RelativePath,
+		metadata.FileSize, metadata.MimeType, metadata.Category,
+		metadata.EntityType, metadata.EntityID, metadata.StorageType, metadata.Hash,
+		metadata.CreatedAt, metadata.CreatedBy, metadata.UpdatedAt, metadata.UpdatedBy,
+		metadata.SyncStatus,
+	)
+	if err != nil {
+		return err
+	}
+	
+	id, err := result.LastInsertId()
+	if err != nil {
+		return err
+	}
+	
+	metadata.ID = int(id)
+	
+	// Insert file content
+	contentQuery := `INSERT INTO file_content (file_metadata_id, content) VALUES (?, ?)`
+	_, err = tx.Exec(contentQuery, metadata.ID, content)
+	if err != nil {
+		return err
+	}
+	
+	// Commit transaction
+	return tx.Commit()
+}
+
+// GetFileContent retrieves the file content by metadata ID
+func (fd *FileDatabase) GetFileContent(metadataID int) ([]byte, error) {
+	query := `SELECT content FROM file_content WHERE file_metadata_id = ?`
+	
+	var content []byte
+	err := fd.db.QueryRow(query, metadataID).Scan(&content)
+	if err == sql.ErrNoRows {
+		return nil, fmt.Errorf("file content not found")
+	}
+	if err != nil {
+		return nil, err
+	}
+	
+	return content, nil
+}
+
+// DeleteFileContent removes file content by metadata ID
+func (fd *FileDatabase) DeleteFileContent(metadataID int) error {
+	query := `DELETE FROM file_content WHERE file_metadata_id = ?`
+	_, err := fd.db.Exec(query, metadataID)
+	return err
 }
 
 // GetFileMetadataByEntity retrieves file metadata for a specific entity

@@ -1,34 +1,29 @@
 # File Management System
 
-This document describes the new file management system that uses a separate database for storing file metadata, keeping the main database lightweight for synchronization.
+This document describes the file management system that uses a separate database for storing both file metadata and file content, keeping the main database lightweight for synchronization.
 
 ## Architecture Overview
 
-The file management system consists of three main components:
+The file management system consists of two main components:
 
-1. **Storage Service** (`storage_service.go`) - Handles physical file storage (local/network)
-2. **File Database** (`file_database.go`) - Manages file metadata in a separate SQLite database
-3. **File Service** (`file_service.go`) - Integrates storage and database operations
+1. **File Database** (`file_database.go`) - Manages file metadata and content in a separate SQLite database
+2. **File Service** (`file_service.go`) - Provides high-level file operations with compression and deduplication
 
 ## Key Features
 
-- **Separate Database**: File metadata is stored in a separate SQLite database to keep the main database lightweight
-- **Flexible Storage**: Supports both local filesystem and network storage
+- **Database Storage**: File content and metadata are stored directly in a separate SQLite database
 - **File Deduplication**: Uses SHA256 hashing to avoid storing duplicate files
+- **Image Compression**: Automatic compression for image files to save space
 - **Sync Management**: Tracks sync status for remote synchronization
 - **Category Organization**: Files can be categorized (logo, invoice, receipt, etc.)
 - **Entity Association**: Files can be linked to specific entities (company, invoice, etc.)
 
 ## Configuration
 
-The system is configured through the `SystemSettings` model with these new fields:
+The system is configured through the `SystemSettings` model with these fields:
 
 ```go
 type SystemSettings struct {
-    // Storage configuration
-    StorageType     string `json:"storage_type"`     // "local" or "network"
-    StorageBasePath string `json:"storage_base_path"` // Base path for file storage
-    
     // File database configuration
     FileDBPath         string `json:"file_db_path"`          // Path to separate file database
     FileDBSyncURL      string `json:"file_db_sync_url"`      // URL for remote sync
@@ -50,11 +45,7 @@ if err != nil {
 }
 
 // Initialize file service
-fileService, err := database.NewFileService(
-    settings.FileDBPath,      // Path to separate file database
-    settings.StorageType,     // Storage type (local/network)
-    settings.StorageBasePath, // Base path for file storage
-)
+fileService, err := NewFileService(settings.FileDBPath)
 if err != nil {
     return err
 }
@@ -64,9 +55,9 @@ defer fileService.Close()
 ### 2. Save a File
 
 ```go
-// Save a company logo
-metadata, err := fileService.SaveFile(
-    file,           // io.Reader (file content)
+// Save a company logo with automatic compression
+metadata, err := fileService.SaveFileWithCompression(
+    file,           // multipart.File (file content)
     fileHeader,     // *multipart.FileHeader (file info)
     "logo",         // category
     "company",      // entity type
@@ -80,15 +71,15 @@ if err != nil {
 fmt.Printf("File saved: %s\n", metadata.StoredName)
 ```
 
-### 3. Get File URL
+### 3. Get File Content
 
 ```go
-url, err := fileService.GetFileURL(metadata.ID)
+content, metadata, err := fileService.GetFileContent(fileID)
 if err != nil {
     return err
 }
 
-fmt.Printf("File URL: %s\n", url)
+fmt.Printf("File: %s, Size: %d bytes\n", metadata.OriginalName, len(content))
 ```
 
 ### 4. Get Files by Entity
@@ -147,22 +138,11 @@ The system supports various file categories:
 - `document` - General documents
 - `backup` - Backup files
 
-## Storage Types
-
-### Local Storage
-- Files are stored in the local filesystem
-- Path configured via `StorageBasePath`
-- Files organized in subdirectories by category and date
-
-### Network Storage
-- Files are stored on a remote server
-- Base URL configured via `StorageBasePath`
-- Supports HTTP/HTTPS protocols
-
 ## Database Schema
 
-The file metadata database contains a single table:
+The file metadata database contains two tables:
 
+### file_metadata table
 ```sql
 CREATE TABLE file_metadata (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -174,7 +154,7 @@ CREATE TABLE file_metadata (
     category TEXT NOT NULL,
     entity_type TEXT,
     entity_id INTEGER,
-    storage_type TEXT NOT NULL,
+    storage_type TEXT NOT NULL DEFAULT 'database',
     hash TEXT NOT NULL,
     sync_status TEXT DEFAULT 'pending',
     sync_error TEXT,
@@ -182,6 +162,15 @@ CREATE TABLE file_metadata (
     created_by INTEGER,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_by INTEGER
+);
+```
+
+### file_content table
+```sql
+CREATE TABLE file_content (
+    file_id INTEGER PRIMARY KEY,
+    content BLOB NOT NULL,
+    FOREIGN KEY (file_id) REFERENCES file_metadata(id) ON DELETE CASCADE
 );
 ```
 
@@ -194,10 +183,12 @@ The system includes automatic migration support:
 
 ## Benefits
 
-1. **Lightweight Main Database**: File metadata is separate, keeping main database fast
+1. **Lightweight Main Database**: File content and metadata are separate, keeping main database fast
 2. **Independent Sync**: Files can be synchronized separately from main data
-3. **Deduplication**: Prevents storage of duplicate files
-4. **Flexible Storage**: Easy to switch between local and network storage
+3. **Deduplication**: Prevents storage of duplicate files using SHA256 hashing
+4. **Automatic Compression**: Images are automatically compressed to save space
+5. **Database Integrity**: File content is stored with ACID guarantees
+6. **Simplified Architecture**: No need for filesystem management or network storage configuration
 5. **Audit Trail**: Tracks who created/modified files and when
 6. **Sync Management**: Built-in support for remote synchronization
 

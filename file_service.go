@@ -153,8 +153,17 @@ type compressedFileWrapper struct {
 	size   int64
 }
 
-func (cfw *compressedFileWrapper) Read(p []byte) (n int, error) {
+func (cfw *compressedFileWrapper) Read(p []byte) (n int, err error) {
 	return cfw.reader.Read(p)
+}
+
+func (cfw *compressedFileWrapper) ReadAt(p []byte, off int64) (n int, err error) {
+	// Create a new reader from the current position
+	currentPos, _ := cfw.reader.Seek(0, 1) // Get current position
+	cfw.reader.Seek(off, 0)                // Seek to offset
+	n, err = cfw.reader.Read(p)
+	cfw.reader.Seek(currentPos, 0)         // Restore original position
+	return n, err
 }
 
 func (cfw *compressedFileWrapper) Seek(offset int64, whence int) (int64, error) {

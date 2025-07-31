@@ -74,6 +74,10 @@ export function DeleteCustomer(arg1) {
   return window['go']['main']['App']['DeleteCustomer'](arg1);
 }
 
+export function DeleteFile(arg1) {
+  return window['go']['main']['App']['DeleteFile'](arg1);
+}
+
 export function DeletePayment(arg1) {
   return window['go']['main']['App']['DeletePayment'](arg1);
 }
@@ -166,6 +170,10 @@ export function GetCompanyByID(arg1) {
   return window['go']['main']['App']['GetCompanyByID'](arg1);
 }
 
+export function GetCompressionSettings() {
+  return window['go']['main']['App']['GetCompressionSettings']();
+}
+
 export function GetCurrentUser() {
   return window['go']['main']['App']['GetCurrentUser']();
 }
@@ -180,6 +188,14 @@ export function GetCustomers() {
 
 export function GetDefaultProductSettings() {
   return window['go']['main']['App']['GetDefaultProductSettings']();
+}
+
+export function GetFileContent(arg1) {
+  return window['go']['main']['App']['GetFileContent'](arg1);
+}
+
+export function GetFilesByEntity(arg1, arg2) {
+  return window['go']['main']['App']['GetFilesByEntity'](arg1, arg2);
 }
 
 export function GetInvoiceByID(arg1) {
@@ -362,6 +378,10 @@ export function UpdateCompany(arg1) {
   return window['go']['main']['App']['UpdateCompany'](arg1);
 }
 
+export function UpdateCompressionSettings(arg1, arg2, arg3, arg4, arg5) {
+  return window['go']['main']['App']['UpdateCompressionSettings'](arg1, arg2, arg3, arg4, arg5);
+}
+
 export function UpdateCustomer(arg1) {
   return window['go']['main']['App']['UpdateCustomer'](arg1);
 }
@@ -424,6 +444,10 @@ export function UpdateUnitOfMeasurement(arg1) {
 
 export function UpdateUser(arg1) {
   return window['go']['main']['App']['UpdateUser'](arg1);
+}
+
+export function UploadFile(arg1, arg2, arg3) {
+  return window['go']['main']['App']['UploadFile'](arg1, arg2, arg3);
 }
 
 export function ValidateZATCAQRCode(arg1) {

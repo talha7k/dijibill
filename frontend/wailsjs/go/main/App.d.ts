@@ -40,6 +40,8 @@ export function CreateUser(arg1:database.User):Promise<void>;
 
 export function DeleteCustomer(arg1:number):Promise<void>;
 
+export function DeleteFile(arg1:number):Promise<void>;
+
 export function DeletePayment(arg1:number):Promise<void>;
 
 export function DeletePaymentType(arg1:number):Promise<void>;
@@ -86,6 +88,8 @@ export function GetCompany():Promise<database.Company>;
 
 export function GetCompanyByID(arg1:number):Promise<database.Company>;
 
+export function GetCompressionSettings():Promise<Record<string, any>>;
+
 export function GetCurrentUser():Promise<database.User>;
 
 export function GetCustomerByID(arg1:number):Promise<database.Customer>;
@@ -93,6 +97,10 @@ export function GetCustomerByID(arg1:number):Promise<database.Customer>;
 export function GetCustomers():Promise<Array<database.Customer>>;
 
 export function GetDefaultProductSettings():Promise<database.DefaultProductSettings>;
+
+export function GetFileContent(arg1:number):Promise<Array<number>>;
+
+export function GetFilesByEntity(arg1:string,arg2:number):Promise<Array<main.FileMetadata>>;
 
 export function GetInvoiceByID(arg1:number):Promise<database.SalesInvoice>;
 
@@ -184,6 +192,8 @@ export function TestCustomerNAHandling():Promise<void>;
 
 export function UpdateCompany(arg1:database.Company):Promise<void>;
 
+export function UpdateCompressionSettings(arg1:number,arg2:number,arg3:number,arg4:number,arg5:number):Promise<void>;
+
 export function UpdateCustomer(arg1:database.Customer):Promise<void>;
 
 export function UpdateDefaultProductSettings(arg1:database.DefaultProductSettings):Promise<void>;
@@ -215,6 +225,8 @@ export function UpdateTaxRate(arg1:database.TaxRate):Promise<void>;
 export function UpdateUnitOfMeasurement(arg1:database.UnitOfMeasurement):Promise<void>;
 
 export function UpdateUser(arg1:database.User):Promise<void>;
+
+export function UploadFile(arg1:string,arg2:string,arg3:number):Promise<string>;
 
 export function ValidateZATCAQRCode(arg1:string):Promise<void>;
 
