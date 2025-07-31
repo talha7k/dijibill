@@ -1,6 +1,7 @@
 <script>
   import Modal from './Modal.svelte'
   import FormField from './FormField.svelte'
+  import TouchDropdown from './TouchDropdown.svelte'
   import InvoiceSelectionModal from './InvoiceSelectionModal.svelte'
   import {
     showCustomerModal,
@@ -83,12 +84,23 @@
   on:secondary={() => $showCustomerModal = false}
 >
   <div class="space-y-4">
-    <FormField
+    <TouchDropdown
       label="Customer"
-      type="select"
+      labelArabic="العميل"
       bind:value={$currentSale.customer_id}
-      options={$customers.map(c => ({ value: c.id, label: c.name }))}
+      options={$customers.map(c => ({ 
+        value: c.id, 
+        label: c.name,
+        labelArabic: c.name_arabic || c.name,
+        description: c.phone ? `📞 ${c.phone}` : 'No phone number'
+      }))}
       placeholder="Select customer"
+      searchable={true}
+      maxHeight="400px"
+      columns={2}
+      on:change={(e) => {
+        $currentSale.customer_id = e.detail.value;
+      }}
     />
     <div class="flex justify-end space-x-2">
       <button
@@ -148,12 +160,23 @@
   on:secondary={() => $showSalesCategoryModal = false}
 >
   <div class="space-y-4">
-    <FormField
+    <TouchDropdown
       label="Sales Category"
-      type="select"
+      labelArabic="فئة المبيعات"
       bind:value={$selectedSalesCategory}
-      options={$salesCategories.map(c => ({ value: c, label: c.name }))}
+      options={$salesCategories.map(c => ({ 
+        value: c, 
+        label: c.name,
+        labelArabic: c.name_arabic || c.name,
+        description: c.description || 'No description available'
+      }))}
       placeholder="Select sales category"
+      searchable={true}
+      maxHeight="350px"
+      columns={2}
+      on:change={(e) => {
+        $selectedSalesCategory = e.detail.value;
+      }}
     />
     <div class="flex justify-end space-x-2">
       <button
