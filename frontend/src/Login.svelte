@@ -6,8 +6,40 @@
 
   let username = '';
   let password = '';
+  let rememberMe = false;
   let loading = false;
   let error = '';
+
+  // Load saved credentials on component mount
+  function loadSavedCredentials() {
+    try {
+      const savedCredentials = localStorage.getItem('dijibill_saved_credentials');
+      if (savedCredentials) {
+        const credentials = JSON.parse(savedCredentials);
+        username = credentials.username || '';
+        rememberMe = true;
+      }
+    } catch (error) {
+      console.error('Error loading saved credentials:', error);
+    }
+  }
+
+  // Save credentials to localStorage
+  function saveCredentials() {
+    try {
+      if (rememberMe && username) {
+        const credentials = {
+          username: username,
+          savedAt: new Date().toISOString()
+        };
+        localStorage.setItem('dijibill_saved_credentials', JSON.stringify(credentials));
+      } else {
+        localStorage.removeItem('dijibill_saved_credentials');
+      }
+    } catch (error) {
+      console.error('Error saving credentials:', error);
+    }
+  }
 
   async function handleLogin() {
     if (!username || !password) {
@@ -20,8 +52,13 @@
 
     try {
       const authContext = await Login(username, password);
+      
+      // Save credentials if remember me is checked
+      saveCredentials();
+      
       dispatch('login-success', authContext);
     } catch (err) {
+      console.error('Login error:', err);
       error = err.message || 'Login failed';
     } finally {
       loading = false;
@@ -33,6 +70,16 @@
       handleLogin();
     }
   }
+
+  function handleRememberMeChange() {
+    if (!rememberMe) {
+      // If unchecking remember me, remove saved credentials
+      localStorage.removeItem('dijibill_saved_credentials');
+    }
+  }
+
+  // Load saved credentials when component mounts
+  loadSavedCredentials();
 </script>
 
 <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -93,6 +140,20 @@
             required
           />
         </div>
+      </div>
+
+      <!-- Remember Me Checkbox -->
+      <div class="flex items-center">
+        <input
+          id="remember-me"
+          type="checkbox"
+          bind:checked={rememberMe}
+          on:change={handleRememberMeChange}
+          class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+        />
+        <label for="remember-me" class="ml-2 block text-sm text-gray-700">
+          Remember my username
+        </label>
       </div>
 
       <button
