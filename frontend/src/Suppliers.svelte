@@ -7,7 +7,7 @@
   import StatusBadge from './components/StatusBadge.svelte'
   import ConfirmationModal from './components/ConfirmationModal.svelte'
 
-  /** @type {Array<{id: number, company_name: string, company_name_arabic: string, contact_person: string, contact_person_arabic: string, email: string, phone: string, vat_number: string, address: string, address_arabic: string, city: string, city_arabic: string, country: string, country_arabic: string, payment_terms: string, active: boolean, created_at: string}>} */
+  /** @type {Array<{id: number, company_id: number, company_name: string, company_name_arabic: string, contact_person: string, contact_person_arabic: string, email: string, phone: string, vat_number: string, address: string, address_arabic: string, city: string, city_arabic: string, country: string, country_arabic: string, payment_terms: string, active: boolean, created_at: any, updated_at: any}>} */
   let suppliers = []
 
   /** @type {string} */

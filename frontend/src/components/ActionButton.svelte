@@ -64,11 +64,11 @@
   }
 
   .btn-primary {
-    @apply bg-blue-600 text-white border-blue-600;
+    @apply bg-purple-500 text-white border-purple-600;
   }
 
   .btn-primary:hover:not(.btn-disabled) {
-    @apply bg-blue-700 border-blue-700;
+    @apply bg-purple-700 border-purple-700;
   }
 
   .btn-secondary {
@@ -80,19 +80,19 @@
   }
 
   .btn-outline {
-    @apply bg-transparent text-blue-600 border-blue-600;
+    @apply bg-transparent text-purple-400 border-purple-400;
   }
 
   .btn-outline:hover:not(.btn-disabled) {
-    @apply bg-blue-600 text-white;
+    @apply bg-purple-400 text-white;
   }
 
   .btn-ghost {
-    @apply bg-transparent text-gray-600 border-transparent;
+    @apply bg-transparent text-purple-200 border-transparent;
   }
 
   .btn-ghost:hover:not(.btn-disabled) {
-    @apply bg-gray-100 text-gray-800;
+    @apply bg-purple-200 text-gray-800;
   }
 
   .btn-danger {

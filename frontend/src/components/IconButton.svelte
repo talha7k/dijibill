@@ -59,19 +59,19 @@
   }
 
   .icon-btn-primary {
-    @apply bg-blue-600 text-white border-blue-600;
+    @apply bg-purple-600 text-white border-purple-600;
   }
 
   .icon-btn-primary:hover:not(.icon-btn-disabled) {
-    @apply bg-blue-700 border-blue-700;
+    @apply bg-purple-700 text-white border-purple-700;
   }
 
   .icon-btn-secondary {
-    @apply bg-gray-100 text-gray-600 border-gray-200;
+    @apply bg-purple-200 text-gray-600 border-gray-200;
   }
 
   .icon-btn-secondary:hover:not(.icon-btn-disabled) {
-    @apply bg-gray-200 text-gray-800 border-gray-300;
+    @apply bg-purple-200 text-purple-800 border-purple-200;
   }
 
   .icon-btn-danger {
@@ -87,7 +87,7 @@
   }
 
   .icon-btn-ghost:hover:not(.icon-btn-disabled) {
-    @apply bg-gray-100 text-gray-700;
+    @apply bg-purple-200 text-gray-700;
   }
 
   .icon-btn-disabled {
