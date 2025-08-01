@@ -2,6 +2,7 @@
   import { onMount } from 'svelte'
   import { GetPurchaseProducts, CreatePurchaseProduct, UpdatePurchaseProduct, DeletePurchaseProduct, GetPurchaseProductCategories, CreatePurchaseProductCategory } from '../wailsjs/go/main/App.js'
   import {database} from '../wailsjs/go/models'
+  import { showDbSuccess, showDbError } from './stores/notificationStore.js'
   
   // Import components
   import PurchaseProductList from './components/PurchaseProductList.svelte'
@@ -116,7 +117,7 @@
   function handlePurchaseProductReports() {
     // TODO: Implement purchase product reports functionality
     console.log('Purchase product reports functionality - to be implemented')
-    alert('Purchase product reports functionality will be implemented soon!')
+    showDbError('Purchase product reports functionality will be implemented soon!')
   }
 
   function handleEditPurchaseProduct(event) {
@@ -151,7 +152,7 @@
       purchaseProductToDelete = null;
     } catch (error) {
       console.error('Error deleting purchase product:', error);
-      alert('Error deleting purchase product: ' + error.message);
+      showDbError('Error deleting purchase product: ' + error.message);
     } finally {
       confirmLoading = false;
     }
@@ -180,7 +181,7 @@
       resetPurchaseProductForm()
     } catch (error) {
       console.error('Error saving purchase product:', error)
-      alert('Error saving purchase product: ' + error.message)
+      showDbError('Error saving purchase product: ' + error.message)
     } finally {
       isLoading = false
     }

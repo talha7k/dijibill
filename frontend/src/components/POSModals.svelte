@@ -3,6 +3,7 @@
   import FormField from './FormField.svelte'
   import TouchDropdown from './TouchDropdown.svelte'
   import InvoiceSelectionModal from './InvoiceSelectionModal.svelte'
+  import { showDbSuccess, showDbError } from '../stores/notificationStore.js'
   import {
     showCustomerModal,
     showTableModal,
@@ -48,13 +49,13 @@
 
   function addPayment() {
     if (!selectedPaymentType || !paymentAmount) {
-      alert('Please select payment type and enter amount')
+      showDbError('Please select payment type and enter amount')
       return
     }
 
     const amount = parseFloat(paymentAmount)
     if (isNaN(amount) || amount <= 0) {
-      alert('Please enter a valid amount')
+      showDbError('Please enter a valid amount')
       return
     }
 

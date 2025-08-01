@@ -6,6 +6,7 @@
   import SupplierModal from './components/SupplierModal.svelte'
   import StatusBadge from './components/StatusBadge.svelte'
   import ConfirmationModal from './components/ConfirmationModal.svelte'
+  import { showDbSuccess, showDbError } from './stores/notificationStore.js'
 
   /** @type {Array<{id: number, company_id: number, company_name: string, company_name_arabic: string, contact_person: string, contact_person_arabic: string, email: string, phone: string, vat_number: string, address: string, address_arabic: string, city: string, city_arabic: string, country: string, country_arabic: string, payment_terms: string, active: boolean, created_at: any, updated_at: any}>} */
   let suppliers = []
@@ -39,8 +40,7 @@
     } catch (error) {
       console.error('Error loading suppliers:', error)
       suppliers = []
-      // Show user-friendly error message
-      alert('Failed to load suppliers. Please check your connection and try again.')
+      showDbError('load', 'suppliers', error)
     } finally {
       loading = false
       console.log('Loading finished. Suppliers count:', suppliers.length)
@@ -88,11 +88,12 @@
       confirmLoading = true;
       await DeleteSupplier(supplierToDelete.id);
       await loadSuppliers(); // Reload the list
+      showDbSuccess('delete', 'Supplier');
       showDeleteConfirm = false;
       supplierToDelete = null;
     } catch (error) {
       console.error('Error deleting supplier:', error);
-      alert('Error deleting supplier. Please try again.');
+      showDbError('delete', 'Supplier', error);
     } finally {
       confirmLoading = false;
     }
@@ -110,9 +111,11 @@
       if (editingSupplier) {
         // Update existing supplier
         await UpdateSupplier({ ...editingSupplier, ...supplierData })
+        showDbSuccess('update', 'Supplier');
       } else {
         // Add new supplier
         await CreateSupplier(supplierData)
+        showDbSuccess('create', 'Supplier');
       }
       
       await loadSuppliers() // Reload the list
@@ -120,7 +123,8 @@
       editingSupplier = null
     } catch (error) {
       console.error('Error saving supplier:', error)
-      alert('Error saving supplier. Please try again.')
+      const operation = editingSupplier ? 'update' : 'create';
+      showDbError(operation, 'Supplier', error)
     } finally {
       loading = false
     }
@@ -134,7 +138,7 @@
 
   function handleImport() {
     // TODO: Implement import functionality
-    alert('Import functionality will be implemented soon')
+    showDbError('Import functionality will be implemented soon')
   }
 
   function handleSearch(event) {

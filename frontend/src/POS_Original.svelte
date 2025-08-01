@@ -4,6 +4,7 @@
   import { database } from '../wailsjs/go/models'
   import Modal from './components/Modal.svelte'
   import FormField from './components/FormField.svelte'
+  import { showDbSuccess, showDbError } from './stores/notificationStore.js'
 
   // State management
   let currentView = 'categories' // 'categories' or 'products'
@@ -153,12 +154,12 @@
   // Save current sale
   async function saveSale() {
     if (currentSale.items.length === 0) {
-      alert('Please add items to the sale')
+      showDbError('Please add items to the sale')
       return
     }
 
     if (!selectedSalesCategory) {
-      alert('Please select a sales category')
+      showDbError('Please select a sales category')
       return
     }
 
@@ -204,10 +205,10 @@
         status: 'pending'
       }
       
-      alert('Sale saved successfully!')
+      showDbSuccess('Sale saved successfully!')
     } catch (error) {
       console.error('Error saving sale:', error)
-      alert('Error saving sale')
+      showDbError('Error saving sale')
     } finally {
       loading = false
     }
@@ -234,7 +235,7 @@
   // Refund current sale
   async function refundSale() {
     if (currentSale.items.length === 0) {
-      alert('No items to refund')
+      showDbError('No items to refund')
       return
     }
 
@@ -283,10 +284,10 @@
       
       showRefundModal = false
       refundReason = ''
-      alert('Refund processed successfully!')
+      showDbSuccess('Refund processed successfully!')
     } catch (error) {
       console.error('Error processing refund:', error)
-      alert('Error processing refund')
+      showDbError('Error processing refund')
     } finally {
       loading = false
     }
@@ -295,12 +296,12 @@
   // Transfer items to another invoice
   async function transferItems() {
     if (currentSale.items.length === 0) {
-      alert('No items to transfer')
+      showDbError('No items to transfer')
       return
     }
 
     if (!transferToInvoiceId) {
-      alert('Please specify the invoice ID to transfer to')
+      showDbError('Please specify the invoice ID to transfer to')
       return
     }
 
@@ -350,10 +351,10 @@
       
       showTransferModal = false
       transferToInvoiceId = null
-      alert('Items transferred successfully!')
+      showDbSuccess('Items transferred successfully!')
     } catch (error) {
       console.error('Error transferring items:', error)
-      alert('Error transferring items')
+      showDbError('Error transferring items')
     } finally {
       loading = false
     }

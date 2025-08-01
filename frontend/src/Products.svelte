@@ -10,6 +10,7 @@
   import HorizontalTabs from './components/HorizontalTabs.svelte'
   import PageLayout from './components/PageLayout.svelte'
   import ConfirmationModal from './components/ConfirmationModal.svelte'
+  import { showDbSuccess, showDbError } from './stores/notificationStore.js'
 
   // State variables
   let products = []
@@ -145,7 +146,7 @@
     // - Product sales report
     // - Product profitability report
     console.log('Product reports functionality - to be implemented')
-    alert('Product reports functionality will be implemented soon!')
+    showDbError('generate', 'Product reports', new Error('Product reports functionality will be implemented soon!'))
   }
 
   function handleEditProduct(event) {
@@ -176,11 +177,12 @@
       confirmLoading = true;
       await DeleteProduct(productToDelete.id);
       await loadProducts();
+      showDbSuccess('delete', 'Product');
       showDeleteConfirm = false;
       productToDelete = null;
     } catch (error) {
       console.error('Error deleting product:', error);
-      alert('Error deleting product: ' + error.message);
+      showDbError('delete', 'Product', error);
     } finally {
       confirmLoading = false;
     }
@@ -191,9 +193,10 @@
       isLoading = true;
       await DeleteProduct(id);
       await loadProducts();
+      showDbSuccess('delete', 'Product');
     } catch (error) {
       console.error('Error deleting product:', error);
-      alert('Error deleting product: ' + error.message);
+      showDbError('delete', 'Product', error);
     } finally {
       isLoading = false;
     }
@@ -222,7 +225,7 @@
       resetProductForm()
     } catch (error) {
       console.error('Error saving product:', error)
-      alert('Error saving product: ' + error.message)
+      showDbError('Error saving product: ' + error.message)
     } finally {
       isLoading = false
     }

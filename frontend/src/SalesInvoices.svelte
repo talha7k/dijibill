@@ -18,6 +18,7 @@
   import PageLayout from './components/PageLayout.svelte'
   import DataTable from './components/DataTable.svelte'
   import StatusBadge from './components/StatusBadge.svelte'
+  import { showDbSuccess, showDbError } from './stores/notificationStore.js'
   
   let invoices = []
   let isLoading = false
@@ -118,9 +119,10 @@
         await SaveInvoiceHTMLEnglish(invoiceId)
       }
       console.log(`Invoice ${invoiceId} saved in ${language}`)
+      showDbSuccess('save', 'Invoice');
     } catch (error) {
       console.error('Error saving invoice:', error)
-      alert('Error saving invoice: ' + error.message)
+      showDbError('save', 'Invoice', error)
     }
   }
 
@@ -139,7 +141,7 @@
       console.log(`Invoice ${invoiceId} viewed in ${language}`)
     } catch (error) {
       console.error('Error viewing invoice:', error)
-      alert('Error viewing invoice: ' + error.message)
+      showDbError('view', 'Invoice', error)
     }
   }
 
@@ -153,7 +155,7 @@
       showInvoiceModal = true
     } catch (error) {
       console.error('Error loading invoice for editing:', error)
-      alert('Error loading invoice: ' + error.message)
+      showDbError('load', 'Invoice', error)
     }
   }
 
@@ -169,11 +171,11 @@
     
     try {
       await refundInvoice(invoice.id, reason)
-      alert(`Invoice ${invoice.invoice_number} has been successfully refunded.`)
+      showDbSuccess('refund', `Invoice ${invoice.invoice_number}`);
       await loadInvoices() // Refresh the list
     } catch (error) {
       console.error('Error refunding invoice:', error)
-      alert('Error refunding invoice: ' + error.message)
+      showDbError('refund', 'Invoice', error)
     }
   }
   

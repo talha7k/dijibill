@@ -3,6 +3,7 @@
   import Modal from './Modal.svelte'
   import FormField from './FormField.svelte'
   import StatusBadge from './StatusBadge.svelte'
+  import { showDbSuccess, showDbError } from '../stores/notificationStore.js'
   import {
     showInvoiceSelectionModal,
     openInvoices,
@@ -87,7 +88,7 @@
 
   async function confirmRefund() {
     if (!invoiceToRefund || !refundReason.trim()) {
-      alert('Please enter a refund reason')
+      showDbError('Please enter a refund reason')
       return
     }
 

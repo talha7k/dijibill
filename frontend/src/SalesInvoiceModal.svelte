@@ -4,6 +4,7 @@
   import {database} from '../wailsjs/go/models'
   import Modal from './components/Modal.svelte'
   import FormField from './components/FormField.svelte'
+  import { showDbSuccess, showDbError } from './stores/notificationStore.js'
   
   const dispatch = createEventDispatcher()
   
@@ -363,7 +364,7 @@
     console.log('Valid items:', validItems)
     if (validItems.length === 0) {
       console.log('No valid items found')
-      alert('Please select products for your invoice items')
+      showDbError('Please select products for your invoice items')
       return
     }
     
@@ -404,13 +405,13 @@
         result = await UpdateSalesInvoice(new database.SalesInvoice(invoiceObj))
         console.log('UpdateSalesInvoice result:', result)
         console.log('UpdateSalesInvoice completed successfully')
-        alert('Invoice updated successfully!')
+        showDbSuccess('Invoice updated successfully!')
       } else {
         console.log('Calling CreateSalesInvoice backend function...')
         result = await CreateSalesInvoice(new database.SalesInvoice(invoiceObj))
         console.log('CreateSalesInvoice result:', result)
         console.log('CreateSalesInvoice completed successfully')
-        alert('Invoice saved successfully!')
+        showDbSuccess('Invoice saved successfully!')
       }
       
       dispatch('saved')
@@ -421,7 +422,7 @@
       console.error('Error message:', error.message)
       console.error('Error stack:', error.stack)
       console.error('Full error object:', error)
-      alert('Error saving invoice: ' + (error.message || error.toString()))
+      showDbError('Error saving invoice: ' + (error.message || error.toString()))
     } finally {
       isSaving = false
       console.log('=== SAVE INVOICE END ===')

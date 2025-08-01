@@ -1,5 +1,6 @@
 <script>
   import { onMount } from 'svelte'
+  import { showDbSuccess, showDbError } from './stores/notificationStore.js'
   
   // Import backend functions
   import { 
@@ -129,11 +130,11 @@
 
   // Event handlers
   function handleCompanySaved(event) {
-    alert(event.detail.message)
+    showDbSuccess(event.detail.message)
   }
 
   function handleError(event) {
-    alert(event.detail.message)
+    showDbError(event.detail.message)
   }
 
   function handleReload() {
@@ -143,12 +144,12 @@
   function handleSystemSave(event) {
     systemSettings = event.detail.systemSettings
     if (event.detail.message) {
-      alert(event.detail.message)
+      showDbSuccess(event.detail.message)
     }
   }
 
   function handleSystemError(event) {
-    alert(event.detail.message)
+    showDbError(event.detail.message)
   }
 
   // Tab configuration

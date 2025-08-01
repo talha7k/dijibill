@@ -8,6 +8,7 @@
 	import CustomerModal from './components/CustomerModal.svelte';
 	import ConfirmationModal from './components/ConfirmationModal.svelte';
 	import StatusBadge from './components/StatusBadge.svelte';
+	import { showDbSuccess, showDbError } from './stores/notificationStore.js';
 
 	let customers = [];
 	let loading = false;
@@ -30,6 +31,7 @@
 			console.log('✅ Customers loaded successfully:', customers.length, 'customers');
 		} catch (error) {
 			console.error('❌ Error loading customers:', error);
+			showDbError('load', 'customers', error);
 			customers = [];
 		} finally {
 			loading = false;
@@ -67,18 +69,21 @@
 				console.log('💾 Customer object before update:', customer);
 				const updateResult = await UpdateCustomer(customer);
 				console.log('✅ Customer updated successfully, result:', updateResult);
+				showDbSuccess('update', 'Customer');
 			} else {
 				console.log('💾 Creating new customer');
 				console.log('💾 Customer object before create:', customer);
 				const createResult = await CreateCustomer(customer);
 				console.log('✅ Customer created successfully, result:', createResult);
+				showDbSuccess('create', 'Customer');
 			}
 
 			await loadCustomers();
 			closeModal();
 		} catch (error) {
 			console.error('❌ Error saving customer:', error);
-			alert('Error saving customer: ' + error.message);
+			const operation = isEditing ? 'update' : 'create';
+			showDbError(operation, 'Customer', error);
 		} finally {
 			loading = false;
 		}
@@ -122,6 +127,7 @@
 			
 			const deleteResult = await DeleteCustomer(id);
 			console.log('✅ Customer deleted successfully, result:', deleteResult);
+			showDbSuccess('delete', 'Customer');
 			
 			console.log('🔄 Reloading customer list...');
 			await loadCustomers();
@@ -138,7 +144,7 @@
 				stack: error.stack,
 				name: error.name
 			});
-			alert('Failed to delete customer: ' + error.message);
+			showDbError('delete', 'Customer', error);
 		} finally {
 			loading = false;
 		}

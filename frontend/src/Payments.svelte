@@ -7,6 +7,7 @@
 	import StatusBadge from './components/StatusBadge.svelte';
 	import PaymentModal from './components/PaymentModal.svelte';
 	import ConfirmationModal from './components/ConfirmationModal.svelte';
+	import { showDbSuccess, showDbError } from './stores/notificationStore.js';
 
 	/** @type {Array<any>} */
 	let payments = [];
@@ -36,6 +37,7 @@
 			]);
 		} catch (error) {
 			console.error('Error loading payment data:', error);
+			showDbError('load', 'payment data', error);
 		} finally {
 			loading = false;
 		}
@@ -102,15 +104,18 @@
 			if (isEditing) {
 				paymentObj.id = editingPayment.id;
 				await UpdatePayment(paymentObj);
+				showDbSuccess('update', 'Payment');
 			} else {
 				await CreatePayment(paymentObj);
+				showDbSuccess('create', 'Payment');
 			}
 
 			await loadPayments();
 			closeModal();
 		} catch (error) {
 			console.error('Error saving payment:', error);
-			alert('Error saving payment: ' + error.message);
+			const operation = isEditing ? 'update' : 'create';
+			showDbError(operation, 'Payment', error);
 		} finally {
 			loading = false;
 		}
@@ -132,11 +137,12 @@
 			try {
 				await DeletePayment(paymentToDelete);
 				await loadPayments();
+				showDbSuccess('delete', 'Payment');
 				showDeleteConfirm = false;
 				paymentToDelete = null;
 			} catch (error) {
 				console.error('Error deleting payment:', error);
-				alert('Error deleting payment: ' + error.message);
+				showDbError('delete', 'Payment', error);
 			} finally {
 				confirmLoading = false;
 			}
@@ -169,11 +175,11 @@
 			updatedPayment.status = 'refunded';
 			
 			await UpdatePayment(updatedPayment);
-			alert(`Payment #${payment.id} has been successfully refunded.`);
+			showDbSuccess('update', `Payment #${payment.id} refunded`);
 			await loadPayments(); // Refresh the list
 		} catch (error) {
 			console.error('Error refunding payment:', error);
-			alert('Error refunding payment: ' + error.message);
+			showDbError('update', 'Payment refund', error);
 		} finally {
 			loading = false;
 		}
@@ -239,16 +245,7 @@
 	const columns = [
 		{ key: 'id', label: 'Payment ID', render: (item) => `#${item.id}` },
 		{ key: 'invoice_id', label: 'Invoice', render: (item) => getInvoiceNumber(item.invoice_id) },
-		{ key: 'amount', label: 'Amount', render: (item) => `<span class="font-semibold">${formatCurrency(item.amount)}</span>`, class: 'font-semibold' },
-		{ key: 'payment_type_id', label: 'Method', render: (item) => getPaymentTypeName(item.payment_type_id) },
-		{ key: 'payment_date', label: 'Date', render: (item) => formatDate(item.payment_date) },
-		{ key: 'reference', label: 'Reference', render: (item) => item.reference || '-' },
-		{ key: 'status', label: 'Status' },
-		{
-			label: 'Actions',
-			actions: [
-				{ key: 'edit', text: 'Edit', icon: 'edit', class: 'btn-secondary', title: 'Edit Payment' },
-				{ key: 'refund', text: 'Refund', icon: 'undo', class: 'btn-warning', title: 'Refund Payment' },
+		{ key: 'amount', label: 'Amount', render: (item) => `< class: 'btn-warning', title: 'Refund Payment' },
 				{ key: 'delete', text: 'Delete', icon: 'delete', class: 'btn-error', title: 'Delete Payment' }
 			]
 		}
@@ -260,7 +257,16 @@
 		icon: 'add'
 	};
 
-	/** @type {Array<{text: string, icon: string}>} */
+	/** @type {Array<{text: string, icon: string}>} */span class="font-semibold">${formatCurrency(item.amount)}</span>`, class: 'font-semibold' },
+		{ key: 'payment_type_id', label: 'Method', render: (item) => getPaymentTypeName(item.payment_type_id) },
+		{ key: 'payment_date', label: 'Date', render: (item) => formatDate(item.payment_date) },
+		{ key: 'reference', label: 'Reference', render: (item) => item.reference || '-' },
+		{ key: 'status', label: 'Status' },
+		{
+			label: 'Actions',
+			actions: [
+				{ key: 'edit', text: 'Edit', icon: 'edit', class: 'btn-secondary', title: 'Edit Payment' },
+				{ key: 'refund', text: 'Refund', icon: 'undo',
 	const secondaryActions = [
 		{
 			text: 'Reports',

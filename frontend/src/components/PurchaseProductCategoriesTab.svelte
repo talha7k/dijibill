@@ -4,6 +4,7 @@
   import { database } from '../../wailsjs/go/models'
   import DataTable from './DataTable.svelte'
   import PurchaseProductCategoryModal from './PurchaseProductCategoryModal.svelte'
+  import { showDbSuccess, showDbError } from '../stores/notificationStore.js'
 
   // Props
   export let categories = []
@@ -102,7 +103,7 @@
       resetCategoryForm()
     } catch (error) {
       console.error('Error saving purchase product category:', error)
-      alert('Error saving purchase product category: ' + error.message)
+      showDbError('Error saving purchase product category: ' + error.message)
     } finally {
       isLoading = false
     }

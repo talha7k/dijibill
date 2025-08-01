@@ -13,6 +13,7 @@ import {
   UpdatePayment,
   GetSalesInvoiceByID
 } from '../../wailsjs/go/main/App.js'
+import { showDbSuccess, showDbError } from '../stores/notificationStore.js'
 import { database } from '../../wailsjs/go/models'
 import { 
   categories,
@@ -109,12 +110,12 @@ export async function saveSale() {
     const selectedCategory = get(selectedSalesCategory)
     
     if (!selectedCategory) {
-      alert('Please select a sales category before saving the sale.')
+      showDbError('Please select a sales category before saving the sale.')
       return
     }
     
     if (sale.items.length === 0) {
-      alert('Cannot save an empty sale. Please add items first.')
+      showDbError('Cannot save an empty sale. Please add items first.')
       return
     }
 
@@ -148,11 +149,11 @@ export async function saveSale() {
     const invoiceObj = new database.SalesInvoice(invoiceData)
     const createdInvoice = await CreateSalesInvoice(invoiceObj)
     
-    alert('Sale saved successfully!')
+    showDbSuccess('Sale saved successfully!')
     resetSale()
   } catch (error) {
     console.error('Error saving sale:', error)
-    alert('Error saving sale: ' + error.message)
+    showDbError('Error saving sale: ' + error.message)
   } finally {
     loading.set(false)
   }
@@ -167,12 +168,12 @@ export async function refundSale() {
     const reason = get(refundReason)
     
     if (!selectedCategory) {
-      alert('Please select a sales category before processing refund.')
+      showDbError('Please select a sales category before processing refund.')
       return
     }
     
     if (sale.items.length === 0) {
-      alert('Cannot process refund for an empty sale.')
+      showDbError('Cannot process refund for an empty sale.')
       return
     }
 
@@ -206,13 +207,13 @@ export async function refundSale() {
     const refundInvoiceObj = new database.SalesInvoice(refundInvoiceData)
     const createdRefundInvoice = await CreateSalesInvoice(refundInvoiceObj)
     
-    alert('Refund processed successfully!')
+    showDbSuccess('Refund processed successfully!')
     resetSale()
     showRefundModal.set(false)
     refundReason.set('')
   } catch (error) {
     console.error('Error processing refund:', error)
-    alert('Error processing refund: ' + error.message)
+    showDbError('Error processing refund: ' + error.message)
   } finally {
     loading.set(false)
   }
@@ -224,12 +225,12 @@ export async function transferItems() {
   const selectedInvoice = get(selectedTransferInvoice)
   
   if (sale.items.length === 0) {
-    alert('No items to transfer')
+    showDbError('No items to transfer')
     return
   }
 
   if (!selectedInvoice) {
-    alert('Please select an invoice to transfer to')
+    showDbError('Please select an invoice to transfer to')
     return
   }
 
@@ -269,10 +270,10 @@ export async function transferItems() {
     resetSale()
     showTransferModal.set(false)
     selectedTransferInvoice.set(null)
-    alert(`Items transferred successfully to Invoice #${selectedInvoice.invoice_number}!`)
+    showDbSuccess(`Items transferred successfully to Invoice #${selectedInvoice.invoice_number}!`)
   } catch (error) {
     console.error('Error transferring items:', error)
-    alert('Error transferring items')
+    showDbError('Error transferring items')
   } finally {
     loading.set(false)
   }
@@ -283,12 +284,12 @@ export async function openPaymentModal() {
   const selectedCategory = get(selectedSalesCategory)
   
   if (!selectedCategory) {
-    alert('Please select a sales category before processing payment.')
+    showDbError('Please select a sales category before processing payment.')
     return
   }
   
   if (sale.items.length === 0) {
-    alert('Cannot process payment for an empty sale.')
+    showDbError('Cannot process payment for an empty sale.')
     return
   }
 
@@ -333,7 +334,7 @@ export async function openPaymentModal() {
     showPaymentModal.set(true)
   } catch (error) {
     console.error('Error creating invoice for payment:', error)
-    alert('Error creating invoice: ' + error.message)
+    showDbError('Error creating invoice: ' + error.message)
   } finally {
     loading.set(false)
   }
@@ -346,17 +347,17 @@ export function addPaymentItem(paymentTypeId, amount) {
   
   const paymentType = paymentTypesList.find(pt => pt.id === paymentTypeId)
   if (!paymentType) {
-    alert('Invalid payment type selected')
+    showDbError('Invalid payment type selected')
     return
   }
   
   if (amount <= 0) {
-    alert('Payment amount must be greater than 0')
+    showDbError('Payment amount must be greater than 0')
     return
   }
   
   if (amount > currentRemaining) {
-    alert('Payment amount cannot exceed remaining amount')
+    showDbError('Payment amount cannot exceed remaining amount')
     return
   }
   
@@ -390,12 +391,12 @@ export async function processPayments() {
   const remaining = get(remainingAmount)
   
   if (!invoice) {
-    alert('No invoice selected for payment')
+    showDbError('No invoice selected for payment')
     return
   }
   
   if (payments.length === 0) {
-    alert('Please add at least one payment')
+    showDbError('Please add at least one payment')
     return
   }
   
@@ -434,7 +435,7 @@ export async function processPayments() {
     await UpdateSalesInvoice(new database.SalesInvoice(updatedInvoice))
     
     const statusMessage = invoiceStatus === 'paid' ? 'Payment completed successfully!' : 'Partial payment processed successfully!'
-    alert(statusMessage)
+    showDbSuccess(statusMessage)
     
     resetSale()
     showPaymentModal.set(false)
@@ -443,7 +444,7 @@ export async function processPayments() {
     remainingAmount.set(0)
   } catch (error) {
     console.error('Error processing payments:', error)
-    alert('Error processing payments: ' + error.message)
+    showDbError('Error processing payments: ' + error.message)
   } finally {
     loading.set(false)
   }
@@ -461,7 +462,7 @@ export async function refundInvoice(invoiceId, refundReason = '') {
     // Get the full invoice details
     const invoice = await GetSalesInvoiceByID(invoiceId)
     if (!invoice) {
-      alert('Invoice not found')
+      showDbError('Invoice not found')
       return
     }
     
@@ -490,14 +491,14 @@ export async function refundInvoice(invoiceId, refundReason = '') {
     
     await UpdateSalesInvoice(new database.SalesInvoice(updatedInvoice))
     
-    alert('Invoice and all associated payments have been marked as refunded successfully!')
+    showDbSuccess('Invoice and all associated payments have been marked as refunded successfully!')
     
     // Reload open invoices if needed
     await loadOpenInvoices()
     
   } catch (error) {
     console.error('Error refunding invoice:', error)
-    alert('Error refunding invoice: ' + error.message)
+    showDbError('Error refunding invoice: ' + error.message)
   } finally {
     loading.set(false)
   }
@@ -519,7 +520,7 @@ export async function loadPastInvoices() {
     pastInvoices.set(pastInvoicesList)
   } catch (error) {
     console.error('Error loading past invoices:', error)
-    alert('Error loading past invoices: ' + error.message)
+    showDbError('Error loading past invoices: ' + error.message)
   } finally {
     loading.set(false)
   }
@@ -566,13 +567,13 @@ export async function reprintReceipt(invoiceId) {
     // Get the full invoice details
     const invoice = await GetSalesInvoiceByID(invoiceId)
     if (!invoice) {
-      alert('Invoice not found')
+      showDbError('Invoice not found')
       return
     }
     
-    // For now, we'll just show an alert. In a real implementation,
+    // For now, we'll just show a notification. In a real implementation,
     // this would trigger the receipt printing functionality
-    alert(`Reprinting receipt for Invoice #${invoice.invoice_number || invoice.id}`)
+    showDbSuccess(`Reprinting receipt for Invoice #${invoice.invoice_number || invoice.id}`)
     
     // TODO: Implement actual receipt printing logic here
     // This could involve:
@@ -583,7 +584,7 @@ export async function reprintReceipt(invoiceId) {
     
   } catch (error) {
     console.error('Error reprinting receipt:', error)
-    alert('Error reprinting receipt: ' + error.message)
+    showDbError('Error reprinting receipt: ' + error.message)
   } finally {
     loading.set(false)
   }

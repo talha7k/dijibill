@@ -7,6 +7,7 @@
   import ClickableStatusBadge from './components/ClickableStatusBadge.svelte'
   import ConfirmationModal from './components/ConfirmationModal.svelte'
   import InventoryUpdateModal from './components/InventoryUpdateModal.svelte'
+  import { showDbSuccess, showDbError } from './stores/notificationStore.js'
 
   /** @type {Array<any>} */
   let purchaseInvoices = []
@@ -80,7 +81,7 @@
       showInvoiceModal = true
     } catch (error) {
       console.error('Error fetching invoice details:', error)
-      alert('Error loading invoice details: ' + error.message)
+      showDbError('load', 'Purchase Invoice', error)
     } finally {
       loading = false
     }
@@ -102,6 +103,7 @@
           vat_rate: parseFloat(invoiceData.vat_rate) || 0,
           vat_inclusive: invoiceData.vat_inclusive || false
         })
+        showDbSuccess('update', 'Purchase Invoice');
       } else {
         // Create new invoice
         await CreatePurchaseInvoice({
@@ -113,13 +115,15 @@
           vat_rate: parseFloat(invoiceData.vat_rate) || 0,
           vat_inclusive: invoiceData.vat_inclusive || false
         })
+        showDbSuccess('create', 'Purchase Invoice');
       }
       
       showInvoiceModal = false
       await loadData() // Refresh the list
     } catch (error) {
       console.error('Error saving invoice:', error)
-      alert('Error saving invoice: ' + error.message)
+      const operation = editingInvoice ? 'update' : 'create';
+      showDbError(operation, 'Purchase Invoice', error)
     }
   }
 
@@ -145,11 +149,12 @@
       confirmLoading = true;
       await DeletePurchaseInvoice(invoiceToDelete.id);
       await loadData(); // Refresh the list
+      showDbSuccess('delete', 'Purchase Invoice');
       showDeleteConfirm = false;
       invoiceToDelete = null;
     } catch (error) {
       console.error('Error deleting invoice:', error);
-      alert('Error deleting invoice: ' + error.message);
+      showDbError('delete', 'Purchase Invoice', error);
     } finally {
       confirmLoading = false;
     }
@@ -161,7 +166,7 @@
 
   async function handleMarkAsReceived(invoice) {
     if (invoice.status === 'received') {
-      alert('Invoice is already marked as received')
+      showDbError('update', 'Purchase Invoice', new Error('Invoice is already marked as received'))
       return
     }
 
@@ -188,7 +193,7 @@
       await loadData()
     } catch (error) {
       console.error('Error marking invoice as received:', error)
-      alert('Error marking invoice as received: ' + error.message)
+      showDbError('update', 'Purchase Invoice status', error)
     } finally {
       markingReceived = false
     }
@@ -208,7 +213,7 @@
 
   function handleImport() {
     // TODO: Implement import functionality
-    alert('Import functionality will be implemented soon')
+    showDbError('Import functionality will be implemented soon')
   }
 
   function handleSearch(event) {

@@ -5,6 +5,7 @@
   import FormField from './components/FormField.svelte'
   import UserModal from './components/UserModal.svelte'
   import AccessControl from './components/AccessControl.svelte'
+  import { showDbSuccess, showDbError } from './stores/notificationStore.js'
   
   let users = []
   let currentUser = null
@@ -49,6 +50,7 @@
       users = await GetUsersByCompany(currentUser.company_id)
     } catch (error) {
       console.error('Error loading users:', error)
+      showDbError('load', 'users', error)
     } finally {
       isLoading = false
     }
@@ -90,10 +92,10 @@
 
       await CreateUser(newUser)
       await loadUsers()
-      console.log('User created successfully')
+      showDbSuccess('create', 'User')
     } catch (error) {
       console.error('Error creating user:', error)
-      alert('Error creating user: ' + error.message)
+      showDbError('create', 'User', error)
     }
   }
 
@@ -126,16 +128,16 @@
 
       await UpdateUser(updatedUser)
       await loadUsers()
-      console.log('User updated successfully')
+      showDbSuccess('update', 'User')
     } catch (error) {
       console.error('Error updating user:', error)
-      alert('Error updating user: ' + error.message)
+      showDbError('update', 'User', error)
     }
   }
 
   async function handleDeleteUser(user) {
     if (user.id === currentUser.id) {
-      alert('You cannot delete your own account')
+      showDbError('delete', 'User', new Error('You cannot delete your own account'))
       return
     }
 
@@ -143,17 +145,17 @@
       try {
         await DeleteUser(user.id)
         await loadUsers()
-        console.log('User deleted successfully')
+        showDbSuccess('delete', 'User')
       } catch (error) {
         console.error('Error deleting user:', error)
-        alert('Error deleting user: ' + error.message)
+        showDbError('delete', 'User', error)
       }
     }
   }
 
   async function toggleUserStatus(user) {
     if (user.id === currentUser.id) {
-      alert('You cannot deactivate your own account')
+      showDbError('update', 'User', new Error('You cannot deactivate your own account'))
       return
     }
 
@@ -166,10 +168,10 @@
 
       await UpdateUser(updatedUser)
       await loadUsers()
-      console.log('User status updated successfully')
+      showDbSuccess('update', 'User status')
     } catch (error) {
       console.error('Error updating user status:', error)
-      alert('Error updating user status: ' + error.message)
+      showDbError('update', 'User status', error)
     }
   }
 
