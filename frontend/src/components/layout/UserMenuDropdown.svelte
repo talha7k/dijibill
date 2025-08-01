@@ -30,9 +30,11 @@
     if (!dropdownElement || !buttonRect) return;
     
     const rect = buttonRect;
+    
     dropdownElement.style.position = 'fixed';
     dropdownElement.style.top = `${rect.bottom + 8}px`;
-    dropdownElement.style.left = `${rect.right - 208}px`; // 208px = w-52 (13rem * 16px)
+    dropdownElement.style.right = '16px'; // Fixed right margin
+    dropdownElement.style.left = 'unset';
     dropdownElement.style.zIndex = '999999';
   }
   
@@ -77,7 +79,7 @@
   }
 </script>
 
-{#if isOpen && currentUser}
+{#if isOpen && buttonRect && currentUser}
   <ul 
     bind:this={dropdownElement}
     class="menu menu-sm dropdown-content mt-3 p-2 shadow rounded-box w-52 glass-card"
