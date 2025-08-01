@@ -1,5 +1,7 @@
 <script>
   import { createEventDispatcher } from 'svelte'
+  import ActionButton from './ActionButton.svelte'
+  import IconButton from './IconButton.svelte'
   
   export let show = false
   export let title = ''
@@ -58,14 +60,14 @@
     <div class="modal-content {sizeClass}">
       <!-- Header -->
       <div class="modal-header">
-        <h3 class="heading-3">{title}</h3>
-        <button 
-          class="btn-icon text-white/70 hover:text-white hover:bg-white/10"
+        <h3 class="font-bold text-lg text-white">{title}</h3>
+        <IconButton
+          icon="times"
+          variant="ghost"
+          size="sm"
+          customClass="text-white modal-close-btn"
           on:click={closeModal}
-          aria-label="Close modal"
-        >
-          <i class="fas fa-times w-5 h-5"></i>
-        </button>
+        />
       </div>
 
       <!-- Body -->
@@ -77,26 +79,21 @@
       {#if showPrimaryButton || showSecondaryButton}
         <div class="modal-footer">
           {#if showSecondaryButton}
-            <button 
-              class="btn-glass-outline" 
-              on:click={handleSecondaryAction}
+            <ActionButton
+              variant="ghost"
+              text={secondaryButtonText}
               disabled={loading}
-            >
-              {secondaryButtonText}
-            </button>
+              on:click={handleSecondaryAction}
+            />
           {/if}
-          
           {#if showPrimaryButton}
-            <button 
-              class="btn-primary" 
-              on:click={handlePrimaryAction}
+            <ActionButton
+              variant="primary"
+              text={primaryButtonText}
               disabled={primaryButtonDisabled || loading}
-            >
-              {#if loading}
-                <span class="loading-spinner-sm mr-2"></span>
-              {/if}
-              {primaryButtonText}
-            </button>
+              {loading}
+              on:click={handlePrimaryAction}
+            />
           {/if}
         </div>
       {/if}

@@ -1,6 +1,8 @@
 <script>
   import { createEventDispatcher } from 'svelte'
   import FormField from './FormField.svelte'
+  import ActionButton from './ActionButton.svelte'
+  import IconButton from './IconButton.svelte'
   import { getFaIcon } from '../utils/iconUtils.js'
   
   /** @type {Array<any>} */
@@ -57,29 +59,23 @@
       {#if showActions}
         <div class="action-buttons">
           {#if primaryAction}
-            <button 
-              class="btn btn-primary" 
+            <ActionButton
+              variant="primary"
+              icon={primaryAction.icon}
+              text={primaryAction.text || 'Action'}
+              {loading}
               on:click={handlePrimaryAction}
-              disabled={loading}
-            >
-              {#if primaryAction && 'icon' in primaryAction && primaryAction.icon}
-                <i class="fas {primaryAction.icon}"></i>
-              {/if}
-              {primaryAction && 'text' in primaryAction ? primaryAction.text : 'Action'}
-            </button>
+            />
           {/if}
           
           {#each secondaryActions as action}
-            <button 
-              class="btn btn-secondary-outline" 
-              on:click={() => handleSecondaryAction(action)}
+            <ActionButton
+              variant="outline"
+              icon={action.icon}
+              text={action.text || 'Action'}
               disabled={loading}
-            >
-              {#if action && 'icon' in action && action.icon}
-                <i class="fas {action.icon}"></i>
-              {/if}
-              {action && 'text' in action ? action.text : 'Action'}
-            </button>
+              on:click={() => handleSecondaryAction(action)}
+            />
           {/each}
         </div>
       {/if}
@@ -117,12 +113,12 @@
           {searchTerm ? 'No items match your search criteria.' : emptyStateMessage}
         </p>
         {#if !searchTerm && primaryAction}
-          <button class="btn btn-primary" on:click={handlePrimaryAction}>
-            {#if primaryAction.icon}
-              <i class="{getFaIcon(primaryAction.icon)} mr-2"></i>
-            {/if}
-            {primaryAction.text}
-          </button>
+          <ActionButton
+            variant="primary"
+            icon={primaryAction.icon}
+            text={primaryAction.text}
+            on:click={handlePrimaryAction}
+          />
         {/if}
       </div>
     {:else}
@@ -159,18 +155,25 @@
                     <div class="action-buttons">
                       <slot name="actions" {item} {index}>
                         {#each (columns.find(col => col.actions)?.actions || []) as action}
-                          <button
-                            class="btn btn-sm {action.class || 'btn-secondary'}"
-                            on:click={() => handleRowAction(action.key, item)}
-                            title={action.title || action.text}
-                            disabled={loading}
-                          >
-                            {#if action.icon}
-                              <i class="{getFaIcon(action.icon)}"></i>
-                            {:else}
-                              {action.text}
-                            {/if}
-                          </button>
+                          {#if action.icon}
+                            <IconButton
+                              icon={action.icon}
+                              variant={action.key === 'delete' ? 'danger' : 'secondary'}
+                              title={action.title || action.text}
+                              disabled={loading}
+                              on:click={() => handleRowAction(action.key, item)}
+                            />
+                          {:else}
+                            <ActionButton
+                              variant="ghost"
+                              size="sm"
+                              text={action.text}
+                              title={action.title || action.text}
+                              disabled={loading}
+                              customClass={action.class || ''}
+                              on:click={() => handleRowAction(action.key, item)}
+                            />
+                          {/if}
                         {/each}
                       </slot>
                     </div>

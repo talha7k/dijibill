@@ -301,7 +301,7 @@
 
 <PageLayout 
   title="Product Management" 
-  icon="fa-box" 
+  icon="product" 
   showIndicator={true}
 >
   <!-- Horizontal Tabs -->

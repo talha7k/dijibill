@@ -435,15 +435,43 @@
   }
 
   .modal-header {
-    @apply px-6 py-4 border-b border-white/20;
+    @apply flex items-center justify-between px-6 py-5 border-b border-white/10;
+    /* Ensure header stays fixed width and X button doesn't shift due to scrollbar */
+    position: sticky;
+    top: 0;
+    background: inherit;
+    z-index: 10;
+    margin-bottom: 0;
+    /* Better spacing and alignment */
+    min-height: 4rem;
+  }
+
+  .modal-header h3 {
+    @apply flex-1 pr-4;
+    /* Ensure title doesn't overlap with close button */
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  .modal-close-btn {
+    /* Better positioning for close button */
+    position: relative;
+    right: 0;
+    top: 0;
+    transform: none;
+    flex-shrink: 0;
   }
 
   .modal-body {
-    @apply px-6 py-4;
+    @apply px-6 py-6;
+    /* Better spacing to match header */
   }
 
   .modal-footer {
-    @apply px-6 py-4 border-t border-white/20 flex justify-end space-x-3;
+    @apply px-6 py-5 border-t border-white/20 flex justify-end gap-3;
+    /* Consistent padding with header and better button spacing */
+    min-height: 4rem;
+    align-items: center;
   }
 }
 

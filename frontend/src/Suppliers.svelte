@@ -216,8 +216,8 @@
     {
       label: 'Actions',
       actions: [
-        { key: 'edit', text: 'Edit', icon: 'fa-edit', class: 'btn-primary' },
-        { key: 'delete', text: 'Delete', icon: 'fa-trash', class: 'btn-error' }
+        { key: 'edit', text: 'Edit', icon: 'edit', class: 'btn-primary' },
+        { key: 'delete', text: 'Delete', icon: 'delete', class: 'btn-error' }
       ]
     }
   ]
@@ -245,8 +245,8 @@
     searchPlaceholder="Search suppliers..."
     emptyStateTitle="No suppliers found"
     emptyStateMessage="Start by adding your first supplier"
-    emptyStateIcon="fa-truck"
-    primaryAction={{ text: 'Add Supplier', icon: 'fa-plus' }}
+    emptyStateIcon="truck"
+    primaryAction={{ text: 'Add Supplier', icon: 'add' }}
     on:primary-action={handleAddSupplier}
     on:search={handleSearch}
     on:row-action={(e) => {

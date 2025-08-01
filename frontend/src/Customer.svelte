@@ -168,25 +168,25 @@
 		{ 
 			label: 'Actions',
 			actions: [
-				{ key: 'edit', text: 'Edit', icon: 'fa-edit', class: 'btn-secondary', title: 'Edit Customer' },
-				{ key: 'delete', text: 'Delete', icon: 'fa-trash', class: 'btn-error', title: 'Delete Customer' }
+				{ key: 'edit', text: 'Edit', icon: 'edit', class: 'btn-secondary', title: 'Edit Customer' },
+				{ key: 'delete', text: 'Delete', icon: 'delete', class: 'btn-error', title: 'Delete Customer' }
 			]
 		}
 	];
 
 	const primaryAction = {
 		text: 'Add Customer',
-		icon: 'fa-plus'
+		icon: 'add'
 	};
 
 	const secondaryActions = [
 		{
 			text: 'Import',
-			icon: 'fa-upload'
+			icon: 'upload'
 		},
 		{
 			text: 'Export',
-			icon: 'fa-download'
+			icon: 'download'
 		}
 	];
 
@@ -233,7 +233,7 @@
 
 <PageLayout 
 	title="Customers" 
-	icon="fa-users" 
+	icon="users" 
 	showIndicator={true}
 >
 	<svelte:fragment slot="actions">
@@ -248,7 +248,7 @@
 		searchPlaceholder="Search customers..."
 		emptyStateTitle="No customers found"
 		emptyStateMessage="Start by adding your first customer"
-		emptyStateIcon="fa-users"
+		emptyStateIcon="users"
 		{primaryAction}
 		{secondaryActions}
 		on:primary-action={handlePrimaryAction}

@@ -220,7 +220,7 @@
 
 <PageLayout 
   title="Purchase Product Management" 
-  icon="fa-shopping-cart" 
+  icon="cart" 
   showIndicator={true}
 >
   <!-- Horizontal Tabs -->

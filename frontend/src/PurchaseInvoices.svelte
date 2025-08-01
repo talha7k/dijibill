@@ -302,10 +302,13 @@
       key: 'status',
       label: 'Status',
       labelArabic: 'الحالة',
-      sortable: true,
+      sortable: true
+    },
+    {
+      label: 'Actions',
       actions: [
-        { key: 'edit', text: 'Edit', icon: 'fa-edit', class: 'btn-primary' },
-        { key: 'delete', text: 'Delete', icon: 'fa-trash', class: 'btn-error' }
+        { key: 'edit', text: 'Edit', icon: 'edit', class: 'btn-primary' },
+        { key: 'delete', text: 'Delete', icon: 'delete', class: 'btn-error' }
       ]
     }
   ]
@@ -313,15 +316,19 @@
 
 <PageLayout
   title="Purchase Invoices"
-  icon="fa-file-invoice"
+  icon="invoice"
 >
   <svelte:fragment slot="actions">
     <button class="btn btn-secondary-outline" on:click={handleImport}>
-      <i class="fas fa-upload"></i>
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+      </svg>
       Import
     </button>
     <button class="btn btn-primary" on:click={handleAddInvoice}>
-      <i class="fas fa-plus"></i>
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+      </svg>
       Add Invoice
     </button>
   </svelte:fragment>
@@ -333,8 +340,8 @@
     searchPlaceholder="Search invoices..."
     emptyStateTitle="No purchase invoices found"
     emptyStateMessage="Start by adding your first purchase invoice"
-    emptyStateIcon="fa-file-invoice"
-    primaryAction={{ text: 'Add Invoice', icon: 'fa-plus' }}
+    emptyStateIcon="invoice"
+    primaryAction={{ text: 'Add Invoice', icon: 'add' }}
     on:primary-action={handleAddInvoice}
     on:search={handleSearch}
     on:row-action={(e) => {

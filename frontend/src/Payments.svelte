@@ -247,9 +247,9 @@
 		{
 			label: 'Actions',
 			actions: [
-				{ key: 'edit', text: 'Edit', icon: 'fa-edit', class: 'btn-secondary', title: 'Edit Payment' },
-				{ key: 'refund', text: 'Refund', icon: 'fa-undo', class: 'btn-warning', title: 'Refund Payment' },
-				{ key: 'delete', text: 'Delete', icon: 'fa-trash', class: 'btn-error', title: 'Delete Payment' }
+				{ key: 'edit', text: 'Edit', icon: 'edit', class: 'btn-secondary', title: 'Edit Payment' },
+				{ key: 'refund', text: 'Refund', icon: 'undo', class: 'btn-warning', title: 'Refund Payment' },
+				{ key: 'delete', text: 'Delete', icon: 'delete', class: 'btn-error', title: 'Delete Payment' }
 			]
 		}
 	];
@@ -257,14 +257,14 @@
 	/** @type {{text: string, icon: string}} */
 	const primaryAction = {
 		text: 'Record Payment',
-		icon: 'fa-plus'
+		icon: 'add'
 	};
 
 	/** @type {Array<{text: string, icon: string}>} */
 	const secondaryActions = [
 		{
 			text: 'Reports',
-			icon: 'fa-chart-bar'
+			icon: 'report'
 		}
 	];
 
@@ -296,7 +296,7 @@
 
 <PageLayout 
 	title="Payments" 
-	icon="fa-credit-card" 
+	icon="payment" 
 	showIndicator={true}
 >
 	<svelte:fragment slot="actions">
@@ -311,7 +311,7 @@
 		searchPlaceholder="Search payments..."
 		emptyStateTitle="No payments recorded"
 		emptyStateMessage="Start by recording your first payment"
-		emptyStateIcon="fa-credit-card"
+		emptyStateIcon="payment"
 		{primaryAction}
 		{secondaryActions}
 		on:primary-action={handlePrimaryAction}

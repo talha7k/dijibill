@@ -94,7 +94,7 @@
 
 <PageLayout 
   title="Dashboard" 
-  icon="fa-tachometer-alt" 
+  icon="dashboard" 
   showIndicator={true}
 >
   <svelte:fragment slot="subtitle">

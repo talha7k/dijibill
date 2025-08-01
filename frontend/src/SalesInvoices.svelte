@@ -198,27 +198,27 @@
     { key: 'issue_date', label: 'Issue Date', render: (item) => formatDate(item.issue_date) },
     { key: 'due_date', label: 'Due Date', render: (item) => formatDate(item.due_date) },
     { key: 'total_amount', label: 'Amount', render: (item) => `<span class="font-medium">${formatCurrency(item.total_amount)}</span>` },
+    { key: 'status', label: 'Status' },
     { 
-      key: 'status', 
-      label: 'Status',
+      label: 'Actions',
       actions: [
-        { key: 'view', text: 'View', icon: 'fa-eye', class: 'btn-info', title: 'View HTML' },
-        { key: 'edit', text: 'Edit', icon: 'fa-edit', class: 'btn-warning', title: 'Edit Invoice' },
-        { key: 'save', text: 'Save', icon: 'fa-download', class: 'btn-success', title: 'Save/Print' },
-        { key: 'refund', text: 'Refund', icon: 'fa-undo', class: 'btn-error', title: 'Refund Invoice' }
+        { key: 'view', text: 'View', icon: 'view', class: 'btn-info', title: 'View HTML' },
+        { key: 'edit', text: 'Edit', icon: 'edit', class: 'btn-warning', title: 'Edit Invoice' },
+        { key: 'save', text: 'Save', icon: 'download', class: 'btn-success', title: 'Save/Print' },
+        { key: 'refund', text: 'Refund', icon: 'undo', class: 'btn-error', title: 'Refund Invoice' }
       ]
     }
   ]
 
   const primaryAction = {
     text: 'New Invoice',
-    icon: 'fa-plus'
+    icon: 'add'
   }
 
   const secondaryActions = [
     {
       text: 'Filter',
-      icon: 'fa-filter'
+      icon: 'filter'
     }
   ]
 
@@ -252,7 +252,7 @@
 
 <PageLayout 
   title="Sales Invoices" 
-  icon="fa-file-invoice" 
+  icon="invoice" 
   showIndicator={true}
 >
   <svelte:fragment slot="actions">
@@ -267,7 +267,7 @@
     searchPlaceholder="Search invoices..."
     emptyStateTitle="No invoices found"
     emptyStateMessage={searchTerm ? 'Try adjusting your search terms' : 'Create your first invoice to get started'}
-    emptyStateIcon="fa-file-invoice"
+    emptyStateIcon="invoice"
     {primaryAction}
     {secondaryActions}
     on:primary-action={handlePrimaryAction}
