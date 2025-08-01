@@ -27,7 +27,7 @@
   let currentView = 'dashboard' // Default to dashboard
   let resultText = "Welcome to DijiBill - ZATCA Compliant Invoicing"
   let sidebarVisible = false // Sidebar visibility state - hidden by default
-  let sidebarAsOverlay = false // Whether sidebar should appear as overlay
+  let sidebarAsOverlay = true // Whether sidebar should appear as overlay
   
   // Authentication state
   let isAuthenticated = false
