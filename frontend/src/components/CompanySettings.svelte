@@ -2,6 +2,7 @@
   import { GetCompany, UpdateCompany, UploadCompanyLogo, UploadCompanyLogoFromData, GetCompanyLogoAsBase64 } from '../../wailsjs/go/main/App.js'
   import { createEventDispatcher, onMount } from 'svelte'
   import FormField from './FormField.svelte'
+  import { showDbSuccess, showDbError } from '../stores/notificationStore.js'
 
   const dispatch = createEventDispatcher()
 
@@ -129,10 +130,10 @@
     isLoading = true
     try {
       await UpdateCompany(companySettings)
-      dispatch('saved', { message: 'Company settings saved successfully!' })
+      showDbSuccess('save', 'Company Settings')
     } catch (error) {
       console.error('Error saving company settings:', error)
-      dispatch('error', { message: 'Error saving company settings: ' + error.message })
+      showDbError('save', 'Company Settings', error)
     } finally {
       isLoading = false
     }

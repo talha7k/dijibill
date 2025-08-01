@@ -104,8 +104,8 @@
     {
       label: 'Actions',
       actions: [
-        { key: 'edit', text: 'Edit', icon: 'fa-edit', class: 'btn-warning', title: 'Edit Product' },
-        { key: 'delete', text: 'Delete', icon: 'fa-trash', class: 'btn-error', title: 'Delete Product' }
+        { key: 'edit', text: 'Edit', icon: 'edit', class: 'btn-warning', title: 'Edit Product' },
+        { key: 'delete', text: 'Delete', icon: 'delete', class: 'btn-error', title: 'Delete Product' }
       ]
     }
   ]
@@ -114,14 +114,14 @@
   /** @type {{text: string, icon: string}} */
   const primaryAction = {
     text: 'Add Product',
-    icon: 'fa-plus'
+    icon: 'add'
   }
 
   /** @type {Array<{text: string, icon: string}>} */
   const secondaryActions = [
     {
       text: 'Reports',
-      icon: 'fa-chart-bar'
+      icon: 'report'
     }
   ]
 

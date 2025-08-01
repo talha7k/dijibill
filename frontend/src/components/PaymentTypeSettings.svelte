@@ -2,6 +2,7 @@
   import { GetPaymentTypes, CreatePaymentType, UpdatePaymentType, DeletePaymentType } from '../../wailsjs/go/main/App.js'
   import { database } from '../../wailsjs/go/models'
   import { createEventDispatcher } from 'svelte'
+  import { showDbSuccess, showDbError } from '../stores/notificationStore.js'
   import DataTable from './DataTable.svelte'
   import PaymentTypeModal from './PaymentTypeModal.svelte'
   import ConfirmationModal from './ConfirmationModal.svelte'
@@ -36,15 +37,17 @@
 
       if (editingPaymentType) {
         await UpdatePaymentType(dbPaymentType)
+        showDbSuccess('update', 'Payment Type')
       } else {
         await CreatePaymentType(dbPaymentType)
+        showDbSuccess('create', 'Payment Type')
       }
       
       dispatch('reload')
       closePaymentTypeModal()
     } catch (error) {
       console.error('Error saving payment type:', error)
-      dispatch('error', { message: 'Error saving payment type: ' + error.message })
+      showDbError('save', 'Payment Type', error)
     } finally {
       loading = false
     }
@@ -76,12 +79,13 @@
       loading = true
       try {
         await DeletePaymentType(paymentTypeToDelete)
+        showDbSuccess('delete', 'Payment Type')
         dispatch('reload')
         showDeleteConfirm = false
         paymentTypeToDelete = null
       } catch (error) {
         console.error('Error deleting payment type:', error)
-        dispatch('error', { message: 'Error deleting payment type: ' + error.message })
+        showDbError('delete', 'Payment Type', error)
       } finally {
         loading = false
       }
@@ -143,14 +147,14 @@
         {
           key: 'edit',
           text: 'Edit',
-          icon: 'fa-edit',
+          icon: 'edit',
           class: 'btn-secondary',
           title: 'Edit payment type'
         },
         {
           key: 'delete',
           text: 'Delete',
-          icon: 'fa-trash',
+          icon: 'delete',
           class: 'btn-error',
           title: 'Delete payment type'
         }
@@ -160,7 +164,7 @@
 
   const primaryAction = {
     label: 'Add Payment Type',
-    icon: 'fa-plus'
+    icon: 'add'
   }
 
   // Event handlers for DataTable

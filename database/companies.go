@@ -2,7 +2,6 @@ package database
 
 import (
 	"fmt"
-	"time"
 )
 
 // Company operations
@@ -76,11 +75,11 @@ func (d *Database) CreateCompany(company *Company) error {
 func (d *Database) UpdateCompany(company *Company) error {
 	query := `
 		UPDATE companies SET name = ?, name_arabic = ?, vat_number = ?, cr_number = ?, email = ?, phone = ?, 
-		address = ?, address_arabic = ?, city = ?, city_arabic = ?, country = ?, country_arabic = ?, logo = NULLIF(?, ''), logo_file_id = ?, updated_at = ?
+		address = ?, address_arabic = ?, city = ?, city_arabic = ?, country = ?, country_arabic = ?, logo = NULLIF(?, ''), logo_file_id = ?
 		WHERE id = ?`
 
 	_, err := d.db.Exec(query, company.Name, company.NameArabic, company.VATNumber, company.CRNumber,
 		company.Email, company.Phone, company.Address, company.AddressArabic, company.City, company.CityArabic,
-		company.Country, company.CountryArabic, company.Logo, company.LogoFileID, time.Now(), company.ID)
+		company.Country, company.CountryArabic, company.Logo, company.LogoFileID, company.ID)
 	return err
 }

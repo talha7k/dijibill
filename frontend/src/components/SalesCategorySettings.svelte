@@ -149,14 +149,14 @@
         {
           key: 'edit',
           text: 'Edit',
-          icon: 'fa-edit',
+          icon: 'edit',
           class: 'btn-secondary',
           title: 'Edit sales category'
         },
         {
           key: 'delete',
           text: 'Delete',
-          icon: 'fa-trash',
+          icon: 'delete',
           class: 'btn-error',
           title: 'Delete sales category'
         }
@@ -166,7 +166,7 @@
 
   const primaryAction = {
     label: 'Add Sales Category',
-    icon: 'fa-plus'
+    icon: 'add'
   }
 
   // Event handlers for DataTable

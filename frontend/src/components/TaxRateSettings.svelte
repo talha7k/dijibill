@@ -140,14 +140,14 @@
         {
           key: 'edit',
           text: 'Edit',
-          icon: 'fa-edit',
+          icon: 'edit',
           class: 'btn-secondary',
           title: 'Edit tax rate'
         },
         {
           key: 'delete',
           text: 'Delete',
-          icon: 'fa-trash',
+          icon: 'delete',
           class: 'btn-error',
           title: 'Delete tax rate'
         }
@@ -157,7 +157,7 @@
 
   const primaryAction = {
     label: 'Add Tax Rate',
-    icon: 'fa-plus'
+    icon: 'add'
   }
 
   // Event handlers for DataTable

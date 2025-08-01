@@ -3,6 +3,7 @@
   import { GetDefaultProductSettings, UpdateDefaultProductSettings, GetTaxRates, GetUnitsOfMeasurement } from '../../wailsjs/go/main/App.js'
    import { database } from '../../wailsjs/go/models'
   import FormField from './FormField.svelte'
+  import { showDbSuccess, showDbError } from '../stores/notificationStore.js'
 
   const dispatch = createEventDispatcher()
 
@@ -79,7 +80,7 @@
       }
     } catch (error) {
       console.error('Error loading default product settings:', error)
-      dispatch('error', { message: 'Failed to load default product settings' })
+      showDbError('load', 'Default Product Settings', error)
     } finally {
       isLoading = false
     }
@@ -101,10 +102,10 @@
       settings.default_price_change_allowed = defaultProductSettings.default_price_change_allowed
 
       await UpdateDefaultProductSettings(settings)
-      dispatch('saved', { message: 'Default product settings saved successfully!' })
+      showDbSuccess('save', 'Default Product Settings')
     } catch (error) {
       console.error('Error saving default product settings:', error)
-      dispatch('error', { message: 'Failed to save default product settings' })
+      showDbError('save', 'Default Product Settings', error)
     } finally {
       isLoading = false
     }

@@ -5,6 +5,7 @@
   import DataTable from './DataTable.svelte'
   import UnitModal from './UnitModal.svelte'
   import ConfirmationModal from './ConfirmationModal.svelte'
+  import { showDbSuccess, showDbError } from '../stores/notificationStore.js'
 
   const dispatch = createEventDispatcher()
 
@@ -62,15 +63,15 @@
         {
           key: 'edit',
           text: 'Edit',
-          icon: 'fa-edit',
-          class: 'btn-primary',
+          icon: 'edit',
+          class: 'btn-secondary',
           title: 'Edit unit'
         },
         {
           key: 'delete',
           text: 'Delete',
-          icon: 'fa-trash',
-          class: 'btn-danger',
+          icon: 'delete',
+          class: 'btn-error',
           title: 'Delete unit'
         }
       ]
@@ -78,8 +79,8 @@
   ]
 
   const primaryAction = {
-    text: 'Add Unit',
-    icon: 'fa-plus'
+    label: 'Add Unit',
+    icon: 'add'
   }
 
   // Reactive declarations
@@ -131,12 +132,13 @@
     try {
       loading = true;
       await DeleteUnitOfMeasurement(unitToDelete.id);
+      showDbSuccess('delete', 'Unit of Measurement');
       dispatch('reload');
       showDeleteConfirm = false;
       unitToDelete = null;
     } catch (error) {
       console.error('Error deleting unit:', error);
-      dispatch('error', { message: 'Error deleting unit: ' + error.message });
+      showDbError('delete', 'Unit of Measurement', error);
     } finally {
       loading = false;
     }
@@ -161,6 +163,7 @@
           updated_at: unitToEdit.updated_at || null
         });
         await UpdateUnitOfMeasurement(updatedUnit);
+        showDbSuccess('update', 'Unit of Measurement');
       } else {
         // Create new unit
         const newUnit = new database.UnitOfMeasurement({
@@ -174,13 +177,14 @@
           updated_at: null
         });
         await CreateUnitOfMeasurement(newUnit);
+        showDbSuccess('create', 'Unit of Measurement');
       }
       
       dispatch('reload');
       closeUnitModal();
     } catch (error) {
       console.error('Error saving unit:', error);
-      dispatch('error', { message: 'Error saving unit: ' + error.message });
+      showDbError('save', 'Unit of Measurement', error);
     } finally {
       loading = false;
     }
