@@ -20,8 +20,7 @@
 {#if isVisible}
   {#if asOverlay}
     <!-- Backdrop -->
-    <div 
-      class="fixed inset-0 bg-black/50 z-40 transition-opacity duration-300"
+    <div class="fixed inset-0 bg-black/50 z-[999998] transition-opacity duration-300"
       on:click={closeSidebar}
       on:keydown={(e) => e.key === 'Escape' && closeSidebar()}
       role="button"
@@ -31,7 +30,7 @@
   {/if}
   
   <!-- Sidebar -->
-  <div class="{asOverlay ? 'fixed left-0 top-0 h-full w-64 z-50' : 'w-64 h-full'} bg-base-100/10 backdrop-blur-lg border-r border-white/20 flex flex-col transition-transform duration-300">
+  <div class="{asOverlay ? 'fixed left-0 top-0 h-full w-64 z-[999999]' : 'w-64 h-full'} bg-base-100/10 backdrop-blur-lg border-r border-white/20 flex flex-col transition-transform duration-300">
     <!-- Logo/Header -->
     <div class="p-4 border-b border-white/20">
       <div class="flex items-center gap-3">

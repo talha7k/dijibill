@@ -1,5 +1,6 @@
 <script>
   import { createEventDispatcher } from 'svelte';
+  import UserMenuDropdown from './UserMenuDropdown.svelte';
   
   export let isAuthenticated = false;
   /** @type {{ username: string, role: string } | null} */
@@ -12,8 +13,24 @@
   
   const dispatch = createEventDispatcher();
   
+  let userMenuOpen = false;
+  let userMenuButton;
+  let userMenuButtonRect = null;
+  
   function toggleSidebar() {
     dispatch('toggle-sidebar');
+  }
+  
+  function toggleUserMenu(event) {
+    event.stopPropagation();
+    if (!userMenuOpen && userMenuButton) {
+      userMenuButtonRect = userMenuButton.getBoundingClientRect();
+    }
+    userMenuOpen = !userMenuOpen;
+  }
+  
+  function closeUserMenu() {
+    userMenuOpen = false;
   }
   
   function showUserProfile() {
@@ -117,45 +134,26 @@
       
       <!-- User Menu -->
       {#if isAuthenticated && currentUser}
-        <div class="dropdown dropdown-end">
-          <div tabindex="0" role="button" class="btn btn-ghost btn-circle text-white">
-            <i class="fas fa-user w-5 h-5"></i>
-          </div>
-          <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[9999] p-2 shadow bg-base-100 rounded-box w-52">
-            <li class="menu-title">
-              <span class="text-xs text-gray-500">Signed in as</span>
-              <span class="font-semibold">{currentUser.username}</span>
-              <span class="text-xs text-gray-500 capitalize">{currentUser.role}</span>
-            </li>
-            <div class="divider my-1"></div>
-            <li>
-              <button class="btn btn-ghost justify-start" on:click={showUserProfile}>
-                <i class="fas fa-user w-4 h-4 mr-2"></i>
-                Profile
-              </button>
-            </li>
-            <li>
-              <button class="btn btn-ghost justify-start" on:click={showAccessControl}>
-                <i class="fas fa-shield-alt w-4 h-4 mr-2"></i>
-                Access Control
-              </button>
-            </li>
-            <li>
-              <button class="btn btn-ghost justify-start" on:click={switchToSettings}>
-                <i class="fas fa-cog w-4 h-4 mr-2"></i>
-                Settings
-              </button>
-            </li>
-            <div class="divider my-1"></div>
-            <li>
-              <button class="btn btn-ghost justify-start text-error" on:click={handleLogout}>
-                <i class="fas fa-sign-out-alt w-4 h-4 mr-2"></i>
-                Logout
-              </button>
-            </li>
-          </ul>
-        </div>
+        <button 
+          bind:this={userMenuButton}
+          class="btn btn-ghost btn-circle text-white"
+          on:click={toggleUserMenu}
+        >
+          <i class="fas fa-user w-5 h-5"></i>
+        </button>
       {/if}
     </div>
   </div>
 </header>
+
+<!-- User Menu Dropdown - Rendered outside of header stacking context -->
+<UserMenuDropdown 
+  {currentUser}
+  isOpen={userMenuOpen}
+  buttonRect={userMenuButtonRect}
+  on:close={closeUserMenu}
+  on:show-user-profile={showUserProfile}
+  on:show-access-control={showAccessControl}
+  on:view-change={switchToSettings}
+  on:logout={handleLogout}
+/>

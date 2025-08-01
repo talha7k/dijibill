@@ -24,5 +24,8 @@
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-glass);
     overflow: hidden;
+    /* Ensure this doesn't create a stacking context that interferes with header dropdowns */
+    position: relative;
+    z-index: 1;
   }
 </style>
