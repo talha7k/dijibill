@@ -215,9 +215,11 @@
       if (editingProduct) {
         // We're editing an existing product, so update it
         await UpdateProduct(product)
+        showDbSuccess('update', 'Product')
       } else {
         // We're creating a new product
         await CreateProduct(product)
+        showDbSuccess('create', 'Product')
       }
       
       await loadProducts()
@@ -225,7 +227,7 @@
       resetProductForm()
     } catch (error) {
       console.error('Error saving product:', error)
-      showDbError('Error saving product: ' + error.message)
+      showDbError(editingProduct ? 'update' : 'create', 'Product', error)
     } finally {
       isLoading = false
     }

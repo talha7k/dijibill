@@ -5,6 +5,9 @@
   import FormField from './components/FormField.svelte'
   import UserModal from './components/UserModal.svelte'
   import AccessControl from './components/AccessControl.svelte'
+  import ConfirmationModal from './components/ConfirmationModal.svelte'
+  import ActionButton from './components/ActionButton.svelte'
+  import IconButton from './components/IconButton.svelte'
   import { showDbSuccess, showDbError } from './stores/notificationStore.js'
   
   let users = []
@@ -15,6 +18,9 @@
   let showAccessControl = false
   let selectedUser = null
   let selectedUserForAccess = null
+  let showDeleteConfirm = false
+  let userToDelete = null
+  let confirmLoading = false
 
   // Reactive filtered users
   $: filteredUsers = users.filter(user => {
@@ -135,21 +141,36 @@
     }
   }
 
-  async function handleDeleteUser(user) {
+  function handleDeleteUser(user) {
     if (user.id === currentUser.id) {
       showDbError('delete', 'User', new Error('You cannot delete your own account'))
       return
     }
 
-    if (confirm(`Are you sure you want to delete user "${user.username}"? This action cannot be undone.`)) {
-      try {
-        await DeleteUser(user.id)
-        await loadUsers()
-        showDbSuccess('delete', 'User')
-      } catch (error) {
-        console.error('Error deleting user:', error)
-        showDbError('delete', 'User', error)
-      }
+    userToDelete = user
+    showDeleteConfirm = true
+  }
+
+  function cancelDelete() {
+    showDeleteConfirm = false
+    userToDelete = null
+  }
+
+  async function confirmDelete() {
+    if (!userToDelete) return
+    
+    try {
+      confirmLoading = true
+      await DeleteUser(userToDelete.id)
+      await loadUsers()
+      showDbSuccess('delete', 'User')
+      showDeleteConfirm = false
+      userToDelete = null
+    } catch (error) {
+      console.error('Error deleting user:', error)
+      showDbError('delete', 'User', error)
+    } finally {
+      confirmLoading = false
     }
   }
 
@@ -201,19 +222,19 @@
       <div class="flex justify-between items-center mb-6">
         <div class="flex gap-2">
           {#if isAdmin}
-            <button class="btn btn-primary" on:click={openAddUserModal}>
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-              </svg>
-              Add User
-            </button>
+            <ActionButton
+              variant="primary"
+              icon="plus"
+              text="Add User"
+              on:click={openAddUserModal}
+            />
           {/if}
-          <button class="btn btn-outline btn-secondary" on:click={() => loadUsers()}>
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-            </svg>
-            Refresh
-          </button>
+          <ActionButton
+            variant="outline"
+            icon="refresh"
+            text="Refresh"
+            on:click={() => loadUsers()}
+          />
         </div>
         <div class="form-control">
           <FormField
@@ -273,54 +294,42 @@
                   <td>
                     <div class="flex gap-1">
                       <!-- View Permissions -->
-                      <button 
-                        class="btn btn-ghost btn-xs" 
-                        on:click={() => openAccessControl(user)}
+                      <IconButton
+                        icon="shield-check"
+                        variant="ghost"
+                        size="xs"
                         title="View Permissions"
-                      >
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-                        </svg>
-                      </button>
+                        on:click={() => openAccessControl(user)}
+                      />
                       
                       {#if isAdmin}
                         <!-- Edit User -->
-                        <button 
-                          class="btn btn-ghost btn-xs" 
-                          on:click={() => openEditUserModal(user)}
+                        <IconButton
+                          icon="edit"
+                          variant="ghost"
+                          size="xs"
                           title="Edit User"
-                        >
-                          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                          </svg>
-                        </button>
+                          on:click={() => openEditUserModal(user)}
+                        />
                         
                         <!-- Toggle Status -->
                         {#if user.id !== currentUser.id}
-                          <button 
-                            class="btn btn-ghost btn-xs" 
-                            on:click={() => toggleUserStatus(user)}
+                          <IconButton
+                            icon={user.is_active ? "times" : "check"}
+                            variant="ghost"
+                            size="xs"
                             title={user.is_active ? 'Deactivate User' : 'Activate User'}
-                          >
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              {#if user.is_active}
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636M5.636 18.364l12.728-12.728"></path>
-                              {:else}
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                              {/if}
-                            </svg>
-                          </button>
+                            on:click={() => toggleUserStatus(user)}
+                          />
                           
                           <!-- Delete User -->
-                          <button 
-                            class="btn btn-ghost btn-xs text-error" 
-                            on:click={() => handleDeleteUser(user)}
+                          <IconButton
+                            icon="trash"
+                            variant="danger"
+                            size="xs"
                             title="Delete User"
-                          >
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                            </svg>
-                          </button>
+                            on:click={() => handleDeleteUser(user)}
+                          />
                         {/if}
                       {/if}
                     </div>
@@ -337,9 +346,12 @@
                         {searchTerm ? 'No users found matching your search' : 'No users found'}
                       </p>
                       {#if isAdmin && !searchTerm}
-                        <button class="btn btn-primary btn-sm" on:click={openAddUserModal}>
-                          Add your first user
-                        </button>
+                        <ActionButton
+                          variant="primary"
+                          size="sm"
+                          text="Add your first user"
+                          on:click={openAddUserModal}
+                        />
                       {/if}
                     </div>
                   </td>
@@ -385,3 +397,15 @@
     on:close={() => showAccessControl = false}
   />
 {/if}
+
+<!-- Confirmation Modal -->
+<ConfirmationModal
+  show={showDeleteConfirm}
+  title="Delete User"
+  message={userToDelete ? `Are you sure you want to delete user "${userToDelete.username}"? This action cannot be undone.` : ''}
+  confirmText="Delete"
+  cancelText="Cancel"
+  loading={confirmLoading}
+  on:confirm={confirmDelete}
+  on:cancel={cancelDelete}
+/>

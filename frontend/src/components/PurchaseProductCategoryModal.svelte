@@ -1,6 +1,8 @@
 <script>
   import { createEventDispatcher } from 'svelte'
   import FormField from './FormField.svelte'
+  import ActionButton from './ActionButton.svelte'
+  import IconButton from './IconButton.svelte'
 
   export let show = false
   export let editingCategory = null
@@ -25,9 +27,13 @@
         <h3 class="font-bold text-lg text-white">
           {editingCategory ? 'Edit Purchase Product Category' : 'New Purchase Product Category'}
         </h3>
-        <button class="btn btn-sm btn-circle btn-ghost text-white" on:click={closeModal}>
-          <i class="fas fa-times w-4 h-4"></i>
-        </button>
+        <IconButton
+          icon="x"
+          variant="ghost"
+          size="sm"
+          customClass="text-white"
+          on:click={closeModal}
+        />
       </div>
       
       <div class="space-y-4">
@@ -70,13 +76,18 @@
       </div>
 
       <div class="modal-action">
-        <button class="btn btn-ghost" on:click={closeModal}>Cancel</button>
-        <button class="btn btn-primary" on:click={saveCategory} disabled={isLoading}>
-          {#if isLoading}
-            <span class="loading loading-spinner loading-sm"></span>
-          {/if}
-          {editingCategory ? 'Update' : 'Create'} Category
-        </button>
+        <ActionButton
+          variant="ghost"
+          text="Cancel"
+          on:click={closeModal}
+        />
+        <ActionButton
+          variant="primary"
+          text="{editingCategory ? 'Update' : 'Create'} Category"
+          loading={isLoading}
+          disabled={isLoading}
+          on:click={saveCategory}
+        />
       </div>
     </div>
   </div>

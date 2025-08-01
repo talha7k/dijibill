@@ -7,6 +7,7 @@
   import ClickableStatusBadge from './components/ClickableStatusBadge.svelte'
   import ConfirmationModal from './components/ConfirmationModal.svelte'
   import InventoryUpdateModal from './components/InventoryUpdateModal.svelte'
+  import ActionButton from './components/ActionButton.svelte'
   import { showDbSuccess, showDbError } from './stores/notificationStore.js'
 
   /** @type {Array<any>} */
@@ -324,18 +325,18 @@
   icon="invoice"
 >
   <svelte:fragment slot="actions">
-    <button class="btn btn-secondary-outline" on:click={handleImport}>
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
-      </svg>
-      Import
-    </button>
-    <button class="btn btn-primary" on:click={handleAddInvoice}>
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-      </svg>
-      Add Invoice
-    </button>
+    <ActionButton
+      variant="outline"
+      icon="upload"
+      text="Import"
+      on:click={handleImport}
+    />
+    <ActionButton
+      variant="primary"
+      icon="plus"
+      text="Add Invoice"
+      on:click={handleAddInvoice}
+    />
   </svelte:fragment>
 
   <DataTable

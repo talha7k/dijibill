@@ -1,5 +1,6 @@
 <script>
   import { createEventDispatcher, onMount, onDestroy } from 'svelte';
+  import ActionButton from '../ActionButton.svelte';
   
   export let isOpen = false;
   /** @type {{ username: string, role: string } | null} */
@@ -92,29 +93,41 @@
     </li>
     <div class="divider my-1"></div>
     <li>
-      <button class="btn btn-ghost justify-start" on:click={showUserProfile}>
-        <i class="fas fa-user w-4 h-4 mr-2"></i>
-        Profile
-      </button>
+      <ActionButton
+        variant="ghost"
+        customClass="justify-start"
+        icon="user"
+        text="Profile"
+        on:click={showUserProfile}
+      />
     </li>
     <li>
-      <button class="btn btn-ghost justify-start" on:click={showAccessControl}>
-        <i class="fas fa-shield-alt w-4 h-4 mr-2"></i>
-        Access Control
-      </button>
+      <ActionButton
+        variant="ghost"
+        customClass="justify-start"
+        icon="shield"
+        text="Access Control"
+        on:click={showAccessControl}
+      />
     </li>
     <li>
-      <button class="btn btn-ghost justify-start" on:click={switchToSettings}>
-        <i class="fas fa-cog w-4 h-4 mr-2"></i>
-        Settings
-      </button>
+      <ActionButton
+        variant="ghost"
+        customClass="justify-start"
+        icon="cog"
+        text="Settings"
+        on:click={switchToSettings}
+      />
     </li>
     <div class="divider my-1"></div>
     <li>
-      <button class="btn btn-ghost justify-start text-error" on:click={handleLogout}>
-        <i class="fas fa-sign-out-alt w-4 h-4 mr-2"></i>
-        Logout
-      </button>
+      <ActionButton
+        variant="ghost"
+        customClass="justify-start text-error"
+        icon="logout"
+        text="Logout"
+        on:click={handleLogout}
+      />
     </li>
   </ul>
 {/if}

@@ -6,6 +6,7 @@
   import SupplierModal from './components/SupplierModal.svelte'
   import StatusBadge from './components/StatusBadge.svelte'
   import ConfirmationModal from './components/ConfirmationModal.svelte'
+  import ActionButton from './components/ActionButton.svelte'
   import { showDbSuccess, showDbError } from './stores/notificationStore.js'
 
   /** @type {Array<{id: number, company_id: number, company_name: string, company_name_arabic: string, contact_person: string, contact_person_arabic: string, email: string, phone: string, vat_number: string, address: string, address_arabic: string, city: string, city_arabic: string, country: string, country_arabic: string, payment_terms: string, active: boolean, created_at: any, updated_at: any}>} */
@@ -232,14 +233,18 @@
   icon="fa-truck"
 >
   <svelte:fragment slot="actions">
-    <button class="btn btn-secondary-outline" on:click={handleImport}>
-      <i class="fas fa-upload"></i>
-      Import
-    </button>
-    <button class="btn btn-primary" on:click={handleAddSupplier}>
-      <i class="fas fa-plus"></i>
-      Add Supplier
-    </button>
+    <ActionButton
+      variant="outline"
+      icon="upload"
+      text="Import"
+      on:click={handleImport}
+    />
+    <ActionButton
+      variant="primary"
+      icon="plus"
+      text="Add Supplier"
+      on:click={handleAddSupplier}
+    />
   </svelte:fragment>
 
   <DataTable

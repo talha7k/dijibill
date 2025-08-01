@@ -2,6 +2,7 @@
   import { createEventDispatcher } from 'svelte'
   import Modal from './Modal.svelte'
   import FormField from './FormField.svelte'
+  import ActionButton from './ActionButton.svelte'
 
   const dispatch = createEventDispatcher()
 
@@ -268,17 +269,18 @@
         </div>
 
         <div class="flex justify-end gap-2 pt-4">
-          <button type="button" class="btn btn-ghost" on:click={closeModal}>
-            Cancel
-          </button>
-          <button type="submit" class="btn btn-primary" disabled={isLoading}>
-            {#if isLoading}
-              <span class="loading loading-spinner loading-sm"></span>
-              Updating...
-            {:else}
-              Update Profile
-            {/if}
-          </button>
+          <ActionButton
+            variant="ghost"
+            text="Cancel"
+            on:click={closeModal}
+          />
+          <ActionButton
+            variant="primary"
+            text={isLoading ? 'Updating...' : 'Update Profile'}
+            loading={isLoading}
+            disabled={isLoading}
+            on:click={handleUpdateProfile}
+          />
         </div>
       </form>
     {:else}
@@ -309,17 +311,18 @@
         />
 
         <div class="flex justify-end gap-2 pt-4">
-          <button type="button" class="btn btn-ghost" on:click={closeModal}>
-            Cancel
-          </button>
-          <button type="submit" class="btn btn-primary" disabled={isLoading}>
-            {#if isLoading}
-              <span class="loading loading-spinner loading-sm"></span>
-              Changing...
-            {:else}
-              Change Password
-            {/if}
-          </button>
+          <ActionButton
+            variant="ghost"
+            text="Cancel"
+            on:click={closeModal}
+          />
+          <ActionButton
+            variant="primary"
+            text={isLoading ? 'Changing...' : 'Change Password'}
+            loading={isLoading}
+            disabled={isLoading}
+            on:click={handleChangePassword}
+          />
         </div>
       </form>
     {/if}

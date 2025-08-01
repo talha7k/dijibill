@@ -117,7 +117,7 @@
   function handlePurchaseProductReports() {
     // TODO: Implement purchase product reports functionality
     console.log('Purchase product reports functionality - to be implemented')
-    showDbError('Purchase product reports functionality will be implemented soon!')
+    showDbError('info', 'Reports', new Error('Purchase product reports functionality will be implemented soon!'))
   }
 
   function handleEditPurchaseProduct(event) {
@@ -148,11 +148,12 @@
       confirmLoading = true;
       await DeletePurchaseProduct(purchaseProductToDelete.id);
       await loadPurchaseProducts();
+      showDbSuccess('delete', 'Purchase Product');
       showDeleteConfirm = false;
       purchaseProductToDelete = null;
     } catch (error) {
       console.error('Error deleting purchase product:', error);
-      showDbError('Error deleting purchase product: ' + error.message);
+      showDbError('delete', 'Purchase Product', error);
     } finally {
       confirmLoading = false;
     }
@@ -171,9 +172,11 @@
       if (editingPurchaseProduct) {
         // We're editing an existing purchase product, so update it
         await UpdatePurchaseProduct(purchaseProduct)
+        showDbSuccess('update', 'Purchase Product')
       } else {
         // We're creating a new purchase product
         await CreatePurchaseProduct(purchaseProduct)
+        showDbSuccess('create', 'Purchase Product')
       }
       
       await loadPurchaseProducts()
@@ -181,7 +184,7 @@
       resetPurchaseProductForm()
     } catch (error) {
       console.error('Error saving purchase product:', error)
-      showDbError('Error saving purchase product: ' + error.message)
+      showDbError(editingPurchaseProduct ? 'update' : 'create', 'Purchase Product', error)
     } finally {
       isLoading = false
     }

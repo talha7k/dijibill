@@ -1,5 +1,6 @@
 <script>
   import { createEventDispatcher } from 'svelte';
+  import ActionButton from '../ActionButton.svelte';
   
   export let wailsReady = false;
   export let wailsError = null;
@@ -21,9 +22,11 @@
           <h3 class="font-bold">Initialization Error</h3>
           <div class="text-xs">{wailsError}</div>
         </div>
-        <button class="btn btn-sm" on:click={retryInitialization}>
-          Retry
-        </button>
+        <ActionButton
+          size="sm"
+          text="Retry"
+          on:click={retryInitialization}
+        />
       </div>
     {:else}
       <!-- Loading State -->

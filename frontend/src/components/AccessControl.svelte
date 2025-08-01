@@ -1,6 +1,7 @@
 <script>
   import { createEventDispatcher } from 'svelte'
   import Modal from './Modal.svelte'
+  import ActionButton from './ActionButton.svelte'
 
   const dispatch = createEventDispatcher()
 
@@ -158,9 +159,11 @@
 
     <!-- Close Button -->
     <div class="flex justify-end pt-4">
-      <button class="btn btn-primary" on:click={closeModal}>
-        Close
-      </button>
+      <ActionButton
+        variant="primary"
+        text="Close"
+        on:click={closeModal}
+      />
     </div>
   </div>
 </Modal>

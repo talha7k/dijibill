@@ -1,5 +1,6 @@
 <script>
   import FormField from './FormField.svelte'
+  import IconButton from './IconButton.svelte'
   
   export let productForm = {}
   export let taxRates = []
@@ -36,9 +37,11 @@
                 <option value={rate.rate}>{rate.name} ({rate.rate}%)</option>
               {/each}
             </select>
-            <button type="button" class="btn-glass" title="Add Tax Rate">
-              <i class="fas fa-plus w-4 h-4"></i>
-            </button>
+            <IconButton
+              icon="plus"
+              variant="outline"
+              title="Add Tax Rate"
+            />
           </div>
         </div>
 

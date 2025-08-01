@@ -2,6 +2,7 @@
   import { createEventDispatcher } from 'svelte'
   import Modal from './Modal.svelte'
   import FormField from './FormField.svelte'
+  import ActionButton from './ActionButton.svelte'
 
   const dispatch = createEventDispatcher()
 
@@ -278,21 +279,18 @@
 
     <!-- Form Actions -->
     <div class="modal-action">
-      <button type="button" class="btn btn-ghost" on:click={closeModal}>
-        Cancel
-      </button>
-      <button 
-        type="submit" 
-        class="btn btn-primary"
-        class:loading={isLoading}
+      <ActionButton
+        variant="ghost"
+        text="Cancel"
+        on:click={closeModal}
+      />
+      <ActionButton
+        variant="primary"
+        text={isLoading ? 'Saving...' : (user ? 'Update User' : 'Create User')}
+        loading={isLoading}
         disabled={isLoading}
-      >
-        {#if isLoading}
-          Saving...
-        {:else}
-          {user ? 'Update User' : 'Create User'}
-        {/if}
-      </button>
+        on:click={handleSubmit}
+      />
     </div>
   </form>
 </Modal>
