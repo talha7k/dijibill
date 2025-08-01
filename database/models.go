@@ -235,7 +235,8 @@ type Company struct {
 	CityArabic    string `json:"city_arabic"`
 	Country       string `json:"country"`
 	CountryArabic string `json:"country_arabic"`
-	Logo          string `json:"logo"`
+	Logo          string `json:"logo"`          // Legacy field for backward compatibility
+	LogoFileID    *int   `json:"logo_file_id"` // New field for file ID reference
 }
 
 // PaymentType represents different payment methods

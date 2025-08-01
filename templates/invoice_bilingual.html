@@ -272,15 +272,14 @@
             <div class="info-box">
                 <div class="section-title">الفاتورة إلى | Bill To</div>
                 <div class="info-pair">
-                    <div class="primary">{{.Invoice.Customer.NameArabic}}</div>
-                    <div class="secondary" lang="en">{{.Invoice.Customer.Name}}</div>
+                    <div class="primary">{{.Invoice.Customer.NameArabic}} | {{.Invoice.Customer.Name}}</div>
                 </div>
                 <div class="info-pair">
                     <div class="primary">{{.Invoice.Customer.AddressArabic}}</div>
                     <div class="secondary" lang="en">{{.Invoice.Customer.Address}}</div>
                 </div>
                 <div class="info-pair" style="margin-top: 10px;">
-                    <div class="primary">الرقم الضريبي: {{.Invoice.Customer.VATNumber}}</div>
+                    <div class="primary"> VAT Number | الرقم الضريبي: {{.Invoice.Customer.VATNumber}}</div>
                 </div>
             </div>
             <div class="info-box">

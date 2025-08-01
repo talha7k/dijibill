@@ -7,11 +7,11 @@ import (
 
 // Company operations
 func (d *Database) GetCompany() (*Company, error) {
-	query := `SELECT id, name, name_arabic, vat_number, cr_number, email, phone, address, address_arabic, city, city_arabic, country, country_arabic, COALESCE(logo, '') as logo FROM companies LIMIT 1`
+	query := `SELECT id, name, name_arabic, vat_number, cr_number, email, phone, address, address_arabic, city, city_arabic, country, country_arabic, COALESCE(logo, '') as logo, logo_file_id FROM companies LIMIT 1`
 
 	var c Company
 	err := d.db.QueryRow(query).Scan(&c.ID, &c.Name, &c.NameArabic, &c.VATNumber, &c.CRNumber, &c.Email, &c.Phone,
-		&c.Address, &c.AddressArabic, &c.City, &c.CityArabic, &c.Country, &c.CountryArabic, &c.Logo)
+		&c.Address, &c.AddressArabic, &c.City, &c.CityArabic, &c.Country, &c.CountryArabic, &c.Logo, &c.LogoFileID)
 	if err != nil {
 		return nil, err
 	}
@@ -19,7 +19,7 @@ func (d *Database) GetCompany() (*Company, error) {
 }
 
 func (d *Database) GetCompanies() ([]Company, error) {
-	query := `SELECT id, name, name_arabic, vat_number, cr_number, email, phone, address, address_arabic, city, city_arabic, country, country_arabic, COALESCE(logo, '') as logo FROM companies ORDER BY name`
+	query := `SELECT id, name, name_arabic, vat_number, cr_number, email, phone, address, address_arabic, city, city_arabic, country, country_arabic, COALESCE(logo, '') as logo, logo_file_id FROM companies ORDER BY name`
 
 	rows, err := d.db.Query(query)
 	if err != nil {
@@ -31,7 +31,7 @@ func (d *Database) GetCompanies() ([]Company, error) {
 	for rows.Next() {
 		var c Company
 		err := rows.Scan(&c.ID, &c.Name, &c.NameArabic, &c.VATNumber, &c.CRNumber, &c.Email, &c.Phone,
-			&c.Address, &c.AddressArabic, &c.City, &c.CityArabic, &c.Country, &c.CountryArabic, &c.Logo)
+			&c.Address, &c.AddressArabic, &c.City, &c.CityArabic, &c.Country, &c.CountryArabic, &c.Logo, &c.LogoFileID)
 		if err != nil {
 			return nil, fmt.Errorf("error scanning company: %v", err)
 		}
@@ -42,11 +42,11 @@ func (d *Database) GetCompanies() ([]Company, error) {
 }
 
 func (d *Database) GetCompanyByID(id int) (*Company, error) {
-	query := `SELECT id, name, name_arabic, vat_number, cr_number, email, phone, address, address_arabic, city, city_arabic, country, country_arabic, COALESCE(logo, '') as logo FROM companies WHERE id = ?`
+	query := `SELECT id, name, name_arabic, vat_number, cr_number, email, phone, address, address_arabic, city, city_arabic, country, country_arabic, COALESCE(logo, '') as logo, logo_file_id FROM companies WHERE id = ?`
 
 	var c Company
 	err := d.db.QueryRow(query, id).Scan(&c.ID, &c.Name, &c.NameArabic, &c.VATNumber, &c.CRNumber, &c.Email, &c.Phone,
-		&c.Address, &c.AddressArabic, &c.City, &c.CityArabic, &c.Country, &c.CountryArabic, &c.Logo)
+		&c.Address, &c.AddressArabic, &c.City, &c.CityArabic, &c.Country, &c.CountryArabic, &c.Logo, &c.LogoFileID)
 	if err != nil {
 		return nil, fmt.Errorf("error getting company: %v", err)
 	}
@@ -54,12 +54,12 @@ func (d *Database) GetCompanyByID(id int) (*Company, error) {
 }
 
 func (d *Database) CreateCompany(company *Company) error {
-	query := `INSERT INTO companies (name, name_arabic, vat_number, cr_number, email, phone, address, address_arabic, city, city_arabic, country, country_arabic, logo) 
-			  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULLIF(?, ''))`
+	query := `INSERT INTO companies (name, name_arabic, vat_number, cr_number, email, phone, address, address_arabic, city, city_arabic, country, country_arabic, logo, logo_file_id) 
+			  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULLIF(?, ''), ?)`
 
 	result, err := d.db.Exec(query, company.Name, company.NameArabic, company.VATNumber, company.CRNumber,
 		company.Email, company.Phone, company.Address, company.AddressArabic, company.City, company.CityArabic,
-		company.Country, company.CountryArabic, company.Logo)
+		company.Country, company.CountryArabic, company.Logo, company.LogoFileID)
 	if err != nil {
 		return fmt.Errorf("error creating company: %v", err)
 	}
@@ -76,11 +76,11 @@ func (d *Database) CreateCompany(company *Company) error {
 func (d *Database) UpdateCompany(company *Company) error {
 	query := `
 		UPDATE companies SET name = ?, name_arabic = ?, vat_number = ?, cr_number = ?, email = ?, phone = ?, 
-		address = ?, address_arabic = ?, city = ?, city_arabic = ?, country = ?, country_arabic = ?, logo = NULLIF(?, ''), updated_at = ?
+		address = ?, address_arabic = ?, city = ?, city_arabic = ?, country = ?, country_arabic = ?, logo = NULLIF(?, ''), logo_file_id = ?, updated_at = ?
 		WHERE id = ?`
 
 	_, err := d.db.Exec(query, company.Name, company.NameArabic, company.VATNumber, company.CRNumber,
 		company.Email, company.Phone, company.Address, company.AddressArabic, company.City, company.CityArabic,
-		company.Country, company.CountryArabic, company.Logo, time.Now(), company.ID)
+		company.Country, company.CountryArabic, company.Logo, company.LogoFileID, time.Now(), company.ID)
 	return err
 }

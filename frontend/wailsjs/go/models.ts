@@ -15,6 +15,7 @@ export namespace database {
 	    country: string;
 	    country_arabic: string;
 	    logo: string;
+	    logo_file_id?: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new Company(source);
@@ -36,6 +37,7 @@ export namespace database {
 	        this.country = source["country"];
 	        this.country_arabic = source["country_arabic"];
 	        this.logo = source["logo"];
+	        this.logo_file_id = source["logo_file_id"];
 	    }
 	}
 	export class Customer {

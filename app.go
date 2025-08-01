@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/base64"
 	"fmt"
@@ -52,7 +53,7 @@ func (a *App) startup(ctx context.Context) {
 	}
 
 	// Initialize HTML invoice service
-	a.htmlInvoiceService = NewHTMLInvoiceService(a.ctx, a.db)
+	a.htmlInvoiceService = NewHTMLInvoiceService(a.ctx, a.db, a.fileService)
 
 	// Initialize file service
 	fileDBPath := filepath.Join(homeDir, "dijibill_files.db")
@@ -1448,6 +1449,154 @@ func (a *App) Login(username, password string) (*AuthContext, error) {
 }
 
 // File Management Methods
+
+// UploadCompanyLogo uploads a company logo file and returns the file ID
+func (a *App) UploadCompanyLogo() (int, error) {
+	if a.fileService == nil {
+		return 0, fmt.Errorf("file service not initialized")
+	}
+
+	// Open file dialog for images only
+	options := runtime.OpenDialogOptions{
+		Title: "Select Company Logo",
+		Filters: []runtime.FileFilter{
+			{
+				DisplayName: "Images",
+				Pattern:     "*.jpg;*.jpeg;*.png;*.gif;*.bmp;*.webp",
+			},
+		},
+	}
+
+	filePath, err := runtime.OpenFileDialog(a.ctx, options)
+	if err != nil {
+		return 0, fmt.Errorf("failed to open file dialog: %v", err)
+	}
+
+	if filePath == "" {
+		return 0, fmt.Errorf("no file selected")
+	}
+
+	// Read the file
+	file, err := os.Open(filePath)
+	if err != nil {
+		return 0, fmt.Errorf("failed to open file: %v", err)
+	}
+	defer file.Close()
+
+	// Get file info
+	fileInfo, err := file.Stat()
+	if err != nil {
+		return 0, fmt.Errorf("failed to get file info: %v", err)
+	}
+
+	// Create multipart file header
+	header := &multipart.FileHeader{
+		Filename: filepath.Base(filePath),
+		Size:     fileInfo.Size(),
+		Header:   make(map[string][]string),
+	}
+
+	// Detect MIME type based on file extension
+	ext := strings.ToLower(filepath.Ext(filePath))
+	switch ext {
+	case ".jpg", ".jpeg":
+		header.Header["Content-Type"] = []string{"image/jpeg"}
+	case ".png":
+		header.Header["Content-Type"] = []string{"image/png"}
+	case ".gif":
+		header.Header["Content-Type"] = []string{"image/gif"}
+	case ".bmp":
+		header.Header["Content-Type"] = []string{"image/bmp"}
+	case ".webp":
+		header.Header["Content-Type"] = []string{"image/webp"}
+	default:
+		return 0, fmt.Errorf("unsupported image format: %s", ext)
+	}
+
+	// Get current user ID
+	var userID *int
+	if a.currentSession != nil {
+		userID = &a.currentSession.UserID
+	}
+
+	// Save file with compression (if applicable)
+	metadata, err := a.fileService.SaveFileWithCompression(file, header, "company_logos", "company", 0, userID)
+	if err != nil {
+		return 0, fmt.Errorf("failed to save file: %v", err)
+	}
+
+	// Return file ID as int
+	return metadata.ID, nil
+}
+
+// bytesReaderCloser wraps bytes.Reader to implement multipart.File interface
+type bytesReaderCloser struct {
+	*bytes.Reader
+}
+
+func (brc *bytesReaderCloser) Close() error {
+	return nil // bytes.Reader doesn't need closing
+}
+
+// UploadCompanyLogoFromData uploads a company logo from base64 data and returns the file ID
+func (a *App) UploadCompanyLogoFromData(base64Data, filename, mimeType string) (int, error) {
+	if a.fileService == nil {
+		return 0, fmt.Errorf("file service not initialized")
+	}
+
+	// Decode base64 data
+	data, err := base64.StdEncoding.DecodeString(base64Data)
+	if err != nil {
+		return 0, fmt.Errorf("failed to decode base64 data: %v", err)
+	}
+
+	// Create a reader from the data with Close method
+	reader := &bytesReaderCloser{bytes.NewReader(data)}
+
+	// Create multipart file header
+	header := &multipart.FileHeader{
+		Filename: filename,
+		Size:     int64(len(data)),
+		Header:   make(map[string][]string),
+	}
+
+	// Set content type
+	header.Header["Content-Type"] = []string{mimeType}
+
+	// Get current user ID
+	var userID *int
+	if a.currentSession != nil {
+		userID = &a.currentSession.UserID
+	}
+
+	// Save file with compression (if applicable)
+	metadata, err := a.fileService.SaveFileWithCompression(reader, header, "company_logos", "company", 0, userID)
+	if err != nil {
+		return 0, fmt.Errorf("failed to save file: %v", err)
+	}
+
+	// Return file ID as int
+	return metadata.ID, nil
+}
+
+// GetCompanyLogoAsBase64 returns the company logo as base64 data for templates
+func (a *App) GetCompanyLogoAsBase64(fileID int) (string, error) {
+	if a.fileService == nil {
+		return "", fmt.Errorf("file service not initialized")
+	}
+
+	content, metadata, err := a.fileService.GetFileContent(fileID)
+	if err != nil {
+		return "", fmt.Errorf("failed to get file content: %v", err)
+	}
+
+	if metadata == nil {
+		return "", fmt.Errorf("file not found")
+	}
+
+	// Convert to base64
+	return base64.StdEncoding.EncodeToString(content), nil
+}
 
 // UploadFile uploads a file with automatic image compression
 func (a *App) UploadFile(category, entityType string, entityID int) (string, error) {

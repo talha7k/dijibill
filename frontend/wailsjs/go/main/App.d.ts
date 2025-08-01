@@ -88,6 +88,8 @@ export function GetCompany():Promise<database.Company>;
 
 export function GetCompanyByID(arg1:number):Promise<database.Company>;
 
+export function GetCompanyLogoAsBase64(arg1:number):Promise<string>;
+
 export function GetCompressionSettings():Promise<Record<string, any>>;
 
 export function GetCurrentUser():Promise<database.User>;
@@ -225,6 +227,10 @@ export function UpdateTaxRate(arg1:database.TaxRate):Promise<void>;
 export function UpdateUnitOfMeasurement(arg1:database.UnitOfMeasurement):Promise<void>;
 
 export function UpdateUser(arg1:database.User):Promise<void>;
+
+export function UploadCompanyLogo():Promise<number>;
+
+export function UploadCompanyLogoFromData(arg1:string,arg2:string,arg3:string):Promise<number>;
 
 export function UploadFile(arg1:string,arg2:string,arg3:number):Promise<string>;
 

@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"fmt"
 	"log"
 	"os"
@@ -19,10 +20,11 @@ type HTMLInvoiceService struct {
 	ctx             context.Context
 	db              *database.Database
 	templateService *TemplateService
+	fileService     *FileService
 }
 
 // NewHTMLInvoiceService creates a new HTML invoice service
-func NewHTMLInvoiceService(ctx context.Context, db *database.Database) *HTMLInvoiceService {
+func NewHTMLInvoiceService(ctx context.Context, db *database.Database, fileService *FileService) *HTMLInvoiceService {
 	templateService, err := NewTemplateService()
 	if err != nil {
 		log.Printf("Warning: Failed to initialize template service: %v", err)
@@ -33,6 +35,7 @@ func NewHTMLInvoiceService(ctx context.Context, db *database.Database) *HTMLInvo
 		ctx:             ctx,
 		db:              db,
 		templateService: templateService,
+		fileService:     fileService,
 	}
 }
 
@@ -123,6 +126,17 @@ func (h *HTMLInvoiceService) GenerateInvoiceHTMLWithLanguage(invoiceID int, lang
 			CountryArabic: "البلد",
 			VATNumber:     "VAT Number",
 			CRNumber:      "CR Number",
+		}
+	}
+
+	// Load company logo from file system if LogoFileID is available
+	if company.LogoFileID != nil && *company.LogoFileID > 0 && h.fileService != nil {
+		content, _, fileErr := h.fileService.GetFileContent(*company.LogoFileID)
+		if fileErr == nil && content != nil {
+			// Convert to base64 for template usage
+			company.Logo = base64.StdEncoding.EncodeToString(content)
+		} else {
+			log.Printf("Warning: Could not load logo file ID %d: %v", *company.LogoFileID, fileErr)
 		}
 	}
 

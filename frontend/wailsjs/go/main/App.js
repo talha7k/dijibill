@@ -170,6 +170,10 @@ export function GetCompanyByID(arg1) {
   return window['go']['main']['App']['GetCompanyByID'](arg1);
 }
 
+export function GetCompanyLogoAsBase64(arg1) {
+  return window['go']['main']['App']['GetCompanyLogoAsBase64'](arg1);
+}
+
 export function GetCompressionSettings() {
   return window['go']['main']['App']['GetCompressionSettings']();
 }
@@ -444,6 +448,14 @@ export function UpdateUnitOfMeasurement(arg1) {
 
 export function UpdateUser(arg1) {
   return window['go']['main']['App']['UpdateUser'](arg1);
+}
+
+export function UploadCompanyLogo() {
+  return window['go']['main']['App']['UploadCompanyLogo']();
+}
+
+export function UploadCompanyLogoFromData(arg1, arg2, arg3) {
+  return window['go']['main']['App']['UploadCompanyLogoFromData'](arg1, arg2, arg3);
 }
 
 export function UploadFile(arg1, arg2, arg3) {

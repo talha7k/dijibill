@@ -1,6 +1,6 @@
 <script>
-  import { GetCompany, UpdateCompany } from '../../wailsjs/go/main/App.js'
-  import { createEventDispatcher } from 'svelte'
+  import { GetCompany, UpdateCompany, UploadCompanyLogo, UploadCompanyLogoFromData, GetCompanyLogoAsBase64 } from '../../wailsjs/go/main/App.js'
+  import { createEventDispatcher, onMount } from 'svelte'
   import FormField from './FormField.svelte'
 
   const dispatch = createEventDispatcher()
@@ -34,12 +34,30 @@
   const ALLOWED_TYPES = ['image/webp', 'image/png', 'image/svg+xml', 'image/jpeg', 'image/jpg']
   const MAX_SIZE = 500 * 1024 // 500KB in bytes
 
-  function handleLogoUpload(event) {
-    const target = event.target
-    const file = target.files?.[0]
-    logoError = ''
+  // Load existing logo on component mount
+  onMount(async () => {
+    if (companySettings.logo_file_id && companySettings.logo_file_id > 0) {
+      try {
+        const base64Logo = await GetCompanyLogoAsBase64(companySettings.logo_file_id)
+        if (base64Logo) {
+          logoPreview = `data:image/jpeg;base64,${base64Logo}`
+        }
+      } catch (error) {
+        console.error('Error loading existing logo:', error)
+        // If file not found, clear the file ID
+        companySettings.logo_file_id = null
+      }
+    } else if (companySettings.logo) {
+      // Fallback to legacy base64 logo
+      logoPreview = companySettings.logo
+    }
+  })
 
+  async function handleLogoUpload(event) {
+    const file = event.target.files?.[0]
     if (!file) return
+
+    logoError = ''
 
     // Validate file type
     if (!ALLOWED_TYPES.includes(file.type)) {
@@ -55,25 +73,46 @@
       return
     }
 
-    // Convert to base64 and preview
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      const result = e.target?.result
-      if (typeof result === 'string') {
-        logoPreview = result
-        companySettings.logo = result
+    try {
+      // Convert file to base64
+      const reader = new FileReader()
+      reader.onload = async (e) => {
+        try {
+          const result = e.target.result
+          if (typeof result !== 'string') return
+          
+          const dataURL = result
+          const base64Data = dataURL.split(',')[1] // Remove data:image/...;base64, prefix
+          
+          // Upload the file and get the file ID
+          const fileID = await UploadCompanyLogoFromData(base64Data, file.name, file.type)
+          if (fileID > 0) {
+            // Store the file ID in company settings
+            companySettings.logo_file_id = fileID
+            // Clear the old base64 logo
+            companySettings.logo = ''
+            
+            // Set preview directly from the uploaded file
+            logoPreview = dataURL
+          }
+        } catch (error) {
+          console.error('Error uploading logo:', error)
+          logoError = 'Error uploading file. Please try again.'
+          if (fileInput) fileInput.value = ''
+        }
       }
-    }
-    reader.onerror = () => {
+      reader.readAsDataURL(file)
+    } catch (error) {
+      console.error('Error reading file:', error)
       logoError = 'Error reading file. Please try again.'
       if (fileInput) fileInput.value = ''
     }
-    reader.readAsDataURL(file)
   }
 
   function removeLogo() {
     logoPreview = ''
     companySettings.logo = ''
+    companySettings.logo_file_id = null
     logoError = ''
     if (fileInput) fileInput.value = ''
   }
