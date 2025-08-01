@@ -549,47 +549,7 @@ func (d *Database) runMigrations() error {
 		}
 	}
 
-	// Check if storage_base_path column exists in system_settings table
-	columnExists = false
-	err = d.db.QueryRow("SELECT COUNT(*) FROM pragma_table_info('system_settings') WHERE name='storage_base_path'").Scan(&columnExists)
-	if err != nil {
-		return err
-	}
 
-	// Add new storage and file database configuration columns if they don't exist
-	if !columnExists {
-		storageColumns := []string{
-			"ALTER TABLE system_settings ADD COLUMN storage_type TEXT DEFAULT 'local'",
-			"ALTER TABLE system_settings ADD COLUMN storage_base_path TEXT DEFAULT './app_images'",
-			"ALTER TABLE system_settings ADD COLUMN file_db_path TEXT DEFAULT './files.db'",
-			"ALTER TABLE system_settings ADD COLUMN file_db_sync_url TEXT DEFAULT ''",
-			"ALTER TABLE system_settings ADD COLUMN file_db_sync_token TEXT DEFAULT ''",
-			"ALTER TABLE system_settings ADD COLUMN file_db_auto_sync BOOLEAN DEFAULT 0",
-			"ALTER TABLE system_settings ADD COLUMN file_db_sync_interval INTEGER DEFAULT 300",
-		}
-
-		for _, columnQuery := range storageColumns {
-			if _, err := d.db.Exec(columnQuery); err != nil {
-				return fmt.Errorf("error adding storage configuration column: %v", err)
-			}
-		}
-
-		// Update existing records with default values
-		_, err = d.db.Exec(`UPDATE system_settings SET 
-			storage_type = 'local',
-			storage_base_path = './app_images',
-			file_db_path = './files.db',
-			file_db_sync_url = '',
-			file_db_sync_token = '',
-			file_db_auto_sync = 0,
-			file_db_sync_interval = 300
-		WHERE storage_base_path IS NULL OR storage_base_path = ''`)
-		if err != nil {
-			return fmt.Errorf("error updating existing system_settings with storage defaults: %v", err)
-		}
-
-		log.Println("Added storage and file database configuration columns to system_settings table")
-	}
 
 	// Check if logo_file_id column exists in companies table
 	columnExists = false

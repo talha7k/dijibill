@@ -38,8 +38,6 @@ export function CreateUnitOfMeasurement(arg1:database.UnitOfMeasurement):Promise
 
 export function CreateUser(arg1:database.User):Promise<void>;
 
-export function DebugSystemSettingsSchema():Promise<Array<string>>;
-
 export function DeleteCustomer(arg1:number):Promise<void>;
 
 export function DeleteFile(arg1:number):Promise<void>;
@@ -69,8 +67,6 @@ export function DeleteUnitOfMeasurement(arg1:number):Promise<void>;
 export function DeleteUser(arg1:number):Promise<void>;
 
 export function DownloadInvoicePDF(arg1:number):Promise<void>;
-
-export function ForceRunMigrations():Promise<void>;
 
 export function GenerateInvoiceHTML(arg1:number):Promise<string>;
 

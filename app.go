@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"context"
-	"database/sql"
 	"encoding/base64"
 	"fmt"
 	"log"
@@ -1398,59 +1397,9 @@ func (a *App) GetSystemSettings() (*database.SystemSettings, error) {
 	return a.db.GetSystemSettings()
 }
 
-// Debug function to check system_settings table schema
-func (a *App) DebugSystemSettingsSchema() ([]string, error) {
-	rows, err := a.db.GetDB().Query("PRAGMA table_info(system_settings)")
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
 
-	var columns []string
-	for rows.Next() {
-		var cid int
-		var name, dataType string
-		var notNull, pk int
-		var defaultValue sql.NullString
-		
-		err := rows.Scan(&cid, &name, &dataType, &notNull, &defaultValue, &pk)
-		if err != nil {
-			return nil, err
-		}
-		
-		columns = append(columns, fmt.Sprintf("%s (%s)", name, dataType))
-	}
-	
-	return columns, nil
-}
 
-// Force run migrations for debugging
-func (a *App) ForceRunMigrations() error {
-	// Check if storage_base_path column exists
-	var columnExists bool
-	err := a.db.GetDB().QueryRow("SELECT COUNT(*) FROM pragma_table_info('system_settings') WHERE name='storage_base_path'").Scan(&columnExists)
-	if err != nil {
-		return fmt.Errorf("error checking column existence: %v", err)
-	}
 
-	if !columnExists {
-		// Add the missing column
-		_, err = a.db.GetDB().Exec("ALTER TABLE system_settings ADD COLUMN storage_base_path TEXT DEFAULT './app_images'")
-		if err != nil {
-			return fmt.Errorf("error adding storage_base_path column: %v", err)
-		}
-		
-		// Update existing records
-		_, err = a.db.GetDB().Exec("UPDATE system_settings SET storage_base_path = './app_images' WHERE storage_base_path IS NULL OR storage_base_path = ''")
-		if err != nil {
-			return fmt.Errorf("error updating storage_base_path values: %v", err)
-		}
-		
-		log.Println("Manually added storage_base_path column")
-	}
-	
-	return nil
-}
 
 func (a *App) UpdateSystemSettings(settings database.SystemSettings) error {
 	settings.UpdatedAt = time.Now()
