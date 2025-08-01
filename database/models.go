@@ -397,15 +397,6 @@ type SystemSettings struct {
 	AutoBackup       bool       `json:"auto_backup"`
 	BackupFrequency  string     `json:"backup_frequency"`
 	LastBackupTime   *time.Time `json:"last_backup_time,omitempty"`
-	// Storage configuration
-	StorageType      string     `json:"storage_type"`       // "local" or "network"
-	StorageBasePath  string     `json:"storage_base_path"`  // Base path for storage (local path or network URL)
-	// File database configuration (separate from main database)
-	FileDBPath       string     `json:"file_db_path"`       // Path to the separate file database
-	FileDBSyncURL    string     `json:"file_db_sync_url"`   // URL for syncing file database
-	FileDBSyncToken  string     `json:"file_db_sync_token"` // Authentication token for sync
-	FileDBAutoSync   bool       `json:"file_db_auto_sync"`  // Whether to auto-sync file database
-	FileDBSyncInterval int      `json:"file_db_sync_interval"` // Sync interval in minutes
 	CreatedAt        time.Time  `json:"created_at"`
 	UpdatedAt        time.Time  `json:"updated_at"`
 }

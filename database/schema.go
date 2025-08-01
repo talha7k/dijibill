@@ -591,5 +591,28 @@ func (d *Database) runMigrations() error {
 		log.Println("Added storage and file database configuration columns to system_settings table")
 	}
 
+	// Check if logo_file_id column exists in companies table
+	columnExists = false
+	err = d.db.QueryRow("SELECT COUNT(*) FROM pragma_table_info('companies') WHERE name='logo_file_id'").Scan(&columnExists)
+	if err != nil {
+		return err
+	}
+
+	// Add logo_file_id column if it doesn't exist
+	if !columnExists {
+		_, err = d.db.Exec("ALTER TABLE companies ADD COLUMN logo_file_id INTEGER")
+		if err != nil {
+			return fmt.Errorf("error adding logo_file_id column: %v", err)
+		}
+		
+		// Create index for logo_file_id
+		_, err = d.db.Exec("CREATE INDEX IF NOT EXISTS idx_companies_logo_file_id ON companies(logo_file_id)")
+		if err != nil {
+			return fmt.Errorf("error creating index for logo_file_id: %v", err)
+		}
+		
+		log.Println("Added logo_file_id column to companies table")
+	}
+
 	return nil
 }

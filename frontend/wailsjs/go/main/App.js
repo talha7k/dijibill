@@ -70,6 +70,10 @@ export function CreateUser(arg1) {
   return window['go']['main']['App']['CreateUser'](arg1);
 }
 
+export function DebugSystemSettingsSchema() {
+  return window['go']['main']['App']['DebugSystemSettingsSchema']();
+}
+
 export function DeleteCustomer(arg1) {
   return window['go']['main']['App']['DeleteCustomer'](arg1);
 }
@@ -128,6 +132,10 @@ export function DeleteUser(arg1) {
 
 export function DownloadInvoicePDF(arg1) {
   return window['go']['main']['App']['DownloadInvoicePDF'](arg1);
+}
+
+export function ForceRunMigrations() {
+  return window['go']['main']['App']['ForceRunMigrations']();
 }
 
 export function GenerateInvoiceHTML(arg1) {

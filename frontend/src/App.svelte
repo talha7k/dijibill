@@ -21,7 +21,9 @@
     GetAuthContext, 
     GetCurrentUser, 
     MarkIntroAsViewed, 
-    Logout 
+    Logout,
+    DebugSystemSettingsSchema,
+    ForceRunMigrations
   } from '../wailsjs/go/main/App.js'
 
   let currentView = 'dashboard' // Default to dashboard
@@ -54,6 +56,13 @@
   // Check backup status
   async function checkBackupStatus() {
     try {
+      // Force run migrations to ensure storage_base_path column exists
+      await ForceRunMigrations()
+      
+      // Debug: Check table schema
+      const columns = await DebugSystemSettingsSchema()
+      console.log('System settings table columns:', columns)
+      
       const settings = await GetSystemSettings()
       if (settings) {
         autoBackupEnabled = settings.auto_backup
