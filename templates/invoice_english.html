@@ -11,7 +11,36 @@
         .company-info { flex: 1; }
         .name-en { font-size: 26px; font-weight: bold; color: #007bff; }
         .details-en { font-size: 14px; color: #555; margin-top: 8px; }
-        .qr-code { width: 120px; height: 120px; flex-shrink: 0; margin-left: 30px; }
+        .company-logo { width: 120px; height: 120px; flex-shrink: 0; margin-right: 30px; display: flex; align-items: center; justify-content: center; border: 2px dashed #ccc; border-radius: 8px; background-color: #f8f9fa; }
+        .logo-placeholder { color: #999; font-size: 12px; text-align: center; line-height: 1.2; }
+        .bottom-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-top: 20px;
+            gap: 20px;
+        }
+        .totals-column {
+            flex: 1;
+            max-width: 400px;
+        }
+        .totals {
+            width: 100%;
+        }
+        .qr-column {
+             flex: 0 0 180px;
+             display: flex;
+             flex-direction: column;
+             align-items: center;
+         }
+         .qr-code { width: 160px; height: 160px; border: 1px solid #ddd; padding: 10px; background: white; display: flex; align-items: center; justify-content: center; }
+        .footer-section {
+            width: 100%;
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
         .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 35px; }
         .section-title { font-size: 16px; font-weight: bold; color: #007bff; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid #eee; }
         .info-box { background-color: #fdfdfd; padding: 15px; border-radius: 6px; border: 1px solid #eee; }
@@ -24,7 +53,6 @@
         .items-table th.number { text-align: right; }
         .items-table td { padding: 12px 10px; border-bottom: 1px solid #eee; }
         .items-table td.number { text-align: right; }
-        .totals { float: right; width: 320px; margin-top: 20px; }
         .total-row { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee; background-color: #fdfdfd; }
         .total-row.final { font-weight: bold; font-size: 18px; color: #007bff; background-color: #e6f2ff; border-top: 2px solid #007bff; }
         .notes { clear: both; margin-top: 40px; padding: 20px; background-color: #fdfdfd; border-radius: 8px; border: 1px solid #eee; }
@@ -41,7 +69,16 @@
                     <div>VAT: {{.Company.VATNumber}} {{if .Company.CRNumber}}| CR: {{.Company.CRNumber}}{{end}}</div>
                 </div>
             </div>
-            <div class="qr-code">{{if .Invoice.QRCode}}<img src="data:image/png;base64,{{.Invoice.QRCode}}" alt="QR Code" style="width: 120px; height: 120px;">{{end}}</div>
+            <div class="company-logo">
+                {{if .Company.Logo}}
+                    <img src="data:image/png;base64,{{.Company.Logo}}" alt="Company Logo" style="width: 100%; height: 100%; object-fit: contain;">
+                {{else}}
+                    <div class="logo-placeholder">
+                        <div>Company</div>
+                        <div>Logo</div>
+                    </div>
+                {{end}}
+            </div>
         </div>
         <div class="grid-container">
             <div class="info-box">
@@ -70,16 +107,29 @@
                 {{end}}
             </tbody>
         </table>
-        <div style="clear: both;"><div class="totals">
-            <div class="total-row"><span>Subtotal</span><span>{{printf "%.2f" .Invoice.SubTotal}}</span></div>
-            <div class="total-row"><span>VAT</span><span>{{printf "%.2f" .Invoice.VATAmount}}</span></div>
-            <div class="total-row final"><span>TOTAL</span><span>{{printf "%.2f" .Invoice.TotalAmount}}</span></div>
-        </div></div>
         <div class="notes">
-            <div style="font-weight: bold; margin-bottom: 10px;">Notes</div>
-            <div>{{.Invoice.Notes}}</div>
-        </div>
-        <div class="footer"><p>Thank you for your business!</p></div>
+             <div style="font-weight: bold; margin-bottom: 10px;">Notes</div>
+             <div>{{.Invoice.Notes}}</div>
+         </div>
+         <div class="bottom-container">
+             <div class="totals-column">
+                 <div class="totals">
+                     <div class="total-row"><span>Subtotal</span><span>{{printf "%.2f" .Invoice.SubTotal}}</span></div>
+                     <div class="total-row"><span>Value Added Tax | VAT</span><span>{{printf "%.2f" .Invoice.VATAmount}}</span></div>
+                     <div class="total-row final"><span>TOTAL</span><span>{{printf "%.2f" .Invoice.TotalAmount}}</span></div>
+                 </div>
+             </div>
+             {{if .Invoice.QRCode}}
+             <div class="qr-column">
+                 <div class="qr-code">
+                     <img src="data:image/png;base64,{{.Invoice.QRCode}}" alt="QR Code" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+                 </div>
+             </div>
+             {{end}}
+         </div>
+         <div class="footer-section">
+             <div class="footer"><p>Thank you for your business!</p></div>
+         </div>
     </div>
 </body>
 </html>

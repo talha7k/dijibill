@@ -70,12 +70,25 @@
 
         /* --- END OF HEADER STYLE UPDATES --- */
 
-        .qr-code {
+        .company-logo {
             width: 120px;
             height: 120px;
             flex-shrink: 0;
             margin-left: 30px;
             margin-right: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+        }
+
+        .logo-placeholder {
+            color: #999;
+            font-size: 12px;
+            text-align: center;
+            line-height: 1.2;
         }
 
         .grid-container {
@@ -147,10 +160,42 @@
             border-bottom: 1px solid #eee;
         }
 
-        .totals {
-            float: left;
-            width: 320px;
+        .bottom-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
             margin-top: 20px;
+            gap: 20px;
+        }
+        .totals-column {
+            flex: 1;
+            max-width: 400px;
+        }
+        .totals {
+            width: 100%;
+        }
+        .qr-column {
+            flex: 0 0 180px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .qr-code {
+            width: 160px;
+            height: 160px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .footer-section {
+            width: 100%;
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
         }
 
         .total-row {
@@ -212,8 +257,16 @@
                 </div>
                 {{end}}
             </div>
-            <div class="qr-code">{{if .Invoice.QRCode}}<img src="data:image/png;base64,{{.Invoice.QRCode}}"
-                    alt="QR Code" style="width: 120px; height: 120px;">{{end}}</div>
+            <div class="company-logo">
+                {{if .Company.Logo}}
+                    <img src="data:image/png;base64,{{.Company.Logo}}" alt="Company Logo" style="width: 100%; height: 100%; object-fit: contain;">
+                {{else}}
+                    <div class="logo-placeholder">
+                        <div>Company</div>
+                        <div>Logo</div>
+                    </div>
+                {{end}}
+            </div>
         </div>
         <div class="grid-container">
             <div class="info-box">
@@ -263,27 +316,38 @@
                 {{end}}
             </tbody>
         </table>
-        <div style="clear: both;">
-            <div class="totals">
-                <div class="total-row"><span>المجموع الفرعي | Subtotal</span><span>{{printf "%.2f"
-                        .Invoice.SubTotal}}</span></div>
-                <div class="total-row"><span>ضريبة القيمة المضافة | VAT</span><span>{{printf "%.2f"
-                        .Invoice.VATAmount}}</span></div>
-                <div class="total-row final"><span>الإجمالي | TOTAL</span><span>{{printf "%.2f"
-                        .Invoice.TotalAmount}}</span></div>
-            </div>
-        </div>
         <div class="notes">
             <div style="font-weight: bold; margin-bottom: 10px;">ملاحظات | Notes</div>
             <div class="primary">{{.Invoice.NotesArabic}}</div>
             <div class="secondary" lang="en">{{.Invoice.Notes}}</div>
         </div>
-        <div class="footer">
-            <div>
-                <p lang="ar">شكراً لتعاملكم معنا!</p>
+        <div class="bottom-container">
+            <div class="totals-column">
+                <div class="totals">
+                    <div class="total-row"><span>المجموع الفرعي | Subtotal</span><span>{{printf "%.2f"
+                            .Invoice.SubTotal}}</span></div>
+                    <div class="total-row"><span>ضريبة القيمة المضافة | VAT</span><span>{{printf "%.2f"
+                            .Invoice.VATAmount}}</span></div>
+                    <div class="total-row final"><span>الإجمالي | TOTAL</span><span>{{printf "%.2f"
+                            .Invoice.TotalAmount}}</span></div>
+                </div>
             </div>
-            <div>
-                <p lang="en">Thank you for your business!</p>
+            {{if .Invoice.QRCode}}
+            <div class="qr-column">
+                <div class="qr-code">
+                    <img src="data:image/png;base64,{{.Invoice.QRCode}}" alt="QR Code" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+                </div>
+            </div>
+            {{end}}
+        </div>
+        <div class="footer-section">
+            <div class="footer">
+                <div>
+                    <p lang="ar">شكراً لتعاملكم معنا!</p>
+                </div>
+                <div>
+                    <p lang="en">Thank you for your business!</p>
+                </div>
             </div>
         </div>
     </div>
