@@ -3,6 +3,7 @@
   import { GetSystemSettings, UpdateSystemSettings } from '../../wailsjs/go/main/App.js'
   import { database } from '../../wailsjs/go/models'
   import FormField from './FormField.svelte'
+  import { showDbSuccess, showDbError } from '../stores/notificationStore.js'
 
   const dispatch = createEventDispatcher()
 
@@ -73,15 +74,15 @@
       // Also save to localStorage for immediate access by other components
       localStorage.setItem('systemSettings', JSON.stringify(systemSettings))
       
+      showDbSuccess('save', 'System Settings')
+      
       dispatch('save', { 
         systemSettings,
         message: 'System settings saved successfully!'
       })
     } catch (error) {
       console.error('Error saving system settings:', error)
-      dispatch('error', { 
-        message: 'Failed to save system settings. Please try again.'
-      })
+      showDbError('save', 'System Settings', error)
     } finally {
       isLoading = false
     }

@@ -5,6 +5,7 @@
   import DataTable from './DataTable.svelte'
   import SalesCategoryModal from './SalesCategoryModal.svelte'
   import ConfirmationModal from './ConfirmationModal.svelte'
+  import { showDbSuccess, showDbError } from '../stores/notificationStore.js'
 
   const dispatch = createEventDispatcher()
 
@@ -39,6 +40,7 @@
           ...salesCategoryData
         })
         await UpdateSalesCategory(updatedSalesCategory)
+        showDbSuccess('update', 'Sales Category')
       } else {
         // Create new sales category
         const newSalesCategory = new database.SalesCategory({
@@ -48,13 +50,15 @@
           updated_at: null
         })
         await CreateSalesCategory(newSalesCategory)
+        showDbSuccess('create', 'Sales Category')
       }
       
       dispatch('reload')
       closeSalesCategoryModal()
     } catch (error) {
       console.error('Error saving sales category:', error)
-      dispatch('error', { message: 'Error saving sales category: ' + error.message })
+      const operation = editingSalesCategory ? 'update' : 'create'
+      showDbError(operation, 'Sales Category', error)
     } finally {
       loading = false
     }
@@ -75,12 +79,13 @@
       loading = true
       try {
         await DeleteSalesCategory(salesCategoryToDelete)
+        showDbSuccess('delete', 'Sales Category')
         dispatch('reload')
         showDeleteConfirm = false
         salesCategoryToDelete = null
       } catch (error) {
         console.error('Error deleting sales category:', error)
-        dispatch('error', { message: 'Error deleting sales category: ' + error.message })
+        showDbError('delete', 'Sales Category', error)
       } finally {
         loading = false
       }

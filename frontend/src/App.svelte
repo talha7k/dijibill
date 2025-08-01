@@ -13,6 +13,7 @@
   import IntroSlider from './components/IntroSlider.svelte';
   import UserProfile from './components/UserProfile.svelte';
   import AccessControl from './components/AccessControl.svelte';
+  import NotificationContainer from './components/NotificationContainer.svelte';
   
   // Wails functions
   import { 
@@ -563,4 +564,7 @@
       on:close={() => showAccessControl = false}
     />
   {/if}
+  
+  <!-- Notification Container -->
+  <NotificationContainer />
 </div>

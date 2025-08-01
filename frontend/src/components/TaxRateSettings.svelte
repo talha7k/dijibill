@@ -5,6 +5,7 @@
   import DataTable from './DataTable.svelte'
   import TaxRateModal from './TaxRateModal.svelte'
   import ConfirmationModal from './ConfirmationModal.svelte'
+  import { showDbSuccess, showDbError } from '../stores/notificationStore.js'
 
   const dispatch = createEventDispatcher()
 
@@ -40,6 +41,7 @@
           ...taxRateData
         })
         await UpdateTaxRate(updatedTaxRate)
+        showDbSuccess('update', 'Tax Rate')
       } else {
         // Create new tax rate
         const newTaxRate = new database.TaxRate({
@@ -49,13 +51,15 @@
           updated_at: null
         })
         await CreateTaxRate(newTaxRate)
+        showDbSuccess('create', 'Tax Rate')
       }
       
       dispatch('reload')
       closeTaxRateModal()
     } catch (error) {
       console.error('Error saving tax rate:', error)
-      dispatch('error', { message: 'Error saving tax rate: ' + error.message })
+      const operation = editingTaxRate ? 'update' : 'create'
+      showDbError(operation, 'Tax Rate', error)
     } finally {
       loading = false
     }
@@ -77,12 +81,13 @@
     try {
       loading = true
       await DeleteTaxRate(taxRateToDelete.id)
+      showDbSuccess('delete', 'Tax Rate')
       dispatch('reload')
       showDeleteConfirm = false
       taxRateToDelete = null
     } catch (error) {
       console.error('Error deleting tax rate:', error)
-      dispatch('error', { message: 'Error deleting tax rate: ' + error.message })
+      showDbError('delete', 'Tax Rate', error)
     } finally {
       loading = false
     }
