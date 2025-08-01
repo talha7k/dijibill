@@ -155,7 +155,7 @@
   searchPlaceholder="Search purchase products by name, SKU, or barcode..."
   emptyStateTitle="No purchase products found"
   emptyStateMessage="Get started by adding your first purchase product"
-  emptyStateIcon="fa-shopping-cart"
+  emptyStateIcon="cart"
   showSearch={true}
   showActions={true}
   {primaryAction}

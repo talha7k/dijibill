@@ -18,7 +18,7 @@
   /** @type {string} */
   export let emptyStateMessage = 'No items to display'
   /** @type {string} */
-  export let emptyStateIcon = 'fa-table'
+  export let emptyStateIcon = 'table'
   /** @type {boolean} */
   export let showSearch = true
   /** @type {boolean} */

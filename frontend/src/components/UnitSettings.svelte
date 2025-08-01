@@ -214,30 +214,11 @@
      searchPlaceholder="Search units..."
      emptyStateTitle="No units found"
      emptyStateMessage="Start by adding your first unit of measurement"
-     emptyStateIcon="fa-ruler"
+     emptyStateIcon="grid"
      on:primary-action={handlePrimaryAction}
      on:search={handleSearch}
      on:row-action={handleRowAction}
-   >
-     <div slot="actions" let:item class="action-buttons">
-       <button
-         class="btn btn-sm btn-primary"
-         on:click={() => handleRowAction({ detail: { action: 'edit', item } })}
-         title="Edit unit"
-         disabled={loading}
-       >
-         <i class="fas fa-edit"></i>
-       </button>
-       <button
-         class="btn btn-sm btn-danger"
-         on:click={() => handleRowAction({ detail: { action: 'delete', item } })}
-         title="Delete unit"
-         disabled={loading}
-       >
-         <i class="fas fa-trash"></i>
-       </button>
-     </div>
-   </DataTable>
+   />
 
    <!-- Unit Modal -->
    <UnitModal

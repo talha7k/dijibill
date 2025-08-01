@@ -159,7 +159,7 @@
   searchPlaceholder="Search products by name, SKU, or barcode..."
   emptyStateTitle="No products found"
   emptyStateMessage="Get started by adding your first product"
-  emptyStateIcon="fa-box"
+  emptyStateIcon="product"
   showSearch={true}
   showActions={true}
   {primaryAction}

@@ -193,7 +193,7 @@
     searchPlaceholder="Search tax rates..."
     emptyStateTitle="No tax rates found"
     emptyStateMessage="Start by adding your first tax rate"
-    emptyStateIcon="fa-percentage"
+    emptyStateIcon="discount"
     on:primary-action={handlePrimaryAction}
     on:search={handleSearch}
     on:row-action={handleRowAction}

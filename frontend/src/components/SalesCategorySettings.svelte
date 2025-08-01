@@ -203,7 +203,7 @@
     searchPlaceholder="Search sales categories..."
     emptyStateTitle="No sales categories found"
     emptyStateMessage="Start by adding your first sales category"
-    emptyStateIcon="fa-tags"
+    emptyStateIcon="category"
     on:primary-action={handlePrimaryAction}
     on:search={handleSearch}
     on:row-action={handleRowAction}

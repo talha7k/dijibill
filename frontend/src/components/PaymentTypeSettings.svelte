@@ -201,7 +201,7 @@
     searchPlaceholder="Search payment types..."
     emptyStateTitle="No payment types found"
     emptyStateMessage="Start by adding your first payment type"
-    emptyStateIcon="fa-credit-card"
+    emptyStateIcon="payment"
     on:primary-action={handlePrimaryAction}
     on:search={handleSearch}
     on:row-action={handleRowAction}
