@@ -46,9 +46,7 @@
     city_arabic: '',
     country: 'Saudi Arabia',
     country_arabic: 'المملكة العربية السعودية',
-    logo: '',
-    created_at: '',
-    updated_at: ''
+    logo: ''
   }
 
   // System settings

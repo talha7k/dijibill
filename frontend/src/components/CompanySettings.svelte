@@ -20,9 +20,7 @@
     city_arabic: '',
     country: '',
     country_arabic: '',
-    logo: '',
-    created_at: '',
-    updated_at: ''
+    logo: ''
   }
 
   export let isLoading = false
