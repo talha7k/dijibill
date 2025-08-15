@@ -80,20 +80,20 @@ export namespace database {
 	        this.updated_at = this.convertValues(source["updated_at"], time.Time);
 	    }
 	
-		convertValues(a: any, clazz: any, asMap: boolean = false): any {
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
 		    if (!a) {
 		        return a;
 		    }
 		    if (a.slice && a.map) {
-		        return (a as any[]).map(elem => this.convertValues(elem, clazz));
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
 		    } else if ("object" === typeof a) {
 		        if (asMap) {
 		            for (const key of Object.keys(a)) {
-		                a[key] = clazz && typeof clazz === 'function' ? new clazz(a[key]) : a[key];
+		                a[key] = new classs(a[key]);
 		            }
 		            return a;
 		        }
-		        return clazz && typeof clazz === 'function' ? new clazz(a) : a;
+		        return new classs(a);
 		    }
 		    return a;
 		}
@@ -144,20 +144,20 @@ export namespace database {
 	        this.updated_at = this.convertValues(source["updated_at"], time.Time);
 	    }
 	
-		convertValues(a: any, clazz: any, asMap: boolean = false): any {
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
 		    if (!a) {
 		        return a;
 		    }
 		    if (a.slice && a.map) {
-		        return (a as any[]).map(elem => this.convertValues(elem, clazz));
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
 		    } else if ("object" === typeof a) {
 		        if (asMap) {
 		            for (const key of Object.keys(a)) {
-		                a[key] = clazz && typeof clazz === 'function' ? new clazz(a[key]) : a[key];
+		                a[key] = new classs(a[key]);
 		            }
 		            return a;
 		        }
-		        return clazz && typeof clazz === 'function' ? new clazz(a) : a;
+		        return new classs(a);
 		    }
 		    return a;
 		}
@@ -192,20 +192,20 @@ export namespace database {
 	        this.updated_at = this.convertValues(source["updated_at"], time.Time);
 	    }
 	
-		convertValues(a: any, clazz: any, asMap: boolean = false): any {
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
 		    if (!a) {
 		        return a;
 		    }
 		    if (a.slice && a.map) {
-		        return (a as any[]).map(elem => this.convertValues(elem, clazz));
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
 		    } else if ("object" === typeof a) {
 		        if (asMap) {
 		            for (const key of Object.keys(a)) {
-		                a[key] = clazz && typeof clazz === 'function' ? new clazz(a[key]) : a[key];
+		                a[key] = new classs(a[key]);
 		            }
 		            return a;
 		        }
-		        return clazz && typeof clazz === 'function' ? new clazz(a) : a;
+		        return new classs(a);
 		    }
 		    return a;
 		}
@@ -236,20 +236,20 @@ export namespace database {
 	        this.updated_at = this.convertValues(source["updated_at"], time.Time);
 	    }
 	
-		convertValues(a: any, clazz: any, asMap: boolean = false): any {
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
 		    if (!a) {
 		        return a;
 		    }
 		    if (a.slice && a.map) {
-		        return (a as any[]).map(elem => this.convertValues(elem, clazz));
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
 		    } else if ("object" === typeof a) {
 		        if (asMap) {
 		            for (const key of Object.keys(a)) {
-		                a[key] = clazz && typeof clazz === 'function' ? new clazz(a[key]) : a[key];
+		                a[key] = new classs(a[key]);
 		            }
 		            return a;
 		        }
-		        return clazz && typeof clazz === 'function' ? new clazz(a) : a;
+		        return new classs(a);
 		    }
 		    return a;
 		}
@@ -310,20 +310,20 @@ export namespace database {
 	        this.updated_at = this.convertValues(source["updated_at"], time.Time);
 	    }
 	
-		convertValues(a: any, clazz: any, asMap: boolean = false): any {
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
 		    if (!a) {
 		        return a;
 		    }
 		    if (a.slice && a.map) {
-		        return (a as any[]).map(elem => this.convertValues(elem, clazz));
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
 		    } else if ("object" === typeof a) {
 		        if (asMap) {
 		            for (const key of Object.keys(a)) {
-		                a[key] = clazz && typeof clazz === 'function' ? new clazz(a[key]) : a[key];
+		                a[key] = new classs(a[key]);
 		            }
 		            return a;
 		        }
-		        return clazz && typeof clazz === 'function' ? new clazz(a) : a;
+		        return new classs(a);
 		    }
 		    return a;
 		}
@@ -358,20 +358,20 @@ export namespace database {
 	        this.created_at = this.convertValues(source["created_at"], time.Time);
 	    }
 	
-		convertValues(a: any, clazz: any, asMap: boolean = false): any {
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
 		    if (!a) {
 		        return a;
 		    }
 		    if (a.slice && a.map) {
-		        return (a as any[]).map(elem => this.convertValues(elem, clazz));
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
 		    } else if ("object" === typeof a) {
 		        if (asMap) {
 		            for (const key of Object.keys(a)) {
-		                a[key] = clazz && typeof clazz === 'function' ? new clazz(a[key]) : a[key];
+		                a[key] = new classs(a[key]);
 		            }
 		            return a;
 		        }
-		        return clazz && typeof clazz === 'function' ? new clazz(a) : a;
+		        return new classs(a);
 		    }
 		    return a;
 		}
@@ -408,20 +408,20 @@ export namespace database {
 	        this.updated_at = this.convertValues(source["updated_at"], time.Time);
 	    }
 	
-		convertValues(a: any, clazz: any, asMap: boolean = false): any {
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
 		    if (!a) {
 		        return a;
 		    }
 		    if (a.slice && a.map) {
-		        return (a as any[]).map(elem => this.convertValues(elem, clazz));
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
 		    } else if ("object" === typeof a) {
 		        if (asMap) {
 		            for (const key of Object.keys(a)) {
-		                a[key] = clazz && typeof clazz === 'function' ? new clazz(a[key]) : a[key];
+		                a[key] = new classs(a[key]);
 		            }
 		            return a;
 		        }
-		        return clazz && typeof clazz === 'function' ? new clazz(a) : a;
+		        return new classs(a);
 		    }
 		    return a;
 		}
@@ -480,20 +480,20 @@ export namespace database {
 	        this.updated_at = this.convertValues(source["updated_at"], time.Time);
 	    }
 	
-		convertValues(a: any, clazz: any, asMap: boolean = false): any {
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
 		    if (!a) {
 		        return a;
 		    }
 		    if (a.slice && a.map) {
-		        return (a as any[]).map(elem => this.convertValues(elem, clazz));
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
 		    } else if ("object" === typeof a) {
 		        if (asMap) {
 		            for (const key of Object.keys(a)) {
-		                a[key] = clazz && typeof clazz === 'function' ? new clazz(a[key]) : a[key];
+		                a[key] = new classs(a[key]);
 		            }
 		            return a;
 		        }
-		        return clazz && typeof clazz === 'function' ? new clazz(a) : a;
+		        return new classs(a);
 		    }
 		    return a;
 		}
@@ -536,20 +536,20 @@ export namespace database {
 	        this.updated_at = this.convertValues(source["updated_at"], time.Time);
 	    }
 	
-		convertValues(a: any, clazz: any, asMap: boolean = false): any {
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
 		    if (!a) {
 		        return a;
 		    }
 		    if (a.slice && a.map) {
-		        return (a as any[]).map(elem => this.convertValues(elem, clazz));
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
 		    } else if ("object" === typeof a) {
 		        if (asMap) {
 		            for (const key of Object.keys(a)) {
-		                a[key] = clazz && typeof clazz === 'function' ? new clazz(a[key]) : a[key];
+		                a[key] = new classs(a[key]);
 		            }
 		            return a;
 		        }
-		        return clazz && typeof clazz === 'function' ? new clazz(a) : a;
+		        return new classs(a);
 		    }
 		    return a;
 		}
@@ -587,20 +587,20 @@ export namespace database {
 	        this.created_at = this.convertValues(source["created_at"], time.Time);
 	    }
 	
-		convertValues(a: any, clazz: any, asMap: boolean = false): any {
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
 		    if (!a) {
 		        return a;
 		    }
 		    if (a.slice && a.map) {
-		        return (a as any[]).map(elem => this.convertValues(elem, clazz));
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
 		    } else if ("object" === typeof a) {
 		        if (asMap) {
 		            for (const key of Object.keys(a)) {
-		                a[key] = clazz && typeof clazz === 'function' ? new clazz(a[key]) : a[key];
+		                a[key] = new classs(a[key]);
 		            }
 		            return a;
 		        }
-		        return clazz && typeof clazz === 'function' ? new clazz(a) : a;
+		        return new classs(a);
 		    }
 		    return a;
 		}
@@ -653,20 +653,20 @@ export namespace database {
 	        this.updated_at = this.convertValues(source["updated_at"], time.Time);
 	    }
 	
-		convertValues(a: any, clazz: any, asMap: boolean = false): any {
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
 		    if (!a) {
 		        return a;
 		    }
 		    if (a.slice && a.map) {
-		        return (a as any[]).map(elem => this.convertValues(elem, clazz));
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
 		    } else if ("object" === typeof a) {
 		        if (asMap) {
 		            for (const key of Object.keys(a)) {
-		                a[key] = clazz && typeof clazz === 'function' ? new clazz(a[key]) : a[key];
+		                a[key] = new classs(a[key]);
 		            }
 		            return a;
 		        }
-		        return clazz && typeof clazz === 'function' ? new clazz(a) : a;
+		        return new classs(a);
 		    }
 		    return a;
 		}
@@ -721,20 +721,20 @@ export namespace database {
 	        this.updated_at = this.convertValues(source["updated_at"], time.Time);
 	    }
 	
-		convertValues(a: any, clazz: any, asMap: boolean = false): any {
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
 		    if (!a) {
 		        return a;
 		    }
 		    if (a.slice && a.map) {
-		        return (a as any[]).map(elem => this.convertValues(elem, clazz));
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
 		    } else if ("object" === typeof a) {
 		        if (asMap) {
 		            for (const key of Object.keys(a)) {
-		                a[key] = clazz && typeof clazz === 'function' ? new clazz(a[key]) : a[key];
+		                a[key] = new classs(a[key]);
 		            }
 		            return a;
 		        }
-		        return clazz && typeof clazz === 'function' ? new clazz(a) : a;
+		        return new classs(a);
 		    }
 		    return a;
 		}
@@ -768,20 +768,20 @@ export namespace database {
 	        this.updated_at = this.convertValues(source["updated_at"], time.Time);
 	    }
 	
-		convertValues(a: any, clazz: any, asMap: boolean = false): any {
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
 		    if (!a) {
 		        return a;
 		    }
 		    if (a.slice && a.map) {
-		        return (a as any[]).map(elem => this.convertValues(elem, clazz));
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
 		    } else if ("object" === typeof a) {
 		        if (asMap) {
 		            for (const key of Object.keys(a)) {
-		                a[key] = clazz && typeof clazz === 'function' ? new clazz(a[key]) : a[key];
+		                a[key] = new classs(a[key]);
 		            }
 		            return a;
 		        }
-		        return clazz && typeof clazz === 'function' ? new clazz(a) : a;
+		        return new classs(a);
 		    }
 		    return a;
 		}
@@ -836,20 +836,20 @@ export namespace database {
 	        this.updated_at = this.convertValues(source["updated_at"], time.Time);
 	    }
 	
-		convertValues(a: any, clazz: any, asMap: boolean = false): any {
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
 		    if (!a) {
 		        return a;
 		    }
 		    if (a.slice && a.map) {
-		        return (a as any[]).map(elem => this.convertValues(elem, clazz));
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
 		    } else if ("object" === typeof a) {
 		        if (asMap) {
 		            for (const key of Object.keys(a)) {
-		                a[key] = clazz && typeof clazz === 'function' ? new clazz(a[key]) : a[key];
+		                a[key] = new classs(a[key]);
 		            }
 		            return a;
 		        }
-		        return clazz && typeof clazz === 'function' ? new clazz(a) : a;
+		        return new classs(a);
 		    }
 		    return a;
 		}
@@ -895,20 +895,20 @@ export namespace database {
 	        this.updated_at = this.convertValues(source["updated_at"], time.Time);
 	    }
 	
-		convertValues(a: any, clazz: any, asMap: boolean = false): any {
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
 		    if (!a) {
 		        return a;
 		    }
 		    if (a.slice && a.map) {
-		        return (a as any[]).map(elem => this.convertValues(elem, clazz));
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
 		    } else if ("object" === typeof a) {
 		        if (asMap) {
 		            for (const key of Object.keys(a)) {
-		                a[key] = clazz && typeof clazz === 'function' ? new clazz(a[key]) : a[key];
+		                a[key] = new classs(a[key]);
 		            }
 		            return a;
 		        }
-		        return clazz && typeof clazz === 'function' ? new clazz(a) : a;
+		        return new classs(a);
 		    }
 		    return a;
 		}
@@ -943,20 +943,20 @@ export namespace database {
 	        this.updated_at = this.convertValues(source["updated_at"], time.Time);
 	    }
 	
-		convertValues(a: any, clazz: any, asMap: boolean = false): any {
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
 		    if (!a) {
 		        return a;
 		    }
 		    if (a.slice && a.map) {
-		        return (a as any[]).map(elem => this.convertValues(elem, clazz));
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
 		    } else if ("object" === typeof a) {
 		        if (asMap) {
 		            for (const key of Object.keys(a)) {
-		                a[key] = clazz && typeof clazz === 'function' ? new clazz(a[key]) : a[key];
+		                a[key] = new classs(a[key]);
 		            }
 		            return a;
 		        }
-		        return clazz && typeof clazz === 'function' ? new clazz(a) : a;
+		        return new classs(a);
 		    }
 		    return a;
 		}
@@ -989,20 +989,20 @@ export namespace database {
 	        this.updated_at = this.convertValues(source["updated_at"], time.Time);
 	    }
 	
-		convertValues(a: any, clazz: any, asMap: boolean = false): any {
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
 		    if (!a) {
 		        return a;
 		    }
 		    if (a.slice && a.map) {
-		        return (a as any[]).map(elem => this.convertValues(elem, clazz));
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
 		    } else if ("object" === typeof a) {
 		        if (asMap) {
 		            for (const key of Object.keys(a)) {
-		                a[key] = clazz && typeof clazz === 'function' ? new clazz(a[key]) : a[key];
+		                a[key] = new classs(a[key]);
 		            }
 		            return a;
 		        }
-		        return clazz && typeof clazz === 'function' ? new clazz(a) : a;
+		        return new classs(a);
 		    }
 		    return a;
 		}
@@ -1045,20 +1045,20 @@ export namespace database {
 	        this.updated_at = this.convertValues(source["updated_at"], time.Time);
 	    }
 	
-		convertValues(a: any, clazz: any, asMap: boolean = false): any {
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
 		    if (!a) {
 		        return a;
 		    }
 		    if (a.slice && a.map) {
-		        return (a as any[]).map(elem => this.convertValues(elem, clazz));
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
 		    } else if ("object" === typeof a) {
 		        if (asMap) {
 		            for (const key of Object.keys(a)) {
-		                a[key] = clazz && typeof clazz === 'function' ? new clazz(a[key]) : a[key];
+		                a[key] = new classs(a[key]);
 		            }
 		            return a;
 		        }
-		        return clazz && typeof clazz === 'function' ? new clazz(a) : a;
+		        return new classs(a);
 		    }
 		    return a;
 		}
@@ -1132,20 +1132,20 @@ export namespace main {
 	        this.last_sync_at = this.convertValues(source["last_sync_at"], time.Time);
 	    }
 	
-		convertValues(a: any, clazz: any, asMap: boolean = false): any {
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
 		    if (!a) {
 		        return a;
 		    }
 		    if (a.slice && a.map) {
-		        return (a as any[]).map(elem => this.convertValues(elem, clazz));
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
 		    } else if ("object" === typeof a) {
 		        if (asMap) {
 		            for (const key of Object.keys(a)) {
-		                a[key] = clazz && typeof clazz === 'function' ? new clazz(a[key]) : a[key];
+		                a[key] = new classs(a[key]);
 		            }
 		            return a;
 		        }
-		        return clazz && typeof clazz === 'function' ? new clazz(a) : a;
+		        return new classs(a);
 		    }
 		    return a;
 		}

@@ -114,7 +114,7 @@
 			closeModal();
 		} catch (error) {
 			console.error('Error saving payment:', error);
-			const operation = isEditing ? 'update' : 'create';
+			const operation = event.detail.isEditing ? 'update' : 'create';
 			showDbError(operation, 'Payment', error);
 		} finally {
 			loading = false;
@@ -245,7 +245,16 @@
 	const columns = [
 		{ key: 'id', label: 'Payment ID', render: (item) => `#${item.id}` },
 		{ key: 'invoice_id', label: 'Invoice', render: (item) => getInvoiceNumber(item.invoice_id) },
-		{ key: 'amount', label: 'Amount', render: (item) => `< class: 'btn-warning', title: 'Refund Payment' },
+		{ key: 'amount', label: 'Amount', render: (item) => `<span class="font-semibold">${formatCurrency(item.amount)}</span>` },
+		{ key: 'payment_type_id', label: 'Method', render: (item) => getPaymentTypeName(item.payment_type_id) },
+		{ key: 'payment_date', label: 'Date', render: (item) => formatDate(item.payment_date) },
+		{ key: 'reference', label: 'Reference', render: (item) => item.reference || '-' },
+		{ key: 'status', label: 'Status' },
+		{
+			label: 'Actions',
+			actions: [
+				{ key: 'edit', text: 'Edit', icon: 'edit', class: 'btn-secondary', title: 'Edit Payment' },
+				{ key: 'refund', text: 'Refund', icon: 'undo', class: 'btn-warning', title: 'Refund Payment' },
 				{ key: 'delete', text: 'Delete', icon: 'delete', class: 'btn-error', title: 'Delete Payment' }
 			]
 		}
@@ -257,16 +266,7 @@
 		icon: 'add'
 	};
 
-	/** @type {Array<{text: string, icon: string}>} */span class="font-semibold">${formatCurrency(item.amount)}</span>`, class: 'font-semibold' },
-		{ key: 'payment_type_id', label: 'Method', render: (item) => getPaymentTypeName(item.payment_type_id) },
-		{ key: 'payment_date', label: 'Date', render: (item) => formatDate(item.payment_date) },
-		{ key: 'reference', label: 'Reference', render: (item) => item.reference || '-' },
-		{ key: 'status', label: 'Status' },
-		{
-			label: 'Actions',
-			actions: [
-				{ key: 'edit', text: 'Edit', icon: 'edit', class: 'btn-secondary', title: 'Edit Payment' },
-				{ key: 'refund', text: 'Refund', icon: 'undo',
+	/** @type {Array<{text: string, icon: string}>} */
 	const secondaryActions = [
 		{
 			text: 'Reports',
